@@ -71,6 +71,7 @@ export default {
       if (this.isLoginMode) {
         // 로그인 로직
         console.log('로그인 시도:', this.email, this.password);
+        this.$router.push('/move-to-move/mypage');
       } else {
         // 회원가입 로직
         console.log('회원가입 시도:', this.email, this.nickname, this.password, this.confirmPassword);

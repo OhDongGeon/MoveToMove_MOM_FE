@@ -6,12 +6,12 @@ import Chat from '../components/view/ChatCompo.vue';
 
 const routes = [
   {
-    path: '/auth',
+    path: '/',
     name: 'Auth',
     component: AuthLayout,
   },
   {
-    path: '/',
+    path: '/move-to-move',
     component: MainLayout,
     children: [
       {
@@ -30,11 +30,6 @@ const routes = [
         component: Chat,
       },
     ],
-  },
-  // 기본 경로가 '/'인 경우에도 /auth로 리디렉션
-  {
-    path: '/',
-    redirect: '/auth',
   },
 ];
 
