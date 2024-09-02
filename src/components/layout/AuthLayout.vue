@@ -38,13 +38,21 @@
 
         <!-- 로그인/회원가입 모드 전환 링크 -->
         <div class="toggle-mode">
+          <a href="">비밀번호 찾기</a>
           <a href="#" @click.prevent="toggleMode"> {{ isLoginMode ? '회원가입' : '로그인' }}으로 전환 </a>
         </div>
 
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
-          <button class="kakao-login">카카오 로그인</button>
-          <button class="google-login">Google 계정으로 로그인</button>
+          <button>
+            <img src="../../assets/kakao_login_large_wide.png" alt="kakao-login" class="kakao-logo" />
+          </button>
+
+          <button class="google-login-button">
+            <img src="../../assets/web_light_rd_na@4x.png" alt="Google Icon" />
+            <!-- 구글 아이콘 이미지 경로 -->
+            Google 계정으로 로그인
+          </button>
         </div>
       </div>
     </div>
@@ -145,7 +153,9 @@ export default {
 }
 
 .toggle-mode {
+  display: flex;
   margin-top: 15px;
+  justify-content: space-between;
 }
 
 .social-login {
@@ -153,22 +163,31 @@ export default {
   text-align: center;
 }
 
-.kakao-login,
-.google-login {
+.kakao-logo {
+  width: 360px;
+  height: 50px;
+  border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+}
+.google-login-button img {
+  width: 30px; /* 구글 아이콘 너비 */
+  height: 30px; /* 구글 아이콘 높이 */
+  margin-right: 60px; /* 아이콘과 텍스트 사이의 간격 */
+}
+.google-login-button {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 4px;
+  padding: 12px;
+  background-color: white;
+  border: 1px solid #dadce0;
+  border-radius: 14px;
   cursor: pointer;
-}
-
-.kakao-login {
-  background-color: #fee500;
-}
-
-.google-login {
-  background-color: #ffffff;
-  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬로 수정 */
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #3c4043;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
