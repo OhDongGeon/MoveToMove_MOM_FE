@@ -1,16 +1,32 @@
 <template>
-  <div>
-    <chat-compo></chat-compo>
-  </div>
+  <v-app>
+    <!-- Vuetify 애플리케이션 바 -->
+    <v-app-bar app v-if="showAppBar">
+      <v-toolbar-title>My Application</v-toolbar-title>
+    </v-app-bar>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import ChatCompo from './components/ChatCompo.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'App',
-  components: {
-    ChatCompo,
+  setup() {
+    const route = useRoute();
+
+    // 로그인 상태에 따라 AppBar와 Footer 표시 여부 결정
+    const showAppBar = computed(() => route.name !== 'Auth');
+
+    return {
+      showAppBar,
+    };
   },
 };
 </script>
