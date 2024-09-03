@@ -38,10 +38,12 @@
 
         <!-- 로그인/회원가입 모드 전환 링크 -->
         <div class="toggle-mode">
-          <a href="">비밀번호 찾기</a>
+          <a href="#" @click.prevent="isPasswordModalOpen = true">비밀번호 찾기</a>
           <a href="#" @click.prevent="toggleMode"> {{ isLoginMode ? '회원가입' : '로그인' }}으로 전환 </a>
         </div>
-
+        <!-- 비밀번호 찾기 모달 컴포넌트-->
+        <PasswordModal v-model="isPasswordModalOpen" @open-recovery-dialog="openRecoveryDialog" />
+        <PasswordRecoveryDialog :show="isRecoveryDialogOpen" @update:show="isRecoveryDialogOpen = $event" />
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
           <button>
@@ -59,33 +61,39 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'AuthLayout',
-  data() {
-    return {
-      isLoginMode: true, // 현재 모드를 관리하는 상태 변수
-      email: '',
-      nickname: '',
-      password: '',
-      confirmPassword: '',
-    };
-  },
-  methods: {
-    toggleMode() {
-      this.isLoginMode = !this.isLoginMode; // 모드 전환
-    },
-    handleSubmit() {
-      if (this.isLoginMode) {
-        // 로그인 로직
-        console.log('로그인 시도:', this.email, this.password);
-        this.$router.push('/move-to-move/mypage');
-      } else {
-        // 회원가입 로직
-        console.log('회원가입 시도:', this.email, this.nickname, this.password, this.confirmPassword);
-      }
-    },
-  },
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import PasswordModal from '@/components/common/PasswordModal.vue';
+import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
+const isPasswordModalOpen = ref(false); // 첫 번째 모달 상태
+const isRecoveryDialogOpen = ref(false); // 두 번째 모달 상태
+const openRecoveryDialog = () => {
+  isRecoveryDialogOpen.value = true;
+};
+// State variables
+const isLoginMode = ref(true);
+const email = ref('');
+const nickname = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+
+// Router instance
+const router = useRouter();
+
+// Methods
+const toggleMode = () => {
+  isLoginMode.value = !isLoginMode.value; // Toggle mode
+};
+const handleSubmit = () => {
+  if (isLoginMode.value) {
+    // Login logic
+    console.log('로그인 시도:', email.value, password.value);
+    router.push('/move-to-move/mypage');
+  } else {
+    // Signup logic
+    console.log('회원가입 시도:', email.value, nickname.value, password.value, confirmPassword.value);
+  }
 };
 </script>
 
