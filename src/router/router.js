@@ -3,6 +3,7 @@ import MainLayout from '../components/layout/MainLayout.vue';
 import MyPage from '../components/view/MyPageCompo.vue';
 import KanbanBoard from '../components/view/KanbanBoardCompo.vue';
 import Chat from '../components/view/ChatCompo.vue';
+import Profile from '../components/view/ProfileCompo.vue';
 
 const routes = [
   {
@@ -28,6 +29,11 @@ const routes = [
         path: 'chat',
         name: 'ChatCompo',
         component: Chat,
+      },
+      {
+        path: 'profile',
+        name: 'ProfileCompo',
+        component: Profile,
       },
     ],
   },

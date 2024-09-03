@@ -11,8 +11,8 @@
             <span>tot0119@naver.com</span>
             <span>닉네임</span>
           </div>
-          <button>정보수정</button>
-          <button>회원탈퇴</button>
+          <v-btn variant="outlined" to="/move-to-move/profile"> 정보수정 </v-btn>
+          <v-btn variant="outlined"> 회원탈퇴 </v-btn>
         </div>
       </div>
 
