@@ -1,10 +1,5 @@
 <template>
   <v-app>
-    <!-- Vuetify 애플리케이션 바 -->
-    <v-app-bar app v-if="showAppBar">
-      <v-toolbar-title>My Application</v-toolbar-title>
-    </v-app-bar>
-
     <!-- 메인 콘텐츠 영역 -->
     <v-main>
       <router-view />
@@ -37,7 +32,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  color: #f0f8ff;
 }
 </style>

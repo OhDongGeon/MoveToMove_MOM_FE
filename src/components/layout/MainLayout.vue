@@ -18,14 +18,18 @@
 
       <!-- 네비게이션 메뉴 -->
       <nav class="nav-menu">
-        <router-link to="/mypage" class="nav-item">마이페이지</router-link>
-        <router-link to="/kanban" class="nav-item">칸반보드</router-link>
-        <router-link to="/chat" class="nav-item">채팅</router-link>
+        <router-link to="/move-to-move/mypage" class="nav-item">마이페이지</router-link>
+        <router-link to="/move-to-move/kanban" class="nav-item">칸반보드</router-link>
+        <router-link to="/move-to-move/chat" class="nav-item">채팅</router-link>
       </nav>
     </aside>
 
     <!-- 메인 콘텐츠 -->
     <main class="content">
+      <div class="content-header">
+        <!-- 수평선을 위한 div -->
+        <div class="line"></div>
+      </div>
       <router-view />
     </main>
   </div>
@@ -41,6 +45,7 @@ export default {
 .main-layout {
   display: flex;
   min-height: 100vh;
+  background-color: #f0f8ff;
 }
 
 .sidebar {
@@ -51,6 +56,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 20px;
+  border-top-right-radius: 20px;
 }
 
 .sidebar-header {
@@ -92,6 +99,15 @@ export default {
 .content {
   flex: 1;
   padding: 20px;
-  background-color: #f4f7fa;
+  background-color: #f0f8ff;
+}
+
+.content-header {
+  margin-bottom: 20px;
+}
+
+.line {
+  border-top: 1px solid black; /* 검은색 수평선 */
+  margin-bottom: 20px; /* 아래쪽 여백 */
 }
 </style>
