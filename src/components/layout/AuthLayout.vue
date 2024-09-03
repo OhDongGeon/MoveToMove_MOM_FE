@@ -38,46 +38,62 @@
 
         <!-- 로그인/회원가입 모드 전환 링크 -->
         <div class="toggle-mode">
+          <a href="#" @click.prevent="isPasswordModalOpen = true">비밀번호 찾기</a>
           <a href="#" @click.prevent="toggleMode"> {{ isLoginMode ? '회원가입' : '로그인' }}으로 전환 </a>
         </div>
-
+        <!-- 비밀번호 찾기 모달 컴포넌트-->
+        <PasswordModal v-model="isPasswordModalOpen" @open-recovery-dialog="openRecoveryDialog" />
+        <PasswordRecoveryDialog :show="isRecoveryDialogOpen" @update:show="isRecoveryDialogOpen = $event" />
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
-          <button class="kakao-login">카카오 로그인</button>
-          <button class="google-login">Google 계정으로 로그인</button>
+          <button>
+            <img src="../../assets/kakao_login_large_wide.png" alt="kakao-login" class="kakao-logo" />
+          </button>
+
+          <button class="google-login-button">
+            <img src="../../assets/web_light_rd_na@4x.png" alt="Google Icon" />
+            <!-- 구글 아이콘 이미지 경로 -->
+            Google 계정으로 로그인
+          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'AuthLayout',
-  data() {
-    return {
-      isLoginMode: true, // 현재 모드를 관리하는 상태 변수
-      email: '',
-      nickname: '',
-      password: '',
-      confirmPassword: '',
-    };
-  },
-  methods: {
-    toggleMode() {
-      this.isLoginMode = !this.isLoginMode; // 모드 전환
-    },
-    handleSubmit() {
-      if (this.isLoginMode) {
-        // 로그인 로직
-        console.log('로그인 시도:', this.email, this.password);
-        this.$router.push('/move-to-move/mypage');
-      } else {
-        // 회원가입 로직
-        console.log('회원가입 시도:', this.email, this.nickname, this.password, this.confirmPassword);
-      }
-    },
-  },
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import PasswordModal from '@/components/common/PasswordModal.vue';
+import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
+const isPasswordModalOpen = ref(false); // 첫 번째 모달 상태
+const isRecoveryDialogOpen = ref(false); // 두 번째 모달 상태
+const openRecoveryDialog = () => {
+  isRecoveryDialogOpen.value = true;
+};
+// State variables
+const isLoginMode = ref(true);
+const email = ref('');
+const nickname = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+
+// Router instance
+const router = useRouter();
+
+// Methods
+const toggleMode = () => {
+  isLoginMode.value = !isLoginMode.value; // Toggle mode
+};
+const handleSubmit = () => {
+  if (isLoginMode.value) {
+    // Login logic
+    console.log('로그인 시도:', email.value, password.value);
+    router.push('/move-to-move/mypage');
+  } else {
+    // Signup logic
+    console.log('회원가입 시도:', email.value, nickname.value, password.value, confirmPassword.value);
+  }
 };
 </script>
 
@@ -146,7 +162,9 @@ export default {
 }
 
 .toggle-mode {
+  display: flex;
   margin-top: 15px;
+  justify-content: space-between;
 }
 
 .social-login {
@@ -154,22 +172,31 @@ export default {
   text-align: center;
 }
 
-.kakao-login,
-.google-login {
+.kakao-logo {
+  width: 360px;
+  height: 50px;
+  border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+}
+.google-login-button img {
+  width: 30px; /* 구글 아이콘 너비 */
+  height: 30px; /* 구글 아이콘 높이 */
+  margin-right: 60px; /* 아이콘과 텍스트 사이의 간격 */
+}
+.google-login-button {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 4px;
+  padding: 12px;
+  background-color: white;
+  border: 1px solid #dadce0;
+  border-radius: 14px;
   cursor: pointer;
-}
-
-.kakao-login {
-  background-color: #fee500;
-}
-
-.google-login {
-  background-color: #ffffff;
-  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽 정렬로 수정 */
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #3c4043;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
