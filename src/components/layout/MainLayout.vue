@@ -27,8 +27,9 @@
               <span class="user-nickname">이너프</span>
               <!-- 버튼 -->
               <div class="user-info-buttons">
-                <button class="info-button" @click="toInfoModify">정보수정</button>
-                <button class="delete-button">회원탈퇴</button>
+                <round-button-item @click="toInfoModify" :width="60" :height="20"
+                class="info-button">정보수정</round-button-item>
+                <round-button-item :width="60" :height="20" class="delete-button">회원탈퇴</round-button-item>
               </div>
             </div>
           </div>
@@ -223,15 +224,15 @@ export default {
 
 .info-button,
 .delete-button {
-  background-color: white;
-  color: #112f4e;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: bold;
+  background-color: #F0F8FF !important;
+  color: #112f4e !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  border-radius: 5px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
 }
+
 .nav-menu {
   width: 100%;
 }
