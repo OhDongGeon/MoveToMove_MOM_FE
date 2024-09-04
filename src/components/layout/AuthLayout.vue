@@ -68,92 +68,43 @@
     </div>
   </div>
 </template>
-
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
-import defaultProfileImage from '@/assets/logo.png';
+import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
 
-const isPasswordModalOpen = ref(false); // 첫 번째 모달 상태
-const isRecoveryDialogOpen = ref(false); // 두 번째 모달 상태
+const isPasswordModalOpen = ref(false);
+const isRecoveryDialogOpen = ref(false);
 const openRecoveryDialog = () => {
   isRecoveryDialogOpen.value = true;
 };
-// State variables
+
 const isLoginMode = ref(true);
 const email = ref('');
 const nickname = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-
-// Router instance
+const profileImage = ref(defaultProfileImageSrc); // 기본 프로필 이미지 경로
+const fileInput = ref(null);
 const router = useRouter();
 
-// 프로필 이미지 상태
-const profileImage = ref(defaultProfileImage); //TODO 기본 프로필 이미지 경로 넣기
+// 기본 프로필 이미지를 Blob 형식으로 변환하여 저장할 변수
+let defaultProfileImageBlob = null;
 
-// 파일 입력 요소 참조
-const fileInput = ref(null);
+onMounted(async () => {
+  // 기본 이미지 Blob으로 변환
+  const response = await fetch(defaultProfileImageSrc);
+  const blob = await response.blob();
+  defaultProfileImageBlob = new File([blob], 'default-profile.png', { type: blob.type });
+});
 
-// Methods
 const toggleMode = () => {
   isLoginMode.value = !isLoginMode.value; // Toggle mode
 };
-// const handleSubmit = () => {
-//   if (isLoginMode.value) {
-//     // TODO: 로그인 로직 구현을 해야한다. 서버 API (http://localhost:8080/api/members/login)
-//     console.log('로그인 시도:', email.value, password.value);
-//     router.push('/move-to-move/mypage'); // 로그인 이후 라우터 이동
-//   } else {
-//     // TODO: 회원가입 로직 구현을 해야한다. 서버 API (localhost:8080/api/members/sign-up)
-//     console.log('회원가입 시도:', email.value, nickname.value, password.value, confirmPassword.value);
-//   }
-// };
 
-const handleSubmit = async () => {
-  if (isLoginMode.value) {
-    // 로그인 로직
-    console.log('로그인 시도:', email.value, password.value);
-    // TODO: 서버 API (http://localhost:8080/api/members/login)를 통해 로그인 요청 구현
-    router.push('/move-to-move/mypage'); // 로그인 이후 라우터 이동
-  } else {
-    // 회원가입 로직
-    try {
-      // FormData 객체 생성
-      const formData = new FormData();
-      formData.append('email', email.value);
-      formData.append('nickname', nickname.value);
-      formData.append('password', password.value);
-      formData.append('confirmPassword', confirmPassword.value);
-
-      // 파일이 있는 경우 추가
-      if (fileInput.value.files[0]) {
-        formData.append('profileImage', fileInput.value.files[0]); // 프로필 사진 추가
-      }
-
-      // 서버로 FormData 전송
-      const response = await axios.post('http://localhost:8080/api/members/sign-up', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // 파일 업로드를 위한 Content-Type
-        },
-      });
-
-      // 회원가입 성공 시 처리
-      console.log('회원가입 성공:', response.data);
-      alert('회원가입이 완료되었습니다. 로그인 해주세요.');
-      isLoginMode.value = true; // 회원가입 후 로그인 모드로 전환
-    } catch (error) {
-      // 오류 처리
-      console.error('회원가입 실패:', error.response?.data || error.message);
-      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
-    }
-  }
-};
-
-// 프로필 사진 파일 선택 시 호출되는 함수
 const onFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -163,12 +114,52 @@ const onFileChange = (event) => {
     };
     reader.readAsDataURL(file); // 파일을 읽어서 Data 변환
   } else {
-    profileImage.value = defaultProfileImage; // 파일이 없으면 미리보기를 비우고 디폴트 사진을 삽입.
+    profileImage.value = defaultProfileImageSrc; // 파일이 없으면 기본 이미지를 사용
   }
 };
-// 파일 입력 창 열기
+
 const triggerFileInput = () => {
-  fileInput.value.click();
+  if (fileInput.value) {
+    fileInput.value.click();
+  } else {
+    console.error('fileInput이 초기화되지 않았습니다.');
+  }
+};
+
+const handleSubmit = async () => {
+  if (isLoginMode.value) {
+    console.log('로그인 시도:', email.value, password.value);
+    router.push('/move-to-move/mypage');
+  } else {
+    try {
+      const signUpFormJson = JSON.stringify({
+        email: email.value,
+        nickName: nickname.value,
+        password: password.value,
+        confirmPassword: confirmPassword.value,
+      });
+
+      const formData = new FormData();
+      formData.append('form', signUpFormJson);
+
+      const selectedFile = fileInput.value?.files[0];
+      if (selectedFile) {
+        console.log('선택된 파일:', selectedFile);
+        formData.append('file', selectedFile); // 사용자 선택 파일 추가
+      } else {
+        console.log('파일이 선택되지 않았으므로 기본 이미지 업로드');
+        formData.append('file', defaultProfileImageBlob); // 기본 이미지 Blob 추가
+      }
+
+      const response = await axios.post('http://localhost:8080/api/members/sign-up', formData);
+      console.log('회원가입 성공:', response.data);
+      alert('회원가입이 완료되었습니다. 로그인 해주세요.');
+      isLoginMode.value = true;
+    } catch (error) {
+      console.error('회원가입 실패:', error.response?.data || error.message);
+      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+    }
+  }
 };
 </script>
 
