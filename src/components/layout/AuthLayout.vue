@@ -8,14 +8,22 @@
       <div class="form-container">
         <h2>{{ isLoginMode ? '로그인' : '회원가입' }}</h2>
 
-        <!-- 공통 입력 필드 -->
+        <!-- 입력 필드 -->
         <form @submit.prevent="handleSubmit">
+          <!-- 프로필 사진 업로드 -->
+          <div v-if="!isLoginMode" class="form-profile">
+            <label for="profile-profile"></label>
+            <input type="file" id="profile-profile" @change="onFileChange" style="display: none" ref="fileInput" />
+            <img :src="profileImage" alt="프로필 미리보기" class="profile-preview" @click="triggerFileInput" />
+          </div>
+
           <div class="form-group">
             <label for="email">이메일</label>
             <input type="email" id="email" placeholder="이메일을 입력하세요" v-model="email" />
           </div>
 
           <!-- 회원가입일 경우 닉네임 입력 필드 추가 -->
+
           <div v-if="!isLoginMode" class="form-group">
             <label for="nickname">닉네임</label>
             <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" />
@@ -63,9 +71,12 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
 import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
+import defaultProfileImage from '@/assets/logo.png';
+
 const isPasswordModalOpen = ref(false); // 첫 번째 모달 상태
 const isRecoveryDialogOpen = ref(false); // 두 번째 모달 상태
 const openRecoveryDialog = () => {
@@ -81,19 +92,83 @@ const confirmPassword = ref('');
 // Router instance
 const router = useRouter();
 
+// 프로필 이미지 상태
+const profileImage = ref(defaultProfileImage); //TODO 기본 프로필 이미지 경로 넣기
+
+// 파일 입력 요소 참조
+const fileInput = ref(null);
+
 // Methods
 const toggleMode = () => {
   isLoginMode.value = !isLoginMode.value; // Toggle mode
 };
-const handleSubmit = () => {
+// const handleSubmit = () => {
+//   if (isLoginMode.value) {
+//     // TODO: 로그인 로직 구현을 해야한다. 서버 API (http://localhost:8080/api/members/login)
+//     console.log('로그인 시도:', email.value, password.value);
+//     router.push('/move-to-move/mypage'); // 로그인 이후 라우터 이동
+//   } else {
+//     // TODO: 회원가입 로직 구현을 해야한다. 서버 API (localhost:8080/api/members/sign-up)
+//     console.log('회원가입 시도:', email.value, nickname.value, password.value, confirmPassword.value);
+//   }
+// };
+
+const handleSubmit = async () => {
   if (isLoginMode.value) {
-    // Login logic
+    // 로그인 로직
     console.log('로그인 시도:', email.value, password.value);
-    router.push('/move-to-move/mypage');
+    // TODO: 서버 API (http://localhost:8080/api/members/login)를 통해 로그인 요청 구현
+    router.push('/move-to-move/mypage'); // 로그인 이후 라우터 이동
   } else {
-    // Signup logic
-    console.log('회원가입 시도:', email.value, nickname.value, password.value, confirmPassword.value);
+    // 회원가입 로직
+    try {
+      // FormData 객체 생성
+      const formData = new FormData();
+      formData.append('email', email.value);
+      formData.append('nickname', nickname.value);
+      formData.append('password', password.value);
+      formData.append('confirmPassword', confirmPassword.value);
+
+      // 파일이 있는 경우 추가
+      if (fileInput.value.files[0]) {
+        formData.append('profileImage', fileInput.value.files[0]); // 프로필 사진 추가
+      }
+
+      // 서버로 FormData 전송
+      const response = await axios.post('http://localhost:8080/api/members/sign-up', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', // 파일 업로드를 위한 Content-Type
+        },
+      });
+
+      // 회원가입 성공 시 처리
+      console.log('회원가입 성공:', response.data);
+      alert('회원가입이 완료되었습니다. 로그인 해주세요.');
+      isLoginMode.value = true; // 회원가입 후 로그인 모드로 전환
+    } catch (error) {
+      // 오류 처리
+      console.error('회원가입 실패:', error.response?.data || error.message);
+      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+    }
   }
+};
+
+// 프로필 사진 파일 선택 시 호출되는 함수
+const onFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      profileImage.value = e.target.result; // 이미지 미리보기 생성
+    };
+    reader.readAsDataURL(file); // 파일을 읽어서 Data 변환
+  } else {
+    profileImage.value = defaultProfileImage; // 파일이 없으면 미리보기를 비우고 디폴트 사진을 삽입.
+  }
+};
+// 파일 입력 창 열기
+const triggerFileInput = () => {
+  fileInput.value.click();
 };
 </script>
 
@@ -138,7 +213,22 @@ const handleSubmit = () => {
   margin-bottom: 15px;
   text-align: left;
 }
+.form-profile {
+  display: flex; /* Flexbox 사용 */
+  align-items: center; /* 세로 가운데 정렬 */
+  justify-content: flex-start; /* 전체 아이템을 수평 중앙 정렬 */
+  margin-bottom: 1rem; /* 아래쪽 간격 추가 */
+}
 
+.form-profile label {
+  margin-right: 1rem; /* 라벨과 입력 필드 사이 간격 추가 */
+  min-width: 110px; /* 라벨의 최소 너비 지정 */
+  text-align: left; /* 라벨을 왼쪽으로 정렬 */
+}
+.form-profile input[type='file'] {
+  flex-grow: 1; /* 입력 필드를 중앙에 배치 */
+  max-width: 300px; /* 입력 필드의 최대 너비 지정 */
+}
 .form-group label {
   display: block;
   margin-bottom: 5px;
@@ -198,5 +288,20 @@ const handleSubmit = () => {
   font-size: 16px;
   color: #3c4043;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 프로필 사진 CSS */
+.form-profile-preview {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.profile-preview {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 10%;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  margin-top: 10px;
+  aspect-ratio: 1 / 1; /* 가로세로 비율을 1:1로 고정 */
 }
 </style>
