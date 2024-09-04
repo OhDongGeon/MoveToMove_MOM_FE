@@ -78,7 +78,7 @@ import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
-
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
 const openRecoveryDialog = () => {
@@ -173,9 +173,36 @@ const handleSubmit = async () => {
   }
 
   if (isLoginMode.value) {
-    console.log('로그인 시도:', email.value, password.value);
-    router.push('/move-to-move/mypage');
+    // 로그인 서버 API 요청
+    try {
+      // 전송할 데이터 객체 생성
+      const loginData = {
+        email: email.value,
+        password: password.value,
+      };
+
+      // axios를 사용하여 POST 요청 보내기
+      const response = await axios.post(`${API_BASE_URL}/members/login`, loginData);
+
+      // access 토큰 저장
+      const accessToken = response.data.data; // 서버에서 전달된 Access Token
+      // Access Token을 로컬 스토리지에 저장 ( 로컬스토리지에 저장하는 변수 이름 확인 ) 
+      localStorage.setItem('accessToken', accessToken);
+
+      // TODO : 로그인 시 추가될 부분 유저 정보 처리 어떻게 할 것인지 피니아, 세션
+      
+      // TODO : 알림을 위해서 웹 소켓 연결 구현해야함
+
+      // 응답 처리
+      console.log('로그인 성공:', response.data);
+      alert('로그인에 성공했습니다.');
+      router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
+    } catch (error) {
+      console.error('로그인 실패:', error.response?.data || error.message);
+      alert('로그인에 실패했습니다. 다시 시도해주세요.');
+    }
   } else {
+    // 회원가입 서버 api 요청
     try {
       const signUpFormJson = JSON.stringify({
         email: email.value,
@@ -197,7 +224,7 @@ const handleSubmit = async () => {
       }
 
       //TODO 공통 alert 창 만들어서 변경해야함
-      const response = await axios.post('http://localhost:8080/api/members/sign-up', formData);
+      const response = await axios.post(`${API_BASE_URL}/members/sign-up`, formData);
       console.log('회원가입 성공:', response.data);
       alert('회원가입이 완료되었습니다. 로그인 해주세요.');
       isLoginMode.value = true;
