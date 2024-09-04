@@ -4,6 +4,8 @@ import App from './App.vue';
 import { createPinia } from 'pinia';
 import router from './router/index';
 
+import RoundButtonItem from './components/common/item/RoundButtonItem.vue';
+
 // Pinia 인스턴스 생성
 const pinia = createPinia();
 
@@ -41,4 +43,5 @@ createApp(App)
   .use(vuetify) //vuetify 적용
   .use(router) // router 적용
   .component('font-awesome-icon', FontAwesomeIcon)
+  .component('round-button-item', RoundButtonItem) // RoundButtonItem 컴포넌트 등록
   .mount('#app'); // 애플리케이션을 DOM에 마운트
