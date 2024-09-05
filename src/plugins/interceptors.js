@@ -1,20 +1,13 @@
 import axios from 'axios';
-import store from '@/stores';
+import store from '@/store';
 import router from '@/router';
 
-// 인스턴스 생성
-const axiosInstance = axios.create({
-  // baseURL: 'https://move-to-move.online', // 나중 API URL
-  baseURL: 'http://localhost:8080',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+const axiosInstance = axios.create();
 
-// 요청 인터셉터 추가
 axiosInstance.interceptors.request.use(
   function (config) {
     const accessToken = localStorage.getItem('accessToken');
+
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -25,7 +18,6 @@ axiosInstance.interceptors.request.use(
   },
 );
 
-// 응답 인터셉터 추가
 axiosInstance.interceptors.response.use(
   function (response) {
     return response;
