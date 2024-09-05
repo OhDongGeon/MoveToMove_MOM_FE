@@ -3,7 +3,7 @@
     <div class="alert-content">
       <p class="alert-message">{{ message }}</p>
       <!-- 공용 버튼으로 수정 -->
-      <CommonButton @click="closeAlert" :width="60" :height="20" class="info-button" default-text="홈으로" />
+      <CommonButton @click="closeAlert" :width="100" :height="30" :fontSize="30" class="info-button" default-text="홈으로" />
     </div>
   </div>
 </template>
@@ -59,8 +59,8 @@ export default {
 
 .alert-content {
   background-color: #f0f8ff; /* 알림창 배경색 */
-  width: 330px; /* 알림창 너비 설정 */
-  height: 134px; /* 알림창 높이 설정 */
+  width: 500px; /* 알림창 너비 설정 */
+  height: 250px; /* 알림창 높이 설정 */
   padding: 20px; /* 내부 여백 */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
@@ -77,6 +77,8 @@ export default {
   padding-bottom: 20px; /* 버튼과 메시지 사이에 여백 추가 */
   font-size: 14px; /* 메시지의 글꼴 크기 */
   flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
+  font-weight: 800;
+  font-size: larger;
 }
 
 .info-button {
@@ -87,5 +89,8 @@ export default {
   border-radius: 5px !important;
   font-size: 10px !important;
   font-weight: bold !important;
+}
+.v-btn {
+  color: white;
 }
 </style>
