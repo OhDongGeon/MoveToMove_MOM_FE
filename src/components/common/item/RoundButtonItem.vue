@@ -1,10 +1,5 @@
 <template>
-  <v-btn
-    :class="['rounded-pill', 'sizeTest']"
-    :color="color"
-    :style="buttonStyle"
-    @click="$emit('click')"
-  >
+  <v-btn :class="['rounded-pill', 'sizeTest']" :color="color" :style="buttonStyle">
     <slot>
       {{ defaultText }}
     </slot>
@@ -27,7 +22,7 @@ export default {
     height: {
       type: Number,
       default: 72,
-    }
+    },
   },
   setup(props) {
     // props를 쉽게 사용하기 위해 구조 분해(destructuring)
