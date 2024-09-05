@@ -28,7 +28,7 @@
               <!-- 버튼 -->
               <div class="user-info-buttons">
                 <round-button-item @click="toInfoModify" :width="60" :height="20" class="info-button">정보수정</round-button-item>
-                <round-button-item :width="60" :height="20" class="delete-button">회원탈퇴</round-button-item>
+                <round-button-item @click="toWithdraw" :width="60" :height="20" class="delete-button">회원탈퇴</round-button-item>
               </div>
             </div>
           </div>
@@ -98,6 +98,11 @@ export default {
       router.push('/move-to-move/profile');
     };
 
+    const toWithdraw = () => {
+      navigationStore.setActiveItem('mypage');
+      router.push('/move-to-move/withdraw');
+    };
+
     // 알림을 읽음으로 표시하는 메서드
     const markNotificationAsRead = () => {
       navigationStore.setNotificationStatus(false); // 알림을 읽음 상태로 설정
@@ -108,6 +113,7 @@ export default {
       avatarUrl,
       navigateToHome,
       toInfoModify,
+      toWithdraw,
       markNotificationAsRead,
     };
   },
