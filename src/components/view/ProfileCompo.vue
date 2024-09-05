@@ -124,6 +124,7 @@ export default {
         memberInfo.nickName = res.data.nickName;
 
         if (res.data.profileUrl) {
+          memberInfo.profileUrl = res.data.profileUrl;
           previewImage.value = `${res.data.profileUrl}?t=${new Date().getTime()}`;
           selectedImage.value = res.data.profileUrl;
         } else {

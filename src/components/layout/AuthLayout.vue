@@ -193,8 +193,9 @@ const handleSubmit = async () => {
         password: password.value,
       };
 
-      // axios를 사용하여 POST 요청 보내기
-      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData);
+      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData, {
+        withCredentials: true,
+      });
 
       // access 토큰 저장
       const accessToken = response.data.data; // 서버에서 전달된 Access Token
