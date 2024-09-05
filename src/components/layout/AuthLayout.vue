@@ -68,6 +68,8 @@
         </div>
       </div>
     </div>
+    <!-- Alert 컴포넌트 추가 -->
+    <CommonAlert ref="alertComponent" />
   </div>
 </template>
 
@@ -78,13 +80,15 @@ import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
+import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
 
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
 const openRecoveryDialog = () => {
   isRecoveryDialogOpen.value = true;
 };
-
+const alertComponent = ref(null); // Alert 컴포넌트를 위한 ref 추가
 const isLoginMode = ref(true);
 const email = ref('');
 const nickname = ref('');
@@ -147,7 +151,7 @@ const validateNickname = () => {
 
 // 비밀번호 유효성 검사
 const validatePassword = () => {
-  passwordError.value = password.value.length >= 8 ? '' : '비밀번호는 최소 8자 이상이어야 합니다.';
+  passwordError.value = password.value.length >= 6 ? '' : '비밀번호는 최소 6자 이상이어야 합니다.';
 };
 
 // 비밀번호 확인 유효성 검사
@@ -166,6 +170,14 @@ const isFormValid = () => {
   return !emailError.value && !nicknameError.value && !passwordError.value && !confirmPasswordError.value;
 };
 
+//alert 함수
+const openErrorAlert = (message) => {
+  // Alert 컴포넌트의 openAlert 메서드를 호출
+  if (alertComponent.value) {
+    alertComponent.value.openAlert(message);
+  }
+};
+// api 서버 요청 메서드
 const handleSubmit = async () => {
   if (!isFormValid()) {
     alert('입력한 정보를 다시 확인하세요.');
@@ -199,7 +211,10 @@ const handleSubmit = async () => {
       router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
     } catch (error) {
       console.error('로그인 실패:', error.response?.data || error.message);
-      alert('로그인에 실패했습니다. 다시 시도해주세요.');
+
+      // 여기서 Alert 컴포넌트의 openAlert 메서드를 호출하여 에러 메시지를 표시
+      const errorMessage = error.response?.data?.message || '로그인에 실패했습니다. 다시 시도해주세요.';
+      openErrorAlert(errorMessage);
     }
   } else {
     // 회원가입 서버 api 요청
