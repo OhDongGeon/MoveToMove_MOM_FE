@@ -74,7 +74,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
-import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
+import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
 
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
