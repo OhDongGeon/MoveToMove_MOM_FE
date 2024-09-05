@@ -57,11 +57,11 @@
         <PasswordRecoveryDialog :show="isRecoveryDialogOpen" @update:show="isRecoveryDialogOpen = $event" />
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
-          <button>
+          <button class="kakao-login-button" @click="handleKakaoLogin">
             <img src="../../assets/kakao_login_large_wide.png" alt="kakao-login" class="kakao-logo" />
           </button>
 
-          <button class="google-login-button">
+          <button class="google-login-button" @click="handleGoogleLogin">
             <img src="../../assets/web_light_rd_na@4x.png" alt="Google Icon" />
             Google 계정으로 로그인
           </button>
@@ -182,15 +182,15 @@ const handleSubmit = async () => {
       };
 
       // axios를 사용하여 POST 요청 보내기
-      const response = await axios.post(`${API_BASE_URL}/members/login`, loginData);
+      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData);
 
       // access 토큰 저장
       const accessToken = response.data.data; // 서버에서 전달된 Access Token
-      // Access Token을 로컬 스토리지에 저장 ( 로컬스토리지에 저장하는 변수 이름 확인 ) 
+      // Access Token을 로컬 스토리지에 저장 ( 로컬스토리지에 저장하는 변수 이름 확인 )
       localStorage.setItem('accessToken', accessToken);
 
       // TODO : 로그인 시 추가될 부분 유저 정보 처리 어떻게 할 것인지 피니아, 세션
-      
+
       // TODO : 알림을 위해서 웹 소켓 연결 구현해야함
 
       // 응답 처리
@@ -224,7 +224,7 @@ const handleSubmit = async () => {
       }
 
       //TODO 공통 alert 창 만들어서 변경해야함
-      const response = await axios.post(`${API_BASE_URL}/members/sign-up`, formData);
+      const response = await axios.post(`${API_BASE_URL}/api/members/sign-up`, formData);
       console.log('회원가입 성공:', response.data);
       alert('회원가입이 완료되었습니다. 로그인 해주세요.');
       isLoginMode.value = true;
@@ -233,6 +233,14 @@ const handleSubmit = async () => {
       alert('회원가입에 실패했습니다. 다시 시도해주세요.');
     }
   }
+};
+
+// 소셜 로그인 함수
+const handleGoogleLogin = () => {
+  window.location.href = `${API_BASE_URL}/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
+};
+const handleKakaoLogin = () => {
+  window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
 };
 </script>
 
