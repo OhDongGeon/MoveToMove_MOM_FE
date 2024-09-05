@@ -77,10 +77,16 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useNavigationStore } from '@/stores/navigationStore';
+
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
 import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
+
+
+// Pinia store 사용 설정
+const navigationStore = useNavigationStore();
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
@@ -210,6 +216,8 @@ const handleSubmit = async () => {
       console.log('로그인 성공:', response.data);
       alert('로그인에 성공했습니다.');
       router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
+      navigationStore.setActiveItem('mypage');
+      
     } catch (error) {
       console.error('로그인 실패:', error.response?.data || error.message);
 
@@ -254,9 +262,11 @@ const handleSubmit = async () => {
 // 소셜 로그인 함수
 const handleGoogleLogin = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
+  navigationStore.setActiveItem('mypage');
 };
 const handleKakaoLogin = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+  navigationStore.setActiveItem('mypage');
 };
 </script>
 

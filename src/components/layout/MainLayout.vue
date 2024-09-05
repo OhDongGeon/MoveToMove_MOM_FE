@@ -2,6 +2,12 @@
   <div class="main-layout">
     <!-- 사이드바 -->
     <aside class="sidebar">
+      <!-- 로그아웃 버튼 -->
+      <div class="logout-button-container" @click="logout">
+        <span class="material-symbols-outlined logout-icon">logout</span>
+        <span class="logout-text">로그아웃</span>
+      </div>
+
       <div class="sidebar-header">
         <!-- 로고 및 사용자 정보 -->
         <img src="../../assets/move-to-move-logo2.png" @click="navigateToHome" alt="Logo" class="logo" />
@@ -106,6 +112,13 @@ export default {
     // 알림을 읽음으로 표시하는 메서드
     const markNotificationAsRead = () => {
       navigationStore.setNotificationStatus(false); // 알림을 읽음 상태로 설정
+    }
+    
+    // 로그아웃 메서드
+    const logout = () => {
+      // 로그아웃 로직을 추가합니다.
+      console.log('Logging out...');
+      // 예시: router.push('/login');
     };
 
     return {
@@ -115,6 +128,7 @@ export default {
       toInfoModify,
       toWithdraw,
       markNotificationAsRead,
+      logout,
     };
   },
 };
@@ -140,8 +154,30 @@ export default {
   position: relative; /* 상대적 위치 지정 */
 }
 
+/* 로그아웃 버튼 스타일 */
+.logout-button-container {
+  position: absolute;
+  top: 10px;
+  left: 10px; /* 사이드바 왼쪽 상단에 위치 */
+  cursor: pointer; /* 클릭 가능한 커서 모양 */
+  display: flex;
+  align-items: center;
+}
+
+.logout-icon {
+  font-size: 24px;
+  color: white; /* 아이콘 색상 */
+  margin-right: 5px; /* 아이콘과 텍스트 간격 */
+}
+
+.logout-text {
+  font-size: 12px;
+  color: white;
+  font-weight: bold;
+}
+
 .sidebar-header {
-  padding: 20px;
+  padding: 10px;
   text-align: center;
   position: relative; /* 알림 아이콘의 절대 위치를 설정하기 위한 상대적 위치 지정 */
 }
@@ -149,8 +185,8 @@ export default {
 .logo {
   width: 200px;
   height: 100px;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 40px;
+  margin-bottom: 10px;
   cursor: pointer; /* 클릭 가능한 커서 모양 */
 }
 
@@ -236,6 +272,7 @@ export default {
   border-radius: 5px !important;
   font-size: 10px !important;
   font-weight: bold !important;
+  justify-content: center !important;
 }
 
 .nav-menu {
