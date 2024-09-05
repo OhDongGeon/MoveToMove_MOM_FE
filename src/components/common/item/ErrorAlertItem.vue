@@ -3,7 +3,7 @@
     <div class="alert-content">
       <p class="alert-message">{{ message }}</p>
       <!-- 공용 버튼으로 수정 -->
-      <CommonButton @click="closeAlert" :width="100" :height="30" :fontSize="30" class="info-button" default-text="홈으로" />
+      <CommonButton @click="closeAlert" :width="100" :height="30" :fontSize="20" class="info-button" default-text="홈으로" />
     </div>
   </div>
 </template>
@@ -82,15 +82,7 @@ export default {
 }
 
 .info-button {
-  background-color: #f0f8ff !important;
-  color: #112f4e !important;
+  background-color: transparent !important; /* 공용 버튼의 배경색은 이미 설정되어 있으므로 투명으로 */
   border: none !important;
-  padding: 5px 10px !important;
-  border-radius: 5px !important;
-  font-size: 10px !important;
-  font-weight: bold !important;
-}
-.v-btn {
-  color: white;
 }
 </style>
