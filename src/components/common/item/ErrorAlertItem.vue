@@ -3,32 +3,41 @@
     <div class="alert-content">
       <p class="alert-message">{{ message }}</p>
       <!-- 공용 버튼으로 수정 -->
-      <CommonButton @click="closeAlert" :width="60" height="20" class="info-button" default-text="홈으로" />
+      <CommonButton @click="closeAlert" :width="60" :height="20" class="info-button" default-text="홈으로" />
     </div>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue';
 import CommonButton from '@/components/common/item/RoundButtonItem.vue';
 
 export default {
   components: {
-    CommonButton, // 공용 버튼 컴포넌트 등록
+    CommonButton,
   },
-  data() {
-    return {
-      show: false,
-      message: '',
+  setup() {
+    // 상태 관리
+    const show = ref(false); // 알림창 보임 여부
+    const message = ref(''); // 알림창 메시지
+
+    // 메서드 정의
+    const openAlert = (newMessage) => {
+      message.value = newMessage;
+      show.value = true;
     };
-  },
-  methods: {
-    openAlert(message) {
-      this.message = message;
-      this.show = true;
-    },
-    closeAlert() {
-      this.show = false;
-    },
+
+    const closeAlert = () => {
+      show.value = false;
+    };
+
+    // 상태와 메서드를 반환하여 템플릿에서 사용 가능하게 함
+    return {
+      show,
+      message,
+      openAlert,
+      closeAlert,
+    };
   },
 };
 </script>
@@ -47,6 +56,7 @@ export default {
   justify-content: center; /* 수평 중앙 정렬 */
   z-index: 1000; /* 다른 요소보다 앞에 보이도록 설정 */
 }
+
 .alert-content {
   background-color: #f0f8ff; /* 알림창 배경색 */
   width: 330px; /* 알림창 너비 설정 */
@@ -60,6 +70,7 @@ export default {
   justify-content: center; /* 내용 수직 중앙 정렬 */
   align-items: center; /* 내용 수평 중앙 정렬 */
 }
+
 .alert-message {
   margin: 0; /* 기본 마진 제거 */
   padding-top: 30px; /* 메시지 위에 패딩 추가 */
@@ -67,6 +78,7 @@ export default {
   font-size: 14px; /* 메시지의 글꼴 크기 */
   flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
 }
+
 .info-button {
   background-color: #f0f8ff !important;
   color: #112f4e !important;
