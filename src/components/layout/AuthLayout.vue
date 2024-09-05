@@ -19,25 +19,28 @@
 
           <div class="form-group">
             <label for="email">이메일</label>
-            <input type="email" id="email" placeholder="이메일을 입력하세요" v-model="email" />
+            <input type="email" id="email" placeholder="이메일을 입력하세요" v-model="email" @blur="validateEmail" />
+            <span v-if="emailError" class="error">{{ emailError }}</span>
           </div>
 
           <!-- 회원가입일 경우 닉네임 입력 필드 추가 -->
-
           <div v-if="!isLoginMode" class="form-group">
             <label for="nickname">닉네임</label>
-            <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" />
+            <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" @blur="validateNickname" />
+            <span v-if="nicknameError" class="error">{{ nicknameError }}</span>
           </div>
 
           <div class="form-group">
             <label for="password">비밀번호</label>
-            <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" />
+            <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" @blur="validatePassword" />
+            <span v-if="passwordError" class="error">{{ passwordError }}</span>
           </div>
 
           <!-- 회원가입일 경우 비밀번호 확인 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="confirm-password">비밀번호 확인</label>
-            <input type="password" id="confirm-password" placeholder="다시 비밀번호를 입력하세요" v-model="confirmPassword" />
+            <input type="password" id="confirm-password" placeholder="다시 비밀번호를 입력하세요" v-model="confirmPassword" @blur="validateConfirmPassword" />
+            <span v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</span>
           </div>
 
           <!-- 버튼 텍스트도 상태에 따라 변경 -->
@@ -54,13 +57,12 @@
         <PasswordRecoveryDialog :show="isRecoveryDialogOpen" @update:show="isRecoveryDialogOpen = $event" />
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
-          <button>
+          <button class="kakao-login-button" @click="handleKakaoLogin">
             <img src="../../assets/kakao_login_large_wide.png" alt="kakao-login" class="kakao-logo" />
           </button>
 
-          <button class="google-login-button">
+          <button class="google-login-button" @click="handleGoogleLogin">
             <img src="../../assets/web_light_rd_na@4x.png" alt="Google Icon" />
-            <!-- 구글 아이콘 이미지 경로 -->
             Google 계정으로 로그인
           </button>
         </div>
@@ -68,13 +70,14 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
-import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
+import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
 
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
@@ -91,11 +94,16 @@ const profileImage = ref(defaultProfileImageSrc); // 기본 프로필 이미지 
 const fileInput = ref(null);
 const router = useRouter();
 
+// 유효성 검사 에러 메시지
+const emailError = ref('');
+const nicknameError = ref('');
+const passwordError = ref('');
+const confirmPasswordError = ref('');
+
 // 기본 프로필 이미지를 Blob 형식으로 변환하여 저장할 변수
 let defaultProfileImageBlob = null;
 
 onMounted(async () => {
-  // 기본 이미지 Blob으로 변환
   const response = await fetch(defaultProfileImageSrc);
   const blob = await response.blob();
   defaultProfileImageBlob = new File([blob], 'default-profile.png', { type: blob.type });
@@ -126,11 +134,75 @@ const triggerFileInput = () => {
   }
 };
 
+// 이메일 유효성 검사
+const validateEmail = () => {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  emailError.value = emailPattern.test(email.value) ? '' : '유효한 이메일 주소를 입력하세요.';
+};
+
+// 닉네임 유효성 검사
+const validateNickname = () => {
+  nicknameError.value = nickname.value.length >= 2 ? '' : '닉네임은 최소 2자 이상이어야 합니다.';
+};
+
+// 비밀번호 유효성 검사
+const validatePassword = () => {
+  passwordError.value = password.value.length >= 8 ? '' : '비밀번호는 최소 8자 이상이어야 합니다.';
+};
+
+// 비밀번호 확인 유효성 검사
+const validateConfirmPassword = () => {
+  confirmPasswordError.value = password.value === confirmPassword.value ? '' : '비밀번호가 일치하지 않습니다.';
+};
+
+// 입력값이 유효한지 확인하는 함수
+const isFormValid = () => {
+  validateEmail();
+  if (!isLoginMode.value) {
+    validateNickname();
+    validatePassword();
+    validateConfirmPassword();
+  }
+  return !emailError.value && !nicknameError.value && !passwordError.value && !confirmPasswordError.value;
+};
+
 const handleSubmit = async () => {
+  if (!isFormValid()) {
+    alert('입력한 정보를 다시 확인하세요.');
+    return;
+  }
+
   if (isLoginMode.value) {
-    console.log('로그인 시도:', email.value, password.value);
-    router.push('/move-to-move/mypage');
+    // 로그인 서버 API 요청
+    try {
+      // 전송할 데이터 객체 생성
+      const loginData = {
+        email: email.value,
+        password: password.value,
+      };
+
+      // axios를 사용하여 POST 요청 보내기
+      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData);
+
+      // access 토큰 저장
+      const accessToken = response.data.data; // 서버에서 전달된 Access Token
+      // Access Token을 로컬 스토리지에 저장 ( 로컬스토리지에 저장하는 변수 이름 확인 )
+      localStorage.setItem('accessToken', accessToken);
+
+      // TODO : 로그인 시 추가될 부분 유저 정보 처리 어떻게 할 것인지 피니아, 세션
+
+      // TODO : 알림을 위해서 웹 소켓 연결 구현해야함
+
+      // 응답 처리
+      console.log('로그인 성공:', response.data);
+      alert('로그인에 성공했습니다.');
+      router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
+    } catch (error) {
+      console.error('로그인 실패:', error.response?.data || error.message);
+      alert('로그인에 실패했습니다. 다시 시도해주세요.');
+    }
   } else {
+    // 회원가입 서버 api 요청
     try {
       const signUpFormJson = JSON.stringify({
         email: email.value,
@@ -151,7 +223,8 @@ const handleSubmit = async () => {
         formData.append('file', defaultProfileImageBlob); // 기본 이미지 Blob 추가
       }
 
-      const response = await axios.post('http://localhost:8080/api/members/sign-up', formData);
+      //TODO 공통 alert 창 만들어서 변경해야함
+      const response = await axios.post(`${API_BASE_URL}/api/members/sign-up`, formData);
       console.log('회원가입 성공:', response.data);
       alert('회원가입이 완료되었습니다. 로그인 해주세요.');
       isLoginMode.value = true;
@@ -160,6 +233,14 @@ const handleSubmit = async () => {
       alert('회원가입에 실패했습니다. 다시 시도해주세요.');
     }
   }
+};
+
+// 소셜 로그인 함수
+const handleGoogleLogin = () => {
+  window.location.href = `${API_BASE_URL}/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
+};
+const handleKakaoLogin = () => {
+  window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
 };
 </script>
 
@@ -208,7 +289,7 @@ const handleSubmit = async () => {
   display: flex; /* Flexbox 사용 */
   align-items: center; /* 세로 가운데 정렬 */
   justify-content: flex-start; /* 전체 아이템을 수평 중앙 정렬 */
-  margin-bottom: 1rem; /* 아래쪽 간격 추가 */
+  margin-bottom: 16px; /* 아래쪽 간격 추가 */
 }
 
 .form-profile label {
