@@ -80,7 +80,7 @@ import { useRouter } from 'vue-router';
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
-import CommonAlert from '@/components/common/item/CommonAlertItem.vue';
+import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
@@ -171,10 +171,10 @@ const isFormValid = () => {
 };
 
 //alert 함수
-const openErrorAlert = (title, message) => {
+const openErrorAlert = (message) => {
   // Alert 컴포넌트의 openAlert 메서드를 호출
   if (alertComponent.value) {
-    alertComponent.value.openAlert(title, message);
+    alertComponent.value.openAlert(message);
   }
 };
 // api 서버 요청 메서드
@@ -214,7 +214,7 @@ const handleSubmit = async () => {
 
       // 여기서 Alert 컴포넌트의 openAlert 메서드를 호출하여 에러 메시지를 표시
       const errorMessage = error.response?.data?.message || '로그인에 실패했습니다. 다시 시도해주세요.';
-      openErrorAlert('에러 발생', errorMessage);
+      openErrorAlert(errorMessage);
     }
   } else {
     // 회원가입 서버 api 요청

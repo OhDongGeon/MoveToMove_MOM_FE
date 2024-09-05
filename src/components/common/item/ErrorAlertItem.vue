@@ -1,0 +1,79 @@
+<template>
+  <div v-if="show" class="alert-overlay">
+    <div class="alert-content">
+      <p class="alert-message">{{ message }}</p>
+      <!-- 공용 버튼으로 수정 -->
+      <CommonButton @click="closeAlert" :width="60" height="20" class="info-button" default-text="홈으로" />
+    </div>
+  </div>
+</template>
+
+<script>
+import CommonButton from '@/components/common/item/RoundButtonItem.vue';
+
+export default {
+  components: {
+    CommonButton, // 공용 버튼 컴포넌트 등록
+  },
+  data() {
+    return {
+      show: false,
+      message: '',
+    };
+  },
+  methods: {
+    openAlert(message) {
+      this.message = message;
+      this.show = true;
+    },
+    closeAlert() {
+      this.show = false;
+    },
+  },
+};
+</script>
+
+<style scoped>
+/* 알림창을 띄우는 위치 조절 */
+.alert-overlay {
+  position: fixed; /* 화면에 고정 */
+  top: 0;
+  left: 0;
+  width: 100vw; /* 전체 화면 너비 */
+  height: 100vh; /* 전체 화면 높이 */
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex; /* Flexbox 사용 */
+  align-items: center; /* 수직 중앙 정렬 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  z-index: 1000; /* 다른 요소보다 앞에 보이도록 설정 */
+}
+.alert-content {
+  background-color: #f0f8ff; /* 알림창 배경색 */
+  width: 330px; /* 알림창 너비 설정 */
+  height: 134px; /* 알림창 높이 설정 */
+  padding: 20px; /* 내부 여백 */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  display: flex; /* Flexbox 사용 */
+  flex-direction: column; /* 세로 정렬 */
+  justify-content: center; /* 내용 수직 중앙 정렬 */
+  align-items: center; /* 내용 수평 중앙 정렬 */
+}
+.alert-message {
+  margin: 0; /* 기본 마진 제거 */
+  padding-top: 30px; /* 메시지 위에 패딩 추가 */
+  padding-bottom: 20px; /* 버튼과 메시지 사이에 여백 추가 */
+  font-size: 14px; /* 메시지의 글꼴 크기 */
+  flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
+}
+.info-button {
+  background-color: #f0f8ff !important;
+  color: #112f4e !important;
+  border: none !important;
+  padding: 5px 10px !important;
+  border-radius: 5px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+}
+</style>
