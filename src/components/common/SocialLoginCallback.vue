@@ -17,7 +17,7 @@ const handleLogin = async () => {
   const accessToken = route.query.accessToken;
   console.log(accessToken);
   if (accessToken) {
-    // 액세스 토큰을 로컬 스토리지에 저장
+    // 액세스 토큰을 피니아에 저장
     authStore.login({ accessToken: accessToken });
 
     try {
