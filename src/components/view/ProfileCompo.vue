@@ -48,8 +48,8 @@
         </div>
       </div>
       <div class="button-group">
-        <round-button-item type="submit" class="save-btn" :width="200" :height="40">저장</round-button-item>
-        <round-button-item type="button" class="cancel-btn" :width="200" :height="40" @click="pageChange">취소</round-button-item>
+        <round-button-item type="submit" :width="200" :height="40">저장</round-button-item>
+        <round-button-item type="button" :width="200" :height="40" :backgroundColor="'cancel'" @click="pageChange">취소</round-button-item>
       </div>
     </v-form>
   </div>
@@ -371,18 +371,18 @@ h1 {
   gap: 10px;
 }
 
-.save-btn,
+/* .save-btn,
 .cancel-btn {
   font-weight: bold !important;
   border-radius: 10px !important;
   color: white !important;
-}
+} */
 
-.save-btn {
+/* .save-btn {
   background: linear-gradient(135deg, #5a6d8c, #112f4e);
 }
 
 .cancel-btn {
   background: #6b9e9b;
-}
+} */
 </style>

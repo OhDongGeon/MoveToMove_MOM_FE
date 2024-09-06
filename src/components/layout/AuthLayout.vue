@@ -6,7 +6,7 @@
     </div>
     <div class="right-side">
       <div class="form-container">
-        <h2>{{ isLoginMode ? '로그인' : '회원가입' }}</h2>
+        <h1>{{ isLoginMode ? '로그인' : '회원가입' }}</h1>
 
         <!-- 입력 필드 -->
         <form @submit.prevent="handleSubmit">
@@ -50,7 +50,7 @@
         <!-- 로그인/회원가입 모드 전환 링크 -->
         <div class="toggle-mode">
           <a href="#" @click.prevent="isPasswordModalOpen = true">비밀번호 찾기</a>
-          <a href="#" @click.prevent="toggleMode"> {{ isLoginMode ? '회원가입' : '로그인' }}으로 전환 </a>
+          <a href="#" @click.prevent="toggleMode"> {{ isLoginMode ? '회원가입' : '로그인' }} </a>
         </div>
         <!-- 비밀번호 찾기 모달 컴포넌트-->
         <PasswordModal v-model="isPasswordModalOpen" @open-recovery-dialog="openRecoveryDialog" />
@@ -77,10 +77,16 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useNavigationStore } from '@/stores/navigationStore';
+
 import PasswordModal from '@/components/common/PasswordModal.vue';
 import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
-import defaultProfileImageSrc from '@/assets/logo.png'; // 기본 이미지 경로
+import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
 import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
+
+
+// Pinia store 사용 설정
+const navigationStore = useNavigationStore();
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
@@ -210,6 +216,8 @@ const handleSubmit = async () => {
       console.log('로그인 성공:', response.data);
       alert('로그인에 성공했습니다.');
       router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
+      navigationStore.setActiveItem('mypage');
+      
     } catch (error) {
       console.error('로그인 실패:', error.response?.data || error.message);
 
@@ -254,9 +262,11 @@ const handleSubmit = async () => {
 // 소셜 로그인 함수
 const handleGoogleLogin = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
+  navigationStore.setActiveItem('mypage');
 };
 const handleKakaoLogin = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+  navigationStore.setActiveItem('mypage');
 };
 </script>
 
@@ -292,12 +302,12 @@ const handleKakaoLogin = () => {
   width: 100%;
   padding: 20px;
   background-color: #ffffff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   text-align: center;
 }
 
 .form-group {
+  margin-top: 30px;
   margin-bottom: 15px;
   text-align: left;
 }
@@ -332,7 +342,7 @@ const handleKakaoLogin = () => {
 .submit-button {
   width: 100%;
   padding: 10px;
-  background-color: #4caf50;
+  background-color: #6B9E9B;
   color: white;
   border: none;
   border-radius: 4px;
@@ -346,7 +356,7 @@ const handleKakaoLogin = () => {
 }
 
 .social-login {
-  margin-top: 20px;
+  margin-top: 30px;
   text-align: center;
 }
 
