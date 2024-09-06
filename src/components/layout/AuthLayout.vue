@@ -10,7 +10,7 @@
     </div>
     <div class="right-side">
       <div class="form-container">
-        <h2>{{ isLoginMode ? "로그인" : "회원가입" }}</h2>
+        <h1>{{ isLoginMode ? "로그인" : "회원가입" }}</h1>
 
         <!-- 입력 필드 -->
         <form @submit.prevent="handleSubmit">
@@ -135,11 +135,12 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useNavigationStore } from "@/stores/navigationStore";
+import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
+
 import PasswordModal from "@/components/common/PasswordModal.vue";
 import PasswordRecoveryDialog from "@/components/common/PasswordRecoveryDialog.vue";
 import defaultProfileImageSrc from "@/assets/basic-profile.png"; // 기본 이미지 경로
 import CommonAlert from "@/components/common/item/ErrorAlertItem.vue";
-import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
 
 // Pinia store 사용 설정
 const authStore = useAuthStore();
@@ -280,7 +281,7 @@ const handleSubmit = async () => {
       );
 
       const accessToken = response.data.data; // 서버에서 전달된 Access Token
-      authStore.login({ accessToken: accessToken });  //피니아에 access토큰 저장
+      authStore.login({ accessToken: accessToken }); //피니아에 access토큰 저장
 
       try {
         await authStore.fetchUser();
@@ -329,18 +330,17 @@ const handleSubmit = async () => {
         formData.append("file", defaultProfileImageBlob); // 기본 이미지 Blob 추가
       }
 
+      //TODO 공통 alert 창 만들어서 변경해야함
       const response = await axios.post(
         `${API_BASE_URL}/api/members/sign-up`,
         formData
       );
       console.log("회원가입 성공:", response.data);
+      alert("회원가입이 완료되었습니다. 로그인 해주세요.");
       isLoginMode.value = true;
     } catch (error) {
       console.error("회원가입 실패:", error.response?.data || error.message);
-      const errorMessage =
-        error.response?.data?.message ||
-        "회원가입에 실패했습니다. 다시 시도해주세요.";
-      openErrorAlert(errorMessage);
+      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
     }
   }
 };

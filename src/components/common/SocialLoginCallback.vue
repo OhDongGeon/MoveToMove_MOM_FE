@@ -7,25 +7,26 @@
 <script setup>
 import { onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
+import { useAuthStore } from "@/stores/memberStore"; // Pinia 스토어 임포트
 
 const router = useRouter();
 const route = useRoute();
-const authStore = useAuthStore();
+const authStore = useAuthStore(); // Pinia 스토어 사용
 
 const handleLogin = async () => {
   // 쿼리 파라미터에서 액세스 토큰 가져오기
   const accessToken = route.query.accessToken;
-  console.log(accessToken);
+
   if (accessToken) {
-    // 액세스 토큰을 피니아에 저장
-    authStore.login({ accessToken: accessToken });
+    // 액세스 토큰을 로컬 스토리지에 저장 - access 토큰 이름 변경할 수 있음
+    localStorage.setItem("accessToken", accessToken);
+    authStore.login({ accessToken }); // Pinia 스토어에 액세스 토큰 저장
 
     try {
       // 스토어에서 유저 정보 요청
       await authStore.fetchUser();
       console.log("유저 정보", authStore.getUser);
-      // TODO : 로그인 성공 알림 할 것인지 안 할것인지?
+
       alert("소셜 로그인에 성공했습니다!");
       router.push("/move-to-move/mypage"); // 성공 후 페이지 이동
     } catch (err) {

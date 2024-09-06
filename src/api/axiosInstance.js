@@ -1,8 +1,7 @@
 import axios from "axios";
-import store from "@/stores";
+// import store from '@/stores';
 import router from "@/router";
-import { useAuthStore } from "@/stores/memberStore"; // Pinia 스토어 가져오기
-
+import { useAuthStore } from "@/stores/memberStore";
 // 인스턴스 생성
 const axiosInstance = axios.create({
   // baseURL: 'https://move-to-move.online', // 나중 API URL
@@ -29,7 +28,6 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 // 응답 인터셉터 추가
 axiosInstance.interceptors.response.use(
   function (response) {
@@ -54,12 +52,14 @@ axiosInstance.interceptors.response.use(
             withCredentials: true,
           }
         );
-        // store.dispatch('/api/members/login', { access_token: result.data });
+
         // 피니아 스토어에 새 토큰 저장으로 변경
         authStore.login({ accessToken: result.data });
+
+        // 원래 요청을 다시 시도
         return await axiosInstance(originalRequest);
       } catch {
-        store.dispatch("/api/members/logout");
+        authStore.logout(); // 피니아 스토어 로그아웃
         if (router.currentRoute.path !== "/") {
           router.push("/");
         }
