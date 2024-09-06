@@ -1,20 +1,24 @@
-import axios from 'axios';
-import store from '@/stores';
-import router from '@/router';
-
+import axios from "axios";
+// import store from '@/stores';
+import router from "@/router";
+import { useAuthStore } from "@/stores/memberStore";
 // 인스턴스 생성
 const axiosInstance = axios.create({
   // baseURL: 'https://move-to-move.online', // 나중 API URL
-  baseURL: 'http://localhost:8080',
+  baseURL: "http://localhost:8080",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // 요청 인터셉터 추가
 axiosInstance.interceptors.request.use(
   function (config) {
-    const accessToken = localStorage.getItem('accessToken');
+    const authStore = useAuthStore(); // 인터셉터 내부에서 호출
+    // const accessToken = localStorage.getItem('accessToken');
+    // 로컬에서 가지고 오는것에서 피니아에서 가지고 오는 것으로 변경
+    const accessToken = authStore.getAccessToken;
+
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -22,37 +26,47 @@ axiosInstance.interceptors.request.use(
   },
   function (error) {
     return Promise.reject(error);
-  },
+  }
 );
-
 // 응답 인터셉터 추가
 axiosInstance.interceptors.response.use(
   function (response) {
     return response;
   },
 
-  function (error) {
+  async function (error) {
     const originalRequest = error.config;
 
-    if (error.response.status === 401) {
-      return axiosInstance
-        .post('/api/members/checks/refresh-token', {
-          withCredentials: true,
-        })
-        .then((result) => {
-          store.dispatch('/api/members/login', { access_token: result.data });
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true; // 무한 루프 방지
+      const authStore = useAuthStore(); // 응답 인터셉터 내부에서 호출
 
-          return axiosInstance(originalRequest);
-        })
-        .catch(() => {
-          store.dispatch('/api/members/logout');
-          if (router.currentRoute.path !== '/') {
-            router.push('/');
+      try {
+        const result = await axiosInstance.post(
+          "/api/members/checks/refresh-token",
+          {
+            withCredentials: true,
           }
-        });
+        );
+
+        // 피니아 스토어에 새 토큰 저장으로 변경
+        authStore.login({ accessToken: result.data });
+
+        // 원래 요청을 다시 시도
+        return await axiosInstance(originalRequest);
+      } catch {
+        authStore.logout(); // 피니아 스토어 로그아웃
+        if (router.currentRoute.path !== "/") {
+          router.push("/");
+        }
+      }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default axiosInstance;

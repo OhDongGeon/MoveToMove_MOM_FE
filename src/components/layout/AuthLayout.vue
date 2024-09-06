@@ -2,63 +2,120 @@
   <div class="auth-layout">
     <div class="left-side">
       <!-- 배경 이미지 또는 기타 콘텐츠 -->
-      <img src="path/to/background-image.png" alt="Background" class="background-image" />
+      <img
+        src="path/to/background-image.png"
+        alt="Background"
+        class="background-image"
+      />
     </div>
     <div class="right-side">
       <div class="form-container">
-        <h1>{{ isLoginMode ? '로그인' : '회원가입' }}</h1>
+        <h1>{{ isLoginMode ? "로그인" : "회원가입" }}</h1>
 
         <!-- 입력 필드 -->
         <form @submit.prevent="handleSubmit">
           <!-- 프로필 사진 업로드 -->
           <div v-if="!isLoginMode" class="form-profile">
             <label for="profile-profile"></label>
-            <input type="file" id="profile-profile" @change="onFileChange" style="display: none" ref="fileInput" />
-            <img :src="profileImage" alt="프로필 미리보기" class="profile-preview" @click="triggerFileInput" />
+            <input
+              type="file"
+              id="profile-profile"
+              @change="onFileChange"
+              style="display: none"
+              ref="fileInput"
+            />
+            <img
+              :src="profileImage"
+              alt="프로필 미리보기"
+              class="profile-preview"
+              @click="triggerFileInput"
+            />
           </div>
 
           <div class="form-group">
             <label for="email">이메일</label>
-            <input type="email" id="email" placeholder="이메일을 입력하세요" v-model="email" @blur="validateEmail" />
+            <input
+              type="email"
+              id="email"
+              placeholder="이메일을 입력하세요"
+              v-model="email"
+              @blur="validateEmail"
+            />
             <span v-if="emailError" class="error">{{ emailError }}</span>
           </div>
 
           <!-- 회원가입일 경우 닉네임 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="nickname">닉네임</label>
-            <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" @blur="validateNickname" />
+            <input
+              type="text"
+              id="nickname"
+              placeholder="닉네임을 입력하세요"
+              v-model="nickname"
+              @blur="validateNickname"
+            />
             <span v-if="nicknameError" class="error">{{ nicknameError }}</span>
           </div>
 
           <div class="form-group">
             <label for="password">비밀번호</label>
-            <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" @blur="validatePassword" />
+            <input
+              type="password"
+              id="password"
+              placeholder="비밀번호를 입력하세요"
+              v-model="password"
+              @blur="validatePassword"
+            />
             <span v-if="passwordError" class="error">{{ passwordError }}</span>
           </div>
 
           <!-- 회원가입일 경우 비밀번호 확인 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="confirm-password">비밀번호 확인</label>
-            <input type="password" id="confirm-password" placeholder="다시 비밀번호를 입력하세요" v-model="confirmPassword" @blur="validateConfirmPassword" />
-            <span v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</span>
+            <input
+              type="password"
+              id="confirm-password"
+              placeholder="다시 비밀번호를 입력하세요"
+              v-model="confirmPassword"
+              @blur="validateConfirmPassword"
+            />
+            <span v-if="confirmPasswordError" class="error">{{
+              confirmPasswordError
+            }}</span>
           </div>
 
           <!-- 버튼 텍스트도 상태에 따라 변경 -->
-          <button type="submit" class="submit-button">{{ isLoginMode ? '로그인' : '회원가입' }}</button>
+          <button type="submit" class="submit-button">
+            {{ isLoginMode ? "로그인" : "회원가입" }}
+          </button>
         </form>
 
         <!-- 로그인/회원가입 모드 전환 링크 -->
         <div class="toggle-mode">
-          <a href="#" @click.prevent="isPasswordModalOpen = true">비밀번호 찾기</a>
-          <a href="#" @click.prevent="toggleMode"> {{ isLoginMode ? '회원가입' : '로그인' }} </a>
+          <a href="#" @click.prevent="isPasswordModalOpen = true"
+            >비밀번호 찾기</a
+          >
+          <a href="#" @click.prevent="toggleMode">
+            {{ isLoginMode ? "회원가입" : "로그인" }}
+          </a>
         </div>
         <!-- 비밀번호 찾기 모달 컴포넌트-->
-        <PasswordModal v-model="isPasswordModalOpen" @open-recovery-dialog="openRecoveryDialog" />
-        <PasswordRecoveryDialog :show="isRecoveryDialogOpen" @update:show="isRecoveryDialogOpen = $event" />
+        <PasswordModal
+          v-model="isPasswordModalOpen"
+          @open-recovery-dialog="openRecoveryDialog"
+        />
+        <PasswordRecoveryDialog
+          :show="isRecoveryDialogOpen"
+          @update:show="isRecoveryDialogOpen = $event"
+        />
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
           <button class="kakao-login-button" @click="handleKakaoLogin">
-            <img src="../../assets/kakao_login_large_wide.png" alt="kakao-login" class="kakao-logo" />
+            <img
+              src="../../assets/kakao_login_large_wide.png"
+              alt="kakao-login"
+              class="kakao-logo"
+            />
           </button>
 
           <button class="google-login-button" @click="handleGoogleLogin">
@@ -74,18 +131,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { useNavigationStore } from '@/stores/navigationStore';
+import { ref, onMounted } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import { useNavigationStore } from "@/stores/navigationStore";
+import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
 
-import PasswordModal from '@/components/common/PasswordModal.vue';
-import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
-import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
-import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
-
+import PasswordModal from "@/components/common/PasswordModal.vue";
+import PasswordRecoveryDialog from "@/components/common/PasswordRecoveryDialog.vue";
+import defaultProfileImageSrc from "@/assets/basic-profile.png"; // 기본 이미지 경로
+import CommonAlert from "@/components/common/item/ErrorAlertItem.vue";
 
 // Pinia store 사용 설정
+const authStore = useAuthStore();
 const navigationStore = useNavigationStore();
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
@@ -96,19 +154,19 @@ const openRecoveryDialog = () => {
 };
 const alertComponent = ref(null); // Alert 컴포넌트를 위한 ref 추가
 const isLoginMode = ref(true);
-const email = ref('');
-const nickname = ref('');
-const password = ref('');
-const confirmPassword = ref('');
+const email = ref("");
+const nickname = ref("");
+const password = ref("");
+const confirmPassword = ref("");
 const profileImage = ref(defaultProfileImageSrc); // 기본 프로필 이미지 경로
 const fileInput = ref(null);
 const router = useRouter();
 
 // 유효성 검사 에러 메시지
-const emailError = ref('');
-const nicknameError = ref('');
-const passwordError = ref('');
-const confirmPasswordError = ref('');
+const emailError = ref("");
+const nicknameError = ref("");
+const passwordError = ref("");
+const confirmPasswordError = ref("");
 
 // 기본 프로필 이미지를 Blob 형식으로 변환하여 저장할 변수
 let defaultProfileImageBlob = null;
@@ -116,7 +174,9 @@ let defaultProfileImageBlob = null;
 onMounted(async () => {
   const response = await fetch(defaultProfileImageSrc);
   const blob = await response.blob();
-  defaultProfileImageBlob = new File([blob], 'default-profile.png', { type: blob.type });
+  defaultProfileImageBlob = new File([blob], "default-profile.png", {
+    type: blob.type,
+  });
 });
 
 const toggleMode = () => {
@@ -140,29 +200,36 @@ const triggerFileInput = () => {
   if (fileInput.value) {
     fileInput.value.click();
   } else {
-    console.error('fileInput이 초기화되지 않았습니다.');
+    console.error("fileInput이 초기화되지 않았습니다.");
   }
 };
 
 // 이메일 유효성 검사
 const validateEmail = () => {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  emailError.value = emailPattern.test(email.value) ? '' : '유효한 이메일 주소를 입력하세요.';
+  emailError.value = emailPattern.test(email.value)
+    ? ""
+    : "유효한 이메일 주소를 입력하세요.";
 };
 
 // 닉네임 유효성 검사
 const validateNickname = () => {
-  nicknameError.value = nickname.value.length >= 2 ? '' : '닉네임은 최소 2자 이상이어야 합니다.';
+  nicknameError.value =
+    nickname.value.length >= 2 ? "" : "닉네임은 최소 2자 이상이어야 합니다.";
 };
 
 // 비밀번호 유효성 검사
 const validatePassword = () => {
-  passwordError.value = password.value.length >= 6 ? '' : '비밀번호는 최소 6자 이상이어야 합니다.';
+  passwordError.value =
+    password.value.length >= 6 ? "" : "비밀번호는 최소 6자 이상이어야 합니다.";
 };
 
 // 비밀번호 확인 유효성 검사
 const validateConfirmPassword = () => {
-  confirmPasswordError.value = password.value === confirmPassword.value ? '' : '비밀번호가 일치하지 않습니다.';
+  confirmPasswordError.value =
+    password.value === confirmPassword.value
+      ? ""
+      : "비밀번호가 일치하지 않습니다.";
 };
 
 // 입력값이 유효한지 확인하는 함수
@@ -173,7 +240,12 @@ const isFormValid = () => {
     validatePassword();
     validateConfirmPassword();
   }
-  return !emailError.value && !nicknameError.value && !passwordError.value && !confirmPasswordError.value;
+  return (
+    !emailError.value &&
+    !nicknameError.value &&
+    !passwordError.value &&
+    !confirmPasswordError.value
+  );
 };
 
 //alert 함수
@@ -183,10 +255,11 @@ const openErrorAlert = (message) => {
     alertComponent.value.openAlert(message);
   }
 };
+
 // api 서버 요청 메서드
 const handleSubmit = async () => {
   if (!isFormValid()) {
-    alert('입력한 정보를 다시 확인하세요.');
+    alert("입력한 정보를 다시 확인하세요.");
     return;
   }
 
@@ -199,30 +272,40 @@ const handleSubmit = async () => {
         password: password.value,
       };
 
-      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData, {
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/members/login`,
+        loginData,
+        {
+          withCredentials: true,
+        }
+      );
 
-      // access 토큰 저장
       const accessToken = response.data.data; // 서버에서 전달된 Access Token
-      // Access Token을 로컬 스토리지에 저장 ( 로컬스토리지에 저장하는 변수 이름 확인 )
-      localStorage.setItem('accessToken', accessToken);
+      authStore.login({ accessToken: accessToken }); //피니아에 access토큰 저장
 
-      // TODO : 로그인 시 추가될 부분 유저 정보 처리 어떻게 할 것인지 피니아, 세션
+      try {
+        await authStore.fetchUser();
+        console.log("유저 정보", authStore.getUser);
+      } catch (err) {
+        console.log("API 요청 실패:", err);
+        alert("로그인 실패: 서버와의 통신에 문제가 있습니다.");
+        router.push("/login"); // 실패 시 로그인 페이지로 리다이렉트
+      }
 
       // TODO : 알림을 위해서 웹 소켓 연결 구현해야함
 
       // 응답 처리
-      console.log('로그인 성공:', response.data);
-      alert('로그인에 성공했습니다.');
-      router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
-      navigationStore.setActiveItem('mypage');
-      
+      console.log("로그인 성공:", response.data);
+      alert("로그인에 성공했습니다.");
+      router.push("/move-to-move/mypage"); // 로그인 성공 후 페이지 이동
+      navigationStore.setActiveItem("mypage");
     } catch (error) {
-      console.error('로그인 실패:', error.response?.data || error.message);
+      console.error("로그인 실패:", error.response?.data || error.message);
 
       // 여기서 Alert 컴포넌트의 openAlert 메서드를 호출하여 에러 메시지를 표시
-      const errorMessage = error.response?.data?.message || '로그인에 실패했습니다. 다시 시도해주세요.';
+      const errorMessage =
+        error.response?.data?.message ||
+        "로그인에 실패했습니다. 다시 시도해주세요.";
       openErrorAlert(errorMessage);
     }
   } else {
@@ -236,25 +319,28 @@ const handleSubmit = async () => {
       });
 
       const formData = new FormData();
-      formData.append('form', signUpFormJson);
+      formData.append("form", signUpFormJson);
 
       const selectedFile = fileInput.value?.files[0];
       if (selectedFile) {
-        console.log('선택된 파일:', selectedFile);
-        formData.append('file', selectedFile); // 사용자 선택 파일 추가
+        console.log("선택된 파일:", selectedFile);
+        formData.append("file", selectedFile); // 사용자 선택 파일 추가
       } else {
-        console.log('파일이 선택되지 않았으므로 기본 이미지 업로드');
-        formData.append('file', defaultProfileImageBlob); // 기본 이미지 Blob 추가
+        console.log("파일이 선택되지 않았으므로 기본 이미지 업로드");
+        formData.append("file", defaultProfileImageBlob); // 기본 이미지 Blob 추가
       }
 
       //TODO 공통 alert 창 만들어서 변경해야함
-      const response = await axios.post(`${API_BASE_URL}/api/members/sign-up`, formData);
-      console.log('회원가입 성공:', response.data);
-      alert('회원가입이 완료되었습니다. 로그인 해주세요.');
+      const response = await axios.post(
+        `${API_BASE_URL}/api/members/sign-up`,
+        formData
+      );
+      console.log("회원가입 성공:", response.data);
+      alert("회원가입이 완료되었습니다. 로그인 해주세요.");
       isLoginMode.value = true;
     } catch (error) {
-      console.error('회원가입 실패:', error.response?.data || error.message);
-      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+      console.error("회원가입 실패:", error.response?.data || error.message);
+      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
     }
   }
 };
@@ -262,11 +348,11 @@ const handleSubmit = async () => {
 // 소셜 로그인 함수
 const handleGoogleLogin = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
-  navigationStore.setActiveItem('mypage');
+  navigationStore.setActiveItem("mypage");
 };
 const handleKakaoLogin = () => {
   window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
-  navigationStore.setActiveItem('mypage');
+  navigationStore.setActiveItem("mypage");
 };
 </script>
 
@@ -323,7 +409,7 @@ const handleKakaoLogin = () => {
   min-width: 110px; /* 라벨의 최소 너비 지정 */
   text-align: left; /* 라벨을 왼쪽으로 정렬 */
 }
-.form-profile input[type='file'] {
+.form-profile input[type="file"] {
   flex-grow: 1; /* 입력 필드를 중앙에 배치 */
   max-width: 300px; /* 입력 필드의 최대 너비 지정 */
 }
@@ -342,7 +428,7 @@ const handleKakaoLogin = () => {
 .submit-button {
   width: 100%;
   padding: 10px;
-  background-color: #6B9E9B;
+  background-color: #6b9e9b;
   color: white;
   border: none;
   border-radius: 4px;
