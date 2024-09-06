@@ -25,6 +25,7 @@ export const useAuthStore = defineStore("accessToken", {
     logout() {
       this.accessToken = "";
       this.user = null;
+      localStorage.removeItem("accessToken");
       localStorage.removeItem("selectedPage");
     },
   },
@@ -41,7 +42,7 @@ export const useAuthStore = defineStore("accessToken", {
         key: "auth", // 로컬 스토리지에 저장될 기본 키 이름
         storage: localStorage,
         paths: ["accessToken", "user"], // 두 가지 상태 모두 저장
-      }
+      },
     ],
   },
 });

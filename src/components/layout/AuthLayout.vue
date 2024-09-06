@@ -279,11 +279,9 @@ const handleSubmit = async () => {
         }
       );
 
-      // access 토큰 저장
       const accessToken = response.data.data; // 서버에서 전달된 Access Token
-      authStore.login({ accessToken: accessToken });
+      authStore.login({ accessToken: accessToken });  //피니아에 access토큰 저장
 
-      // TODO : 피니아, 로컬스토리지에 저장
       try {
         await authStore.fetchUser();
         console.log("유저 정보", authStore.getUser);
