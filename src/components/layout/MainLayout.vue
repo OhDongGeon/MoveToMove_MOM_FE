@@ -33,8 +33,10 @@
               <span class="user-nickname">이너프</span>
               <!-- 버튼 -->
               <div class="user-info-buttons">
-                <round-button-item @click="toInfoModify" :width="60" :height="20" class="info-button">정보수정</round-button-item>
-                <round-button-item @click="toWithdraw" :width="60" :height="20" class="delete-button">회원탈퇴</round-button-item>
+                <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'"
+                :borderRadius="5" backgroundColor="etc">정보수정</round-button-item>
+                <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'"
+                :borderRadius="5" backgroundColor="etc">회원탈퇴</round-button-item>
               </div>
             </div>
           </div>
@@ -261,18 +263,6 @@ export default {
   justify-content: center;
   gap: 10px;
   margin-top: 10px;
-}
-
-.info-button,
-.delete-button {
-  background-color: #f0f8ff !important;
-  color: #112f4e !important;
-  border: none !important;
-  padding: 5px 10px !important;
-  border-radius: 5px !important;
-  font-size: 10px !important;
-  font-weight: bold !important;
-  justify-content: center !important;
 }
 
 .nav-menu {
