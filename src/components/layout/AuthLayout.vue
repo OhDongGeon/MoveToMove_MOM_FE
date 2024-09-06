@@ -139,11 +139,10 @@ import PasswordModal from "@/components/common/PasswordModal.vue";
 import PasswordRecoveryDialog from "@/components/common/PasswordRecoveryDialog.vue";
 import defaultProfileImageSrc from "@/assets/basic-profile.png"; // 기본 이미지 경로
 import CommonAlert from "@/components/common/item/ErrorAlertItem.vue";
-import axiosInstance from "@/api/axiosInstance";
-// import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
+import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
 
 // Pinia store 사용 설정
-// const authStore = useAuthStore();
+const authStore = useAuthStore();
 const navigationStore = useNavigationStore();
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
@@ -255,6 +254,7 @@ const openErrorAlert = (message) => {
     alertComponent.value.openAlert(message);
   }
 };
+
 // api 서버 요청 메서드
 const handleSubmit = async () => {
   if (!isFormValid()) {
@@ -281,16 +281,18 @@ const handleSubmit = async () => {
 
       // access 토큰 저장
       const accessToken = response.data.data; // 서버에서 전달된 Access Token
-      // Access Token을 로컬 스토리지에 저장 ( 로컬스토리지에 저장하는 변수 이름 확인 )
-      localStorage.setItem("accessToken", accessToken);
+      authStore.login({ accessToken: accessToken });
 
       // TODO : 피니아, 로컬스토리지에 저장
       try {
-        const response = await axiosInstance.get("/api/members");
-        console.log(response.data);
+        await authStore.fetchUser();
+        console.log("유저 정보", authStore.getUser);
       } catch (err) {
-        console.log(err);
+        console.log("API 요청 실패:", err);
+        alert("로그인 실패: 서버와의 통신에 문제가 있습니다.");
+        router.push("/login"); // 실패 시 로그인 페이지로 리다이렉트
       }
+
       // TODO : 알림을 위해서 웹 소켓 연결 구현해야함
 
       // 응답 처리
