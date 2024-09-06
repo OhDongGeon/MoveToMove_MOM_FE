@@ -2,15 +2,13 @@
   <div class="main-layout">
     <!-- 사이드바 -->
     <aside class="sidebar">
-      <!-- 로그아웃 버튼 -->
-      <div class="logout-button-container" @click="logout">
-        <span class="material-symbols-outlined logout-icon">logout</span>
-        <span class="logout-text">로그아웃</span>
-      </div>
-
-      <div class="sidebar-header">
-        <!-- 로고 및 사용자 정보 -->
-        <img src="../../assets/move-to-move-logo2.png" @click="navigateToHome" alt="Logo" class="logo" />
+      <!-- 로그아웃 및 알림 컨테이너 -->
+      <div class="top-bar">
+        <!-- 로그아웃 버튼 -->
+        <div class="logout-button-container" @click="logout">
+          <span class="material-symbols-outlined logout-icon">logout</span>
+          <span class="logout-text">로그아웃</span>
+        </div>
 
         <!-- 알림 아이콘 -->
         <div class="notification-container">
@@ -18,6 +16,11 @@
           <!-- 알림 상태에 따른 동그라미 -->
           <span :class="['notification-dot', { active: navigationStore.hasNotification }]"></span>
         </div>
+      </div>
+
+      <div class="sidebar-header">
+        <!-- 로고 및 사용자 정보 -->
+        <img src="../../assets/move-to-move-logo2.png" @click="navigateToHome" alt="Logo" class="logo" />
 
         <!-- 상단 hr 선 -->
         <hr class="divider" />
@@ -35,7 +38,7 @@
               <div class="user-info-buttons">
                 <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'"
                 :borderRadius="5" backgroundColor="etc">정보수정</round-button-item>
-                <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'"
+                <round-button-item @click="toWithdraw" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'"
                 :borderRadius="5" backgroundColor="etc">회원탈퇴</round-button-item>
               </div>
             </div>
@@ -85,6 +88,7 @@
 import { useNavigationStore } from '@/stores/navigationStore';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from '@/api/axios';
 
 export default {
   name: 'MainLayout',
@@ -111,16 +115,24 @@ export default {
       router.push('/move-to-move/withdraw');
     };
 
-    // 알림을 읽음으로 표시하는 메서드
-    const markNotificationAsRead = () => {
-      navigationStore.setNotificationStatus(false); // 알림을 읽음 상태로 설정
-    }
-    
     // 로그아웃 메서드
-    const logout = () => {
-      // 로그아웃 로직을 추가합니다.
-      console.log('Logging out...');
-      // 예시: router.push('/login');
+    const logout = async () => {
+      // 로그아웃 여부 모달창 띄워야함
+
+      try {
+        const response = await axios.post('/api/members/logout'); // 로그아웃 API 호출
+        if (response.status === 200) {
+          console.log('로그아웃 성공');
+          // 로그아웃 후 리디렉션 ,
+          router.push('/Auth');
+
+        } else {
+          console.error('로그아웃 실패', response);
+        }
+
+      } catch (error) {
+        console.error('로그아웃하는 동안 오류가 났습니다.', error);
+      }
     };
 
     return {
@@ -129,7 +141,6 @@ export default {
       navigateToHome,
       toInfoModify,
       toWithdraw,
-      markNotificationAsRead,
       logout,
     };
   },
@@ -153,35 +164,65 @@ export default {
   align-items: center;
   margin-top: 20px;
   border-top-right-radius: 20px;
-  position: relative; /* 상대적 위치 지정 */
+  position: relative;
 }
 
-/* 로그아웃 버튼 스타일 */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+}
+
 .logout-button-container {
-  position: absolute;
-  top: 10px;
-  left: 10px; /* 사이드바 왼쪽 상단에 위치 */
-  cursor: pointer; /* 클릭 가능한 커서 모양 */
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .logout-icon {
   font-size: 24px;
-  color: white; /* 아이콘 색상 */
-  margin-right: 5px; /* 아이콘과 텍스트 간격 */
+  color: white;
+  margin-right: 5px;
 }
 
 .logout-text {
   font-size: 12px;
   color: white;
   font-weight: bold;
+  cursor: pointer;
+}
+
+.notification-container {
+  position: relative; /* 자식 요소의 절대 위치 설정을 위한 상대적 위치 */
+  display: inline-block;
+}
+
+.notification-icon {
+  font-size: 20px;
+  color: white;
+  position: relative; /* 아이콘의 위치 설정 */
+  cursor: pointer;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -5px;  /* 알림 아이콘의 위쪽에 배치 */
+  right: 0px;  /* 알림 아이콘의 오른쪽에 배치 */
+  width: 8px;  /* 동그라미 크기 */
+  height: 8px; /* 동그라미 크기 */
+  border-radius: 50%;
+  background-color: gray; /* 알림이 없을 때 */
+}
+
+.notification-dot.active {
+  background-color: #D63F3F; /* 알림이 있을 때 빨간색 */
 }
 
 .sidebar-header {
   padding: 10px;
   text-align: center;
-  position: relative; /* 알림 아이콘의 절대 위치를 설정하기 위한 상대적 위치 지정 */
 }
 
 .logo {
@@ -189,33 +230,14 @@ export default {
   height: 100px;
   margin-top: 40px;
   margin-bottom: 10px;
-  cursor: pointer; /* 클릭 가능한 커서 모양 */
+  cursor: pointer;
 }
 
-.notification-container {
-  position: absolute;
-  top: 10px;
-  right: 10px; /* 사이드바 오른쪽 상단에 위치 */
-}
-
-.notification-icon {
-  font-size: 24px;
-  cursor: pointer; /* 클릭 가능한 커서 모양 */
-  color: white; /* 기본 아이콘 색상 */
-}
-
-.notification-dot {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: gray; /* 알림이 없을 때 회색 */
-}
-
-.notification-dot.active {
-  background-color: #d63f3f; /* 알림이 있을 때 빨간색 */
+.divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid white;
+  margin: 10px 0;
 }
 
 .user-info {
@@ -237,7 +259,7 @@ export default {
   height: 70px;
   border-radius: 50%;
   margin-right: 10px;
-  border: 2px solid white; /* 프로필 이미지 테두리 */
+  border: 2px solid white;
 }
 
 .user-details {
@@ -270,46 +292,42 @@ export default {
 }
 
 .nav-item {
-  display: flex; /* Flexbox 컨테이너로 설정 */
-  align-items: center; /* 세로 방향 가운데 정렬 */
-  justify-content: flex-start; /* 가로 방향에서 왼쪽 정렬 */
-  padding: 0 20px; /* 수평 방향 패딩만 설정 */
-  height: 80px; /* 높이 설정 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 20px;
+  height: 80px;
   color: white;
   font-size: 18px;
   font-weight: bold;
   text-decoration: none;
-  text-align: center; /* 텍스트 가운데 정렬 */
-  position: relative; /* 텍스트 가운데 정렬을 위해 추가 */
-  background-color: #6b9e9b; /* 기본 배경색 설정 */
-  transition: background 0.3s ease; /* 배경 변경 애니메이션 */
+  background-color: #6b9e9b;
+  transition: background 0.3s ease;
 }
 
 .nav-icon-container {
-  display: flex; /* 아이콘을 위한 flexbox */
-  align-items: center; /* 아이콘을 세로 방향 가운데 정렬 */
-  justify-content: flex-start; /* 아이콘을 왼쪽 정렬 */
-  width: 30px; /* 아이콘 컨테이너의 너비 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 30px;
 }
 
 .nav-icon {
-  margin-right: 10px; /* 아이콘과 텍스트 간격 */
-  font-size: 30px; /* 아이콘 크기 */
+  margin-right: 10px;
+  font-size: 30px;
 }
 
 .nav-text {
-  flex: 1; /* 남은 공간을 차지하여 텍스트를 가운데 정렬 */
-  text-align: center; /* 텍스트를 가운데 정렬 */
+  flex: 1;
+  text-align: center;
 }
 
 .nav-item:hover {
-  background-color: #4a7875; /* 마우스를 올렸을 때 배경색 */
-  color: white;
+  background-color: #4a7875;
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, #5a6d8c, #112f4e); /* 클릭한 상태 유지 시 그라데이션 배경 */
-  color: white;
+  background: linear-gradient(135deg, #5a6d8c, #112f4e);
 }
 
 .content {
@@ -323,15 +341,7 @@ export default {
 }
 
 .line {
-  border-top: 1px solid black; /* 검은색 수평선 */
-  margin-bottom: 20px; /* 아래쪽 여백 */
-}
-
-/* 새로 추가된 hr 스타일 */
-.divider {
-  width: 100%;
-  border: none;
-  border-top: 1px solid white; /* 흰색 수평선 */
-  margin: 10px 0; /* 위아래 여백 */
+  border-top: 1px solid black;
+  margin-bottom: 20px;
 }
 </style>
