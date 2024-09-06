@@ -3,14 +3,21 @@
     <div class="alert-content">
       <p class="alert-message">{{ message }}</p>
       <!-- 공용 버튼으로 수정 -->
-      <CommonButton @click="closeAlert" :width="100" :height="30" :fontSize="20" class="info-button" default-text="홈으로" />
+      <CommonButton
+        @click="closeAlert"
+        :width="100"
+        :height="30"
+        :fontSize="20"
+        class="info-button"
+        default-text="홈으로"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import CommonButton from '@/components/common/item/RoundButtonItem.vue';
+import { ref } from "vue";
+import CommonButton from "@/components/common/item/RoundButtonItem.vue";
 
 export default {
   components: {
@@ -19,7 +26,7 @@ export default {
   setup() {
     // 상태 관리
     const show = ref(false); // 알림창 보임 여부
-    const message = ref(''); // 알림창 메시지
+    const message = ref(""); // 알림창 메시지
 
     // 메서드 정의
     const openAlert = (newMessage) => {
