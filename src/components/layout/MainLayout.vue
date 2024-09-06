@@ -88,7 +88,7 @@
 import { useNavigationStore } from '@/stores/navigationStore';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from '@/api/axios';
+import axios from '@/api/axiosInstance.js';
 
 export default {
   name: 'MainLayout',
