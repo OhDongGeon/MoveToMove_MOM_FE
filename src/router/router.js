@@ -4,6 +4,7 @@ import MyPage from '../components/view/MyPageCompo.vue';
 import KanbanBoard from '../components/view/KanbanBoardCompo.vue';
 import Chat from '../components/view/ChatCompo.vue';
 import Profile from '../components/view/ProfileCompo.vue';
+import Withdraw from '../components/view/WithdrawCompo.vue';
 import SocialLoginCallback from '@/components/common/SocialLoginCallback.vue';
 
 const routes = [
@@ -35,6 +36,11 @@ const routes = [
         path: 'profile',
         name: 'ProfileCompo',
         component: Profile,
+      },
+      {
+        path: 'withdraw',
+        name: 'WithdrawCompo',
+        component: Withdraw,
       },
     ],
   },
