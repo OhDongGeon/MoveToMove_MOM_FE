@@ -15,9 +15,9 @@ const axiosInstance = axios.create({
 // 요청 인터셉터 추가
 axiosInstance.interceptors.request.use(
   function (config) {
+    const authStore = useAuthStore(); // 인터셉터 내부에서 호출
     // const accessToken = localStorage.getItem('accessToken');
     // 로컬에서 가지고 오는것에서 피니아에서 가지고 오는 것으로 변경
-    const authStore = useAuthStore();
     const accessToken = authStore.getAccessToken;
 
     if (accessToken) {
@@ -36,30 +36,34 @@ axiosInstance.interceptors.response.use(
     return response;
   },
 
-  function (error) {
+  async function (error) {
     const originalRequest = error.config;
 
-    if (error.response.status === 401) {
-      // Pinia 스토어 인스턴스 생성
-      const authStore = useAuthStore();
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true; // 무한 루프 방지
+      const authStore = useAuthStore(); // 응답 인터셉터 내부에서 호출
 
-      return axiosInstance
-        .post("/api/members/checks/refresh-token", {
-          withCredentials: true,
-        })
-        .then((result) => {
-          // store.dispatch('/api/members/login', { access_token: result.data });
-          // 피니아 스토어에 새 토큰 저장으로 변경
-          authStore.login({ accessToken: result.data });
-
-          return axiosInstance(originalRequest);
-        })
-        .catch(() => {
-          store.dispatch("/api/members/logout");
-          if (router.currentRoute.path !== "/") {
-            router.push("/");
+      try {
+        const result = await axiosInstance.post(
+          "/api/members/checks/refresh-token",
+          {
+            withCredentials: true,
           }
-        });
+        );
+        // store.dispatch('/api/members/login', { access_token: result.data });
+        // 피니아 스토어에 새 토큰 저장으로 변경
+        authStore.login({ accessToken: result.data });
+        return await axiosInstance(originalRequest);
+      } catch {
+        store.dispatch("/api/members/logout");
+        if (router.currentRoute.path !== "/") {
+          router.push("/");
+        }
+      }
     }
     return Promise.reject(error);
   }

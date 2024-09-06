@@ -5,6 +5,7 @@
 </template>
 
 <script setup>
+import { onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
 
@@ -24,7 +25,7 @@ const handleLogin = async () => {
       // 스토어에서 유저 정보 요청
       await authStore.fetchUser();
       console.log("유저 정보", authStore.getUser);
-
+      // TODO : 로그인 성공 알림 할 것인지 안 할것인지?
       alert("소셜 로그인에 성공했습니다!");
       router.push("/move-to-move/mypage"); // 성공 후 페이지 이동
     } catch (err) {
@@ -39,5 +40,7 @@ const handleLogin = async () => {
 };
 
 // 컴포넌트가 로드될 때 handleLogin 함수 호출
-handleLogin();
+onMounted(() => {
+  handleLogin();
+});
 </script>

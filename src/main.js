@@ -2,14 +2,14 @@ import { createApp } from "vue";
 import App from "./App.vue";
 
 import { createPinia } from "pinia";
-import piniiaPersist from "pinia-plugin-persistedstate";
+import piniaPersist from "pinia-plugin-persistedstate";
 import router from "./router/index";
 
 import RoundButtonItem from "./components/common/item/RoundButtonItem.vue";
 
 // Pinia 인스턴스 생성
 const pinia = createPinia();
-pinia.use(piniiaPersist);
+pinia.use(piniaPersist);
 // Vuetify 설정
 import { createVuetify } from "vuetify";
 import "vuetify/styles"; // Vuetify 스타일 가져오기

@@ -140,8 +140,10 @@ import PasswordRecoveryDialog from "@/components/common/PasswordRecoveryDialog.v
 import defaultProfileImageSrc from "@/assets/basic-profile.png"; // 기본 이미지 경로
 import CommonAlert from "@/components/common/item/ErrorAlertItem.vue";
 import axiosInstance from "@/api/axiosInstance";
+// import { useAuthStore } from "@/stores/memberStore"; //pinia 스토어 임포트
 
 // Pinia store 사용 설정
+// const authStore = useAuthStore();
 const navigationStore = useNavigationStore();
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
@@ -284,9 +286,9 @@ const handleSubmit = async () => {
 
       // TODO : 피니아, 로컬스토리지에 저장
       try {
-        const response = await axiosInstance.get('/api/members');
+        const response = await axiosInstance.get("/api/members");
         console.log(response.data);
-      }catch(err) {
+      } catch (err) {
         console.log(err);
       }
       // TODO : 알림을 위해서 웹 소켓 연결 구현해야함

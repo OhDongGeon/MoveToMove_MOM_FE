@@ -38,15 +38,10 @@ export const useAuthStore = defineStore("accessToken", {
     enabled: true,
     strategies: [
       {
-        key: "auth_token", // 로컬 스토리지에 저장될 키 이름
+        key: "auth", // 로컬 스토리지에 저장될 기본 키 이름
         storage: localStorage,
-        paths: ["accessToken"],
-      },
-      {
-        key: "auth_user", // 유저 정보가 저장될 다른 키 이름
-        storage: localStorage,
-        paths: ["user"],
-      },
+        paths: ["accessToken", "user"], // 두 가지 상태 모두 저장
+      }
     ],
   },
 });
