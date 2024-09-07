@@ -15,7 +15,7 @@
 
 <script>
 import CardHeader from '@/components/common/CardHeader.vue';
-import ContentCompo from '@/components/view/KanbanCardCompo.vue';
+import ContentCompo from '@/components/view/CardOpenCompo.vue';
 export default {
   name: 'KanbanCardCompo',
   components: {

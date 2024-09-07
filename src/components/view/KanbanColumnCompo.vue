@@ -6,16 +6,33 @@
     </div>
     <div class="title-underline"></div>
     <div class="kanban-card-list">
-      <KanbanCard v-for="card in cards" :key="card.id" :card="card" />
+      <KanbanCard v-for="card in cards" :key="card.id" :card="card" @card-click="openKanbanCard" />
     </div>
   </div>
 </template>
 
 <script>
+import { useRouter } from 'vue-router';
+import { useNavigationStore } from '@/stores/navigationStore'; // Navigation Store 가져오기
 import KanbanCard from './KanbanCardCompo.vue';
+
 export default {
   components: {
     KanbanCard,
+  },
+  setup() {
+    const router = useRouter();
+    const navigationStore = useNavigationStore();
+
+    const openKanbanCard = (idx) => {
+      console.log(`칸반카드ID: ${idx}`);
+      navigationStore.setActiveItem('mypage'); // navigationStore 업데이트
+      router.push('kanbanCard'); // 'kanbanCard' 경로로 이동
+    };
+
+    return {
+      openKanbanCard,
+    };
   },
   data() {
     return {
