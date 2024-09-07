@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('accessToken', {
       this.accessToken = '';
       this.user = null;
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('selectedPage');
+      localStorage.removeItem('activeItem');
     },
   },
 

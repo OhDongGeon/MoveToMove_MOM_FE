@@ -133,7 +133,7 @@ export default {
     // 로그아웃 메서드
     const logout = async () => {
       try {
-        const response = await axios.post('/api/members/logout'); // 로그아웃 API 호출
+        const response = await axios.post('/api/members/logout', {}, { withCredentials: true }); // 로그아웃 API 호출
 
         if (response.status === 200) {
           console.log('로그아웃 성공');
