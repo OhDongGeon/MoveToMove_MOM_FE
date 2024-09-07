@@ -6,6 +6,7 @@ import Chat from '../components/view/ChatCompo.vue';
 import Profile from '../components/view/ProfileCompo.vue';
 import Withdraw from '../components/view/WithdrawCompo.vue';
 import SocialLoginCallback from '@/components/common/SocialLoginCallback.vue';
+import NewProject from '@/components/view/NewProjectCompo.vue';
 
 const routes = [
   {
@@ -41,6 +42,11 @@ const routes = [
         path: 'withdraw',
         name: 'WithdrawCompo',
         component: Withdraw,
+      },
+      {
+        path: 'new-project',
+        name: 'NewProjectCompo',
+        component: NewProject,
       },
     ],
   },
