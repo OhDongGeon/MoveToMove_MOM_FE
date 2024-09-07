@@ -4,8 +4,8 @@
     <div class="sub-content">
       <aside class="sidebar">
         <v-expansion-panels v-model="panel" multiple>
-          <v-expansion-panel>
-            <v-expansion-panel-title>프로젝트</v-expansion-panel-title>
+          <v-expansion-panel class="folder-contains">
+            <v-expansion-panel-title class="folder-title">프로젝트</v-expansion-panel-title>
             <v-expansion-panel-text>
               <!-- treeData가 유효할 때만 Vue3Tree를 렌더링 -->
               <Vue3Tree
@@ -29,18 +29,28 @@
                 </template>
               </Vue3Tree>
               <!-- 노드 추가를 위한 버튼 -->
-              <round-button-item class="add-buttons" :width="180" :height="30" @click="newProjectPage">프로젝트 생성 +</round-button-item>
+
+              <round-button-item class="add-buttons" :width="180" :height="25" :borderRadius="5" :fontSize="13" @click="newProjectPage">프로젝트 생성 +</round-button-item>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </aside>
       <main class="main-content">
-        <v-card>
-          <v-card-content> 여기에 이제 content를 개발하세요 </v-card-content>
-        </v-card>
-        <button @click="openKanbanCard">칸반카드 오픈</button>
+
+        <div class="project-title">
+          <label>프로젝트 1</label>
+          <font-awesome-icon :icon="['fas', 'ellipsis']" />
+        </div>
+        <div class="project-content">
+          <div class="column"><kanban-column></kanban-column></div>
+          <div class="column">컬럼 2</div>
+          <div class="column">컬럼 3</div>
+          <div class="column">컬럼 4</div>
+          <div class="column">컬럼 5</div>
+        </div> 
       </main>
     </div>
+    <button @click="openKanbanCard">칸반카드 오픈</button>
   </div>
 </template>
 
@@ -49,11 +59,14 @@ import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
 import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
+import KanbanColumn from './KanbanColumnCompo.vue';
 import { useNavigationStore } from '@/stores/navigationStore';
+
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
   components: {
     Vue3Tree, // Tree 컴포넌트 등록
+    KanbanColumn,
   },
   setup() {
     // ref를 사용하여 상태를 정의합니다.
@@ -147,7 +160,6 @@ export default {
   background-color: #f0f8ff;
   border-radius: 8px;
   height: 970px; /* 부모 컨테이너의 고정된 높이를 픽셀 값으로 설정 */
-  border: 1px solid #000;
   display: flex;
   flex-direction: column; /* 칸반보드 제목과 컨텐츠를 세로로 배치 */
 }
@@ -155,7 +167,6 @@ export default {
 h1 {
   font-size: 32px;
   text-align: left;
-  border: 1px solid #000;
   margin: 0;
 }
 
@@ -166,8 +177,6 @@ h1 {
   margin-top: 20px;
   width: 100%;
   flex-grow: 1; /* sub-content가 남은 공간을 차지하도록 설정 */
-  border-radius: 8px;
-  border: 1px solid #ffffff;
   height: calc(100% - 20px); /* 패딩과 상단 여백을 고려한 높이 설정 */
 }
 
@@ -176,9 +185,19 @@ h1 {
   width: 250px; /* 사이드바의 고정된 너비 설정 */
   background-color: #ffffff; /* 연한 배경색 */
   border-radius: 10px;
-  border: 1px solid #6b9e9b;
+  border: 1.5px solid #6b9e9b;
   height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
+}
+
+.folder-contains {
+  border: 1.5px solid #6b9e9b;
+  border-radius: 10px;
+}
+
+.folder-title {
+  font-weight: bold;
+  font-size: 15px;
 }
 
 /* 메인 컨텐츠 스타일 */
@@ -186,8 +205,38 @@ h1 {
   flex-grow: 1; /* 메인 컨텐츠가 나머지 공간을 채우도록 설정 */
   background-color: #ffffff; /* 흰색 배경색 */
   border-radius: 10px;
-  border: 1px solid #6b9e9b;
+  border: 1.5px solid #6b9e9b;
   height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
+  padding: 5px;
+}
+
+.project-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 22px;
+  font-weight: bold;
+  height: 45px;
+  border-bottom: 1.5px solid #6b9e9b;
+  border-radius: 10px;
+  padding: 0 20px;
+  margin-top: 5px;
+}
+
+.project-content {
+  display: flex;
+  overflow-x: auto; /* 넘치는 경우 가로 스크롤 생성 */
+  gap: 10px; /* 컬럼들 사이의 간격 */
+  margin-top: 10px;
+  height: 92%;
+}
+
+.column {
+  flex: 0 0 32.7%;
+  height: 100%;
+  background: #ffffff;
+  border: 1px solid #6b9e9b;
+  border-radius: 10px;
 }
 
 /* Deep Selector를 사용하여 Vue3Tree의 내부 스타일을 덮어씁니다. */
@@ -196,15 +245,10 @@ h1 {
   padding: 0px;
   font-weight: bold;
   font-size: 12px;
-  color: purple;
+  color: #5a6d8c;
 }
 
 .add-buttons {
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #5a6d8c, #112f4e);
-  border-radius: 10px;
-  margin-top: 10px;
+  margin-top: 30px;
 }
 </style>
