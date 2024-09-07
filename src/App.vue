@@ -1,17 +1,29 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <v-app>
+    <!-- 메인 콘텐츠 영역 -->
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  setup() {
+    const route = useRoute();
+
+    // 로그인 상태에 따라 AppBar와 Footer 표시 여부 결정
+    const showAppBar = computed(() => route.name !== 'Auth');
+
+    return {
+      showAppBar,
+    };
+  },
+};
 </script>
 
 <style>
@@ -20,7 +32,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  color: #f0f8ff;
 }
 </style>
