@@ -1,4 +1,5 @@
 <template>
+
   <div class="contains">
     <div class="card-member">
       <ProfileImage v-for="(member, index) in card.members" :key="index" :src="member.avatar" alt="Member Avatar" :width="25" :height="25" />
