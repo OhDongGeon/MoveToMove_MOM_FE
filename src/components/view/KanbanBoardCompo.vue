@@ -8,11 +8,26 @@
             <v-expansion-panel-title>프로젝트</v-expansion-panel-title>
             <v-expansion-panel-text>
               <!-- treeData가 유효할 때만 Vue3Tree를 렌더링 -->
-              <Vue3Tree :nodes="data" :search-text="searchText" :use-checkbox="false"
-              :use-icon="true" 
-              use-row-delete show-child-count 
-              @nodeExpanded="onNodeExpanded" @update:nodes="onUpdate" @nodeClick="onNodeClick"
-              class="custom-node-class"/>
+              <Vue3Tree
+                :nodes="data"
+                :search-text="searchText"
+                :use-checkbox="false"
+                :use-icon="true"
+                :indentSize="10"
+                :gap="5"
+                use-row-delete
+                @nodeExpanded="onNodeExpanded"
+                @update:nodes="onUpdate"
+                @nodeClick="onNodeClick"
+                class="custom-node-class"
+              >
+                <template #iconActive>
+                  <img src="../../assets/folders24.svg" alt="Folder Icon" width="12" height="12" />
+                </template>
+                <template #iconInactive>
+                  <font-awesome-icon :icon="['fas', 'folder']" />
+                </template>
+              </Vue3Tree>
               <!-- 노드 추가를 위한 버튼 -->
               <round-button-item class="add-buttons" :width="180" :height="30">프로젝트 생성 +</round-button-item>
             </v-expansion-panel-text>
@@ -44,61 +59,61 @@ export default {
 
     const data = ref([
       {
-        "id": 1,
-        "label": "Electronics",
-        "nodes": [
+        id: 1,
+        label: 'Electronics',
+        nodes: [
           {
-            "id": 2,
-            "label": "Computers",
-            "nodes": [
+            id: 2,
+            label: 'Computers',
+            nodes: [
               {
-                "id": 4,
-                "label": "Laptops",
+                id: 4,
+                label: 'Laptops',
               },
               {
-                "id": 5,
-                "label": "Desktops",
-              }
-            ]
+                id: 5,
+                label: 'Desktops',
+              },
+            ],
           },
           {
-            "id": 3,
-            "label": "Mobile Phones",
-            "nodes": [
+            id: 3,
+            label: 'Mobile Phones',
+            nodes: [
               {
-                "id": 6,
-                "label": "Smartphones",
-                "nodes": [
+                id: 6,
+                label: 'Smartphones',
+                nodes: [
                   {
-                    "id": 8,
-                    "label": "Android",
+                    id: 8,
+                    label: 'Android',
                   },
                   {
-                    "id": 9,
-                    "label": "iOS",
-                  }
-                ]
+                    id: 9,
+                    label: 'iOS',
+                  },
+                ],
               },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       },
     ]);
 
-    const searchText = ref("");
+    const searchText = ref('');
     const onNodeExpanded = (node, state) => {
-      console.log("state: ", state);
-      console.log("node: ", node);
+      console.log('state: ', state);
+      console.log('node: ', node);
     };
- 
+
     const onUpdate = (nodes) => {
-      console.log("nodes:", nodes);
+      console.log('nodes:', nodes);
     };
- 
+
     const onNodeClick = (node) => {
       console.log(node);
     };
- 
+
     return {
       panel,
       data,
@@ -137,16 +152,16 @@ h1 {
   width: 100%;
   flex-grow: 1; /* sub-content가 남은 공간을 차지하도록 설정 */
   border-radius: 8px;
-  border: 1px solid #FFFFFF;
+  border: 1px solid #ffffff;
   height: calc(100% - 20px); /* 패딩과 상단 여백을 고려한 높이 설정 */
 }
 
 /* 사이드바 스타일 */
 .sidebar {
   width: 250px; /* 사이드바의 고정된 너비 설정 */
-  background-color: #FFFFFF; /* 연한 배경색 */
+  background-color: #ffffff; /* 연한 배경색 */
   border-radius: 10px;
-  border: 1px solid #6B9E9B;
+  border: 1px solid #6b9e9b;
   height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
 }
@@ -156,7 +171,7 @@ h1 {
   flex-grow: 1; /* 메인 컨텐츠가 나머지 공간을 채우도록 설정 */
   background-color: #ffffff; /* 흰색 배경색 */
   border-radius: 10px;
-  border: 1px solid #6B9E9B;
+  border: 1px solid #6b9e9b;
   height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
 }
 
