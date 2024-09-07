@@ -7,6 +7,8 @@ import Profile from '../components/view/ProfileCompo.vue';
 import Withdraw from '../components/view/WithdrawCompo.vue';
 import SocialLoginCallback from '@/components/common/SocialLoginCallback.vue';
 import KanbanCard from '@/components/layout/KanbanCardLayout.vue';
+import NewProject from '@/components/view/NewProjectCompo.vue';
+
 const routes = [
   {
     path: '/',
@@ -47,6 +49,11 @@ const routes = [
         path: 'kanbanCard',
         name: 'KanbanCardCompo',
         component: KanbanCard,
+      },
+      {
+        path: 'new-project',
+        name: 'NewProjectCompo',
+        component: NewProject,
       },
     ],
   },

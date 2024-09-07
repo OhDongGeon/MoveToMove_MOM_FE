@@ -29,7 +29,7 @@
                 </template>
               </Vue3Tree>
               <!-- 노드 추가를 위한 버튼 -->
-              <round-button-item class="add-buttons" :width="180" :height="30">프로젝트 생성 +</round-button-item>
+              <round-button-item class="add-buttons" :width="180" :height="30" @click="newProjectPage">프로젝트 생성 +</round-button-item>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -46,10 +46,10 @@
 
 <script>
 import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
+import { useRouter } from 'vue-router';
 import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { useRouter } from 'vue-router'; // 라우터를 사용하기 위해 추가
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
   components: {
@@ -58,7 +58,6 @@ export default {
   setup() {
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
-    const router = useRouter();
     const navigationStore = useNavigationStore(); // Pinia store 사용
 
     const data = ref([
@@ -104,6 +103,7 @@ export default {
       },
     ]);
 
+    const router = useRouter();
     const searchText = ref('');
     const onNodeExpanded = (node, state) => {
       console.log('state: ', state);
@@ -123,6 +123,10 @@ export default {
       navigationStore.setActiveItem('mypage');
       router.push('kanbanCard');
     };
+    const newProjectPage = () => {
+      router.replace('/move-to-move/new-project');
+    };
+
     return {
       panel,
       data,
@@ -131,6 +135,7 @@ export default {
       onUpdate,
       onNodeClick,
       openKanbanCard,
+      newProjectPage,
     };
   },
 };
