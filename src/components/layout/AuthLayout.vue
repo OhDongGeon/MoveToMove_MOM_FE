@@ -56,9 +56,13 @@
             {{ isLoginMode ? '회원가입' : '로그인' }}
           </a>
         </div>
+
         <!-- 비밀번호 찾기 모달 컴포넌트-->
+        <!-- 인증번호 보내기 -->
         <PasswordModal v-model="isPasswordModalOpen" @open-recovery-dialog="openRecoveryDialog" />
+        <!-- 비밀번호 변경 모달 -->
         <PasswordRecoveryDialog :show="isRecoveryDialogOpen" @update:show="isRecoveryDialogOpen = $event" />
+
         <!-- 로그인 소셜 버튼들 -->
         <div v-if="isLoginMode" class="social-login">
           <button class="kakao-login-button" @click="handleKakaoLogin">
