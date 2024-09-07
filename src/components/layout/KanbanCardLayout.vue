@@ -33,6 +33,6 @@ export default {
 .custom-divider {
   border: none;
   border-top: 3px solid #6b9e9b;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 </style>
