@@ -39,30 +39,39 @@
 
       <div class="button-group">
         <round-button-item type="button" class="save-btn" :width="200" :height="40" @click="agreementCheck">탈퇴</round-button-item>
-        <round-button-item type="button" class="cancel-btn" :width="200" :height="40" :backgroundColor="'cancel'">취소</round-button-item>
+        <round-button-item type="button" class="cancel-btn" :width="200" :height="40" :backgroundColor="'cancel'" @click="pageChange">취소</round-button-item>
       </div>
     </div>
 
-    <!-- CheckMessage 모달 컴포넌트 -->
     <CheckMessage :isVisible="isModalVisible" @close="closeModal" />
+    <ConfirmAlert :isVisible="isWithdrawVisible" @close="closeWithdraw" message="탈퇴 되었습니다." />
   </div>
 </template>
 
 <script>
 import { ref } from 'vue';
-import CheckMessage from '../common/AlertCheckMessage.vue'; // 자식 컴포넌트 import
+import { useRouter } from 'vue-router';
+import axiosInstance from '@/api/axiosInstance.js';
+import { useAuthStore } from '@/stores/memberStore';
+import CheckMessage from '../common/AlertCheckMessage.vue';
+import ConfirmAlert from '../common/ConfirmAlertCompo.vue';
 
 export default {
   name: 'WithdrawCompo',
   components: {
     CheckMessage,
+    ConfirmAlert,
   },
   setup() {
+    const router = useRouter();
+    const authStore = useAuthStore();
+
     // 체크박스 세팅
     const isAgreed = ref(false);
 
     // 모달 설정
     const isModalVisible = ref(false);
+    const isWithdrawVisible = ref(false);
 
     // 체크박스 상태 변경
     const agreement = () => {
@@ -73,9 +82,12 @@ export default {
     const agreementCheck = () => {
       if (!isAgreed.value) {
         // 모달을 띄우기 전에 상태 확인
-        console.log('모달을 띄우기 전 상태:', isModalVisible.value);
+        // console.log('모달을 띄우기 전 상태:', isModalVisible.value);
         isModalVisible.value = true;
-        console.log('모달을 띄운 후 상태:', isModalVisible.value); // true여야 합니다
+        // isWithdrawVisible.value = true;
+        // console.log('모달을 띄운 후 상태:', isModalVisible.value); // true여야 합니다
+      } else {
+        withdraw();
       }
     };
 
@@ -84,12 +96,42 @@ export default {
       isModalVisible.value = false;
     };
 
+    const closeWithdraw = () => {
+      isWithdrawVisible.value = false;
+    };
+
+    // 취소 페이지 이동
+    const pageChange = () => {
+      router.replace('/move-to-move/mypage');
+    };
+
+    // 회원 탈퇴
+    const withdraw = async () => {
+      try {
+        await axiosInstance.delete('/api/members/withdraw', {
+          withCredentials: true,
+        });
+
+        isWithdrawVisible.value = true;
+        authStore.logout();
+
+        setTimeout(() => {
+          router.replace('/');
+        }, 1000);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     return {
       isAgreed,
       agreement,
       agreementCheck,
       closeModal,
-      isModalVisible, // 부모 폼의 상태를 자식에 전달
+      closeWithdraw,
+      pageChange,
+      isModalVisible,
+      isWithdrawVisible,
     };
   },
 };
@@ -163,7 +205,7 @@ h1 {
 .square-icon {
   color: #6b9e9b;
   margin-right: 10px;
-  font-size: 24px; /* 아이콘 크기 */
+  font-size: 24px;
 }
 
 .checklist-confirm label {

@@ -13,13 +13,21 @@
                 :search-text="searchText"
                 :use-checkbox="false"
                 :use-icon="true"
+                :indentSize="10"
+                :gap="5"
                 use-row-delete
-                show-child-count
                 @nodeExpanded="onNodeExpanded"
                 @update:nodes="onUpdate"
                 @nodeClick="onNodeClick"
                 class="custom-node-class"
-              />
+              >
+                <template #iconActive>
+                  <img src="../../assets/folders24.svg" alt="Folder Icon" width="12" height="12" />
+                </template>
+                <template #iconInactive>
+                  <font-awesome-icon :icon="['fas', 'folder']" />
+                </template>
+              </Vue3Tree>
               <!-- 노드 추가를 위한 버튼 -->
               <round-button-item class="add-buttons" :width="180" :height="30">프로젝트 생성 +</round-button-item>
             </v-expansion-panel-text>

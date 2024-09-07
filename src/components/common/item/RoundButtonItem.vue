@@ -27,7 +27,8 @@ export default {
       type: Number,
       default: 16, // 기본 글자 크기 (px)
     },
-    fontColor: {    // 기본 글자 색
+    fontColor: {
+      // 기본 글자 색
       type: String,
       default: '#ffffff',
     },
@@ -41,12 +42,7 @@ export default {
     },
   },
   setup(props) {
-    const { width, 
-            height, 
-            fontSize,
-            fontColor, 
-            borderRadius, 
-            backgroundColor } = toRefs(props);
+    const { width, height, fontSize, fontColor, borderRadius, backgroundColor } = toRefs(props);
 
     // props에 따라 buttonStyle을 계산
     const buttonStyle = computed(() => {
@@ -67,7 +63,7 @@ export default {
         height: height.value + 'px',
         fontSize: fontSize.value + 'px', // 글자 크기 설정
         color: fontColor.value, // 글자 색
-        borderRadius: borderRadius.value + 'px',  // 둥근 모서리 크기
+        borderRadius: borderRadius.value + 'px', // 둥근 모서리 크기
         display: 'flex',
         alignItems: 'center', // 수직 중앙 정렬
         justifyContent: 'center', // 수평 중앙 정렬
@@ -84,5 +80,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
