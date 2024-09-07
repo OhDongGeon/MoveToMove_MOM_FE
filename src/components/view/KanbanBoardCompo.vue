@@ -38,6 +38,7 @@
         <v-card>
           <v-card-content> 여기에 이제 content를 개발하세요 </v-card-content>
         </v-card>
+        <button @click="openKanbanCard">칸반카드 오픈</button>
       </main>
     </div>
   </div>
@@ -48,7 +49,7 @@ import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
 import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
-
+import { useNavigationStore } from '@/stores/navigationStore';
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
   components: {
@@ -57,6 +58,7 @@ export default {
   setup() {
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
+    const navigationStore = useNavigationStore(); // Pinia store 사용
 
     const data = ref([
       {
@@ -116,6 +118,11 @@ export default {
       console.log(node);
     };
 
+    const openKanbanCard = (idx) => {
+      console.log(`칸반카드ID: ${idx}`);
+      navigationStore.setActiveItem('mypage');
+      router.push('kanbanCard');
+    };
     const newProjectPage = () => {
       router.replace('/move-to-move/new-project');
     };
@@ -127,6 +134,7 @@ export default {
       onNodeExpanded,
       onUpdate,
       onNodeClick,
+      openKanbanCard,
       newProjectPage,
     };
   },

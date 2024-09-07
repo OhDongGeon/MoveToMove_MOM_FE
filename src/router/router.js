@@ -6,6 +6,7 @@ import Chat from '../components/view/ChatCompo.vue';
 import Profile from '../components/view/ProfileCompo.vue';
 import Withdraw from '../components/view/WithdrawCompo.vue';
 import SocialLoginCallback from '@/components/common/SocialLoginCallback.vue';
+import KanbanCard from '@/components/layout/KanbanCardLayout.vue';
 import NewProject from '@/components/view/NewProjectCompo.vue';
 
 const routes = [
@@ -42,6 +43,12 @@ const routes = [
         path: 'withdraw',
         name: 'WithdrawCompo',
         component: Withdraw,
+      },
+      //칸반 카드 open
+      {
+        path: 'kanbanCard',
+        name: 'KanbanCardCompo',
+        component: KanbanCard,
       },
       {
         path: 'new-project',
