@@ -8,11 +8,18 @@
             <v-expansion-panel-title>프로젝트</v-expansion-panel-title>
             <v-expansion-panel-text>
               <!-- treeData가 유효할 때만 Vue3Tree를 렌더링 -->
-              <Vue3Tree :nodes="data" :search-text="searchText" :use-checkbox="false"
-              :use-icon="true" 
-              use-row-delete show-child-count 
-              @nodeExpanded="onNodeExpanded" @update:nodes="onUpdate" @nodeClick="onNodeClick"
-              class="custom-node-class"/>
+              <Vue3Tree
+                :nodes="data"
+                :search-text="searchText"
+                :use-checkbox="false"
+                :use-icon="true"
+                use-row-delete
+                show-child-count
+                @nodeExpanded="onNodeExpanded"
+                @update:nodes="onUpdate"
+                @nodeClick="onNodeClick"
+                class="custom-node-class"
+              />
               <!-- 노드 추가를 위한 버튼 -->
               <round-button-item class="add-buttons" :width="180" :height="30">프로젝트 생성 +</round-button-item>
             </v-expansion-panel-text>
@@ -23,6 +30,7 @@
         <v-card>
           <v-card-content> 여기에 이제 content를 개발하세요 </v-card-content>
         </v-card>
+        <button @click="openKanbanCard">칸반카드 오픈</button>
       </main>
     </div>
   </div>
@@ -32,7 +40,8 @@
 import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
-
+import { useNavigationStore } from '@/stores/navigationStore';
+import { useRouter } from 'vue-router'; // 라우터를 사용하기 위해 추가
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
   components: {
@@ -41,64 +50,71 @@ export default {
   setup() {
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
+    const router = useRouter();
+    const navigationStore = useNavigationStore(); // Pinia store 사용
 
     const data = ref([
       {
-        "id": 1,
-        "label": "Electronics",
-        "nodes": [
+        id: 1,
+        label: 'Electronics',
+        nodes: [
           {
-            "id": 2,
-            "label": "Computers",
-            "nodes": [
+            id: 2,
+            label: 'Computers',
+            nodes: [
               {
-                "id": 4,
-                "label": "Laptops",
+                id: 4,
+                label: 'Laptops',
               },
               {
-                "id": 5,
-                "label": "Desktops",
-              }
-            ]
+                id: 5,
+                label: 'Desktops',
+              },
+            ],
           },
           {
-            "id": 3,
-            "label": "Mobile Phones",
-            "nodes": [
+            id: 3,
+            label: 'Mobile Phones',
+            nodes: [
               {
-                "id": 6,
-                "label": "Smartphones",
-                "nodes": [
+                id: 6,
+                label: 'Smartphones',
+                nodes: [
                   {
-                    "id": 8,
-                    "label": "Android",
+                    id: 8,
+                    label: 'Android',
                   },
                   {
-                    "id": 9,
-                    "label": "iOS",
-                  }
-                ]
+                    id: 9,
+                    label: 'iOS',
+                  },
+                ],
               },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       },
     ]);
 
-    const searchText = ref("");
+    const searchText = ref('');
     const onNodeExpanded = (node, state) => {
-      console.log("state: ", state);
-      console.log("node: ", node);
+      console.log('state: ', state);
+      console.log('node: ', node);
     };
- 
+
     const onUpdate = (nodes) => {
-      console.log("nodes:", nodes);
+      console.log('nodes:', nodes);
     };
- 
+
     const onNodeClick = (node) => {
       console.log(node);
     };
- 
+
+    const openKanbanCard = (idx) => {
+      console.log(`칸반카드ID: ${idx}`);
+      navigationStore.setActiveItem('mypage');
+      router.push('kanbanCard');
+    };
     return {
       panel,
       data,
@@ -106,6 +122,7 @@ export default {
       onNodeExpanded,
       onUpdate,
       onNodeClick,
+      openKanbanCard,
     };
   },
 };
@@ -137,16 +154,16 @@ h1 {
   width: 100%;
   flex-grow: 1; /* sub-content가 남은 공간을 차지하도록 설정 */
   border-radius: 8px;
-  border: 1px solid #FFFFFF;
+  border: 1px solid #ffffff;
   height: calc(100% - 20px); /* 패딩과 상단 여백을 고려한 높이 설정 */
 }
 
 /* 사이드바 스타일 */
 .sidebar {
   width: 250px; /* 사이드바의 고정된 너비 설정 */
-  background-color: #FFFFFF; /* 연한 배경색 */
+  background-color: #ffffff; /* 연한 배경색 */
   border-radius: 10px;
-  border: 1px solid #6B9E9B;
+  border: 1px solid #6b9e9b;
   height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
 }
@@ -156,7 +173,7 @@ h1 {
   flex-grow: 1; /* 메인 컨텐츠가 나머지 공간을 채우도록 설정 */
   background-color: #ffffff; /* 흰색 배경색 */
   border-radius: 10px;
-  border: 1px solid #6B9E9B;
+  border: 1px solid #6b9e9b;
   height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
 }
 
