@@ -12,27 +12,15 @@
 
         <!-- 알림 아이콘 -->
         <div class="notification-container">
-          <span class="material-symbols-outlined notification-icon"
-            >notifications</span
-          >
+          <span class="material-symbols-outlined notification-icon">notifications</span>
           <!-- 알림 상태에 따른 동그라미 -->
-          <span
-            :class="[
-              'notification-dot',
-              { active: navigationStore.hasNotification },
-            ]"
-          ></span>
+          <span :class="['notification-dot', { active: navigationStore.hasNotification }]"></span>
         </div>
       </div>
 
       <div class="sidebar-header">
         <!-- 로고 및 사용자 정보 -->
-        <img
-          src="../../assets/move-to-move-logo2.png"
-          @click="navigateToHome"
-          alt="Logo"
-          class="logo"
-        />
+        <img src="../../assets/move-to-move-logo2.png" @click="navigateToHome" alt="Logo" class="logo" />
 
         <!-- 상단 hr 선 -->
         <hr class="divider" />
@@ -40,7 +28,7 @@
         <div class="user-info">
           <!-- 프로필 이미지와 사용자 정보 -->
           <div class="user-info-content">
-            <img :src="avatarUrl" alt="User Avatar" class="avatar" />
+            <img :src="userProfileUrl" alt="User Avatar" class="avatar" />
 
             <div class="user-details">
               <!-- 현재 회원으로 변경해야함 -->
@@ -48,24 +36,10 @@
               <span class="user-nickname">이너프</span>
               <!-- 버튼 -->
               <div class="user-info-buttons">
-                <round-button-item
-                  @click="toInfoModify"
-                  :width="60"
-                  :height="20"
-                  :fontSize="10"
-                  :fontColor="'#112f4e'"
-                  :borderRadius="5"
-                  backgroundColor="etc"
+                <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'" :borderRadius="5" backgroundColor="etc"
                   >정보수정</round-button-item
                 >
-                <round-button-item
-                  @click="toWithdraw"
-                  :width="60"
-                  :height="20"
-                  :fontSize="10"
-                  :fontColor="'#112f4e'"
-                  :borderRadius="5"
-                  backgroundColor="etc"
+                <round-button-item @click="toWithdraw" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'" :borderRadius="5" backgroundColor="etc"
                   >회원탈퇴</round-button-item
                 >
               </div>
@@ -79,35 +53,20 @@
 
       <!-- 네비게이션 메뉴 -->
       <nav class="nav-menu">
-        <router-link
-          to="/move-to-move/mypage"
-          class="nav-item"
-          :class="{ active: navigationStore.activeItem === 'mypage' }"
-          @click="navigationStore.setActiveItem('mypage')"
-        >
+        <router-link to="/move-to-move/mypage" class="nav-item" :class="{ active: navigationStore.activeItem === 'mypage' }" @click="navigationStore.setActiveItem('mypage')">
           <!-- 아이콘과 텍스트를 별도의 flexbox로 구성 -->
           <div class="nav-icon-container">
             <span class="material-symbols-outlined nav-icon">dashboard</span>
           </div>
           <span class="nav-text">마이페이지</span>
         </router-link>
-        <router-link
-          to="/move-to-move/kanban"
-          class="nav-item"
-          :class="{ active: navigationStore.activeItem === 'kanban' }"
-          @click="navigationStore.setActiveItem('kanban')"
-        >
+        <router-link to="/move-to-move/kanban" class="nav-item" :class="{ active: navigationStore.activeItem === 'kanban' }" @click="navigationStore.setActiveItem('kanban')">
           <div class="nav-icon-container">
             <font-awesome-icon icon="fa-solid fa-clone" class="nav-icon" />
           </div>
           <span class="nav-text">칸반보드</span>
         </router-link>
-        <router-link
-          to="/move-to-move/chat"
-          class="nav-item"
-          :class="{ active: navigationStore.activeItem === 'chat' }"
-          @click="navigationStore.setActiveItem('chat')"
-        >
+        <router-link to="/move-to-move/chat" class="nav-item" :class="{ active: navigationStore.activeItem === 'chat' }" @click="navigationStore.setActiveItem('chat')">
           <div class="nav-icon-container">
             <font-awesome-icon icon="fa-regular fa-comments" class="nav-icon" />
           </div>
@@ -128,61 +87,72 @@
 </template>
 
 <script>
-import { useNavigationStore } from "@/stores/navigationStore";
-import { computed } from "vue";
-import { useRouter } from "vue-router";
-import axios from "@/api/axiosInstance.js";
-import { useAuthStore } from "@/stores/memberStore";
+import axios from '@/api/axiosInstance.js';
+import { useAuthStore } from '@/stores/memberStore';
+import { useNavigationStore } from '@/stores/navigationStore';
+import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
 export default {
-  name: "MainLayout",
+  name: 'MainLayout',
   setup() {
     const navigationStore = useNavigationStore(); // Pinia store 사용
     const authStore = useAuthStore(); // Pinia store 사용
     const router = useRouter(); // Vue Router 사용
 
-    const avatarUrl = computed(() => {
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        "enough"
-      )}&background=random`;
+    // 유저 정보 가져오기
+    onMounted(async () => {
+      await authStore.fetchUser();
+    });
+
+    // 유저 정보 설정
+    const userEmail = computed(() => authStore.user?.email || 'unknown');
+    const userNickName = computed(() => authStore.user?.nickName || 'User');
+    const userProfileUrl = computed(() => {
+      if (authStore.user?.profileUrl) {
+        return authStore.user.profileUrl;
+      }
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(userNickName.value)}&background=random`;
     });
 
     const navigateToHome = () => {
-      navigationStore.setActiveItem("mypage");
-      router.push("/move-to-move/mypage");
+      navigationStore.setActiveItem('mypage');
+      router.push('/move-to-move/mypage');
     };
 
     const toInfoModify = () => {
-      navigationStore.setActiveItem("mypage");
-      router.push("/move-to-move/profile");
+      navigationStore.setActiveItem('mypage');
+      router.push('/move-to-move/profile');
     };
 
     const toWithdraw = () => {
-      navigationStore.setActiveItem("mypage");
-      router.push("/move-to-move/withdraw");
+      navigationStore.setActiveItem('mypage');
+      router.push('/move-to-move/withdraw');
     };
 
     // 로그아웃 메서드
     const logout = async () => {
-      // 로그아웃 여부 모달창 띄워야함
-
       try {
-        const response = await axios.post("/api/members/logout"); // 로그아웃 API 호출
+        const response = await axios.post('/api/members/logout'); // 로그아웃 API 호출
+
         if (response.status === 200) {
-          console.log("로그아웃 성공");
+          console.log('로그아웃 성공');
           authStore.logout(); // Pinia 스토어의 로그아웃 함수 호출
           // 로그아웃 후 리디렉션 ,
-          router.push("/Auth");
+          router.push('/');
         } else {
-          console.error("로그아웃 실패", response);
+          console.error('로그아웃 실패', response);
         }
       } catch (error) {
-        console.error("로그아웃하는 동안 오류가 났습니다.", error);
+        console.error('로그아웃하는 동안 오류가 났습니다.', error);
       }
     };
 
     return {
       navigationStore,
-      avatarUrl,
+      userEmail,
+      userNickName,
+      userProfileUrl,
       navigateToHome,
       toInfoModify,
       toWithdraw,
@@ -268,12 +238,12 @@ export default {
 .sidebar-header {
   padding: 10px;
   text-align: center;
+  margin-top: 20px;
 }
 
 .logo {
   width: 200px;
   height: 100px;
-  margin-top: 40px;
   margin-bottom: 10px;
   cursor: pointer;
 }
