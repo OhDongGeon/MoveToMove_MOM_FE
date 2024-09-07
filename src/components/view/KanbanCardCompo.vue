@@ -1,8 +1,15 @@
 <template>
 
-  <div class="contains">
+  <div class="contains" @click="cardClick">
     <div class="card-member">
-      <ProfileImage v-for="(member, index) in card.members" :key="index" :src="member.avatar" alt="Member Avatar" :width="25" :height="25" />
+      <ProfileImage 
+        v-for="(member, index) in card.members" 
+        :key="index" 
+        :src="member.avatar" 
+        alt="Member Avatar" 
+        :width="25" 
+        :height="25" 
+      />
     </div>
     <div class="card-info">
       <div class="card-title">{{ card.title }}</div>
@@ -28,7 +35,11 @@ export default {
       required: true,
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
+    // 카드 클릭 시 이벤트 핸들러
+    const cardClick = () => {
+      emit('card-click', props.card.id);
+    }
     // priority에 따른 배경색 결정
     const priorityStyle = computed(() => {
       let backgroundColor;
@@ -78,6 +89,7 @@ export default {
     return {
       priorityStyle,
       taskSizeStyle,
+      cardClick,
     };
   },
 };
