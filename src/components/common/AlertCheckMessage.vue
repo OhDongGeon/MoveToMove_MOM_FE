@@ -3,7 +3,7 @@
     <div class="modal-container">
       <div class="modal-content">
         <p>{{ message }}</p>
-        <round-button-item type="button" :width="200" :height="40">{{ buttonText }}</round-button-item>
+        <round-button-item class="home-button" type="button" :width="200" :height="40" @click="closeMessage">{{ buttonText }}</round-button-item>
       </div>
     </div>
   </div>
@@ -51,22 +51,28 @@ export default {
 
 .modal-container {
   background: #f0f8ff;
-  border: 1.5px solid #6b9e9b;
+  border: 2px solid #6b9e9b;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   max-width: 400px;
   width: 100%;
-  text-align: center;
+}
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content p {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   font-size: 18px;
   color: #333;
+  font-weight: bold;
 }
 
-.home-button:hover {
-  background-color: #558a84;
+.home-button {
+  margin-top: 30px;
 }
 </style>
