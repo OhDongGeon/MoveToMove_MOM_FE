@@ -30,37 +30,43 @@
               </Vue3Tree>
               <!-- 노드 추가를 위한 버튼 -->
 
-              <round-button-item class="add-buttons" :width="180" :height="25" :borderRadius="5" :fontSize="13" @click="newProjectPage">프로젝트 생성 +</round-button-item>
+              <round-button-item
+                class="add-buttons"
+                :width="180"
+                :height="25"
+                :borderRadius="5"
+                :fontSize="13"
+                @click="newProjectPage"
+                >프로젝트 생성 +</round-button-item
+              >
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </aside>
       <main class="main-content">
-
         <div class="project-title">
           <label>프로젝트 1</label>
           <font-awesome-icon :icon="['fas', 'ellipsis']" />
         </div>
         <div class="project-content">
-          <div class="column"><kanban-column></kanban-column></div>
-          <div class="column">컬럼 2</div>
-          <div class="column">컬럼 3</div>
-          <div class="column">컬럼 4</div>
-          <div class="column">컬럼 5</div>
-        </div> 
+          <div v-for="col in columns" :key="col.id" class="column">
+            <!-- KanbanColumnCompo에 데이터 전달 -->
+            <kanban-column :id="col.id" :title="col.title" :cards="col.cards" />
+          </div>
+        </div>
       </main>
     </div>
-    <button @click="openKanbanCard">칸반카드 오픈</button>
+    <!-- <button @click="openKanbanCard">칸반카드 오픈</button> -->
   </div>
 </template>
 
 <script>
+import { useNavigationStore } from '@/stores/navigationStore';
 import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
 import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
 import KanbanColumn from './KanbanColumnCompo.vue';
-import { useNavigationStore } from '@/stores/navigationStore';
 
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
@@ -116,6 +122,140 @@ export default {
       },
     ]);
 
+    // 칸반 컬럼 데이터
+    const columns = ref([
+      {
+        id: 1,
+        title: 'Task',
+        cards: [
+          {
+            id: 3,
+            title: '화면 설계',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+          {
+            id: 4,
+            title: 'API 명세',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+          {
+            id: 5,
+            title: '기능 설계',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+          {
+            id: 6,
+            title: '구현 분담',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+          {
+            id: 5,
+            title: '게시글 CRUD',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: '진행중',
+        cards: [
+          {
+            id: 2,
+            title: '데이터베이스 설계',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 3,
+        title: '완료',
+        cards: [
+          {
+            id: 1,
+            title: '주제 선정',
+            priority: '중간',
+            task_size: 'Medium',
+            members: [
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+              },
+              {
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
     const router = useRouter();
     const searchText = ref('');
     const onNodeExpanded = (node, state) => {
@@ -143,6 +283,7 @@ export default {
     return {
       panel,
       data,
+      columns, // 칸반 컬럼 데이터
       searchText,
       onNodeExpanded,
       onUpdate,

@@ -17,6 +17,7 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import { aliases, mdi } from 'vuetify/iconsets/mdi';
 import 'vuetify/styles'; // Vuetify 스타일 가져오기
+import '@mdi/font/css/materialdesignicons.css';
 
 // FontAwesome
 import { library } from '@fortawesome/fontawesome-svg-core';
