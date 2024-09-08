@@ -32,8 +32,8 @@
 
             <div class="user-details">
               <!-- 현재 회원으로 변경해야함 -->
-              <span class="user-email">eunjungkim1004@naver.com</span>
-              <span class="user-nickname">이너프</span>
+              <span class="user-email">{{ userEmail }}</span>
+              <span class="user-nickname">{{ userNickName }}</span>
               <!-- 버튼 -->
               <div class="user-info-buttons">
                 <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'" :borderRadius="5" backgroundColor="etc"
