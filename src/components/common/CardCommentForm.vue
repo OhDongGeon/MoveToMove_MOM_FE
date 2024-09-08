@@ -26,7 +26,7 @@ export default {
   },
   setup() {
     const newComment = ref('');
-    const avatar =  'https://via.placeholder.com/40'
+    const avatar =  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg'
 
     // 댓글 제출 함수
     const submitComment = () => {

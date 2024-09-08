@@ -88,10 +88,10 @@ export default {
     const modalItems = ref([]);
 
     const users = ref([
-      { id: 1, name: "닉네임", avatar: "https://via.placeholder.com/30" },
-      { id: 2, name: "파이리", avatar: "https://via.placeholder.com/30" },
-      { id: 3, name: "팬텀", avatar: "https://via.placeholder.com/30" },
-      { id: 4, name: "메타몽", avatar: "https://via.placeholder.com/30" },
+      { id: 1, name: "팬텀", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg" },
+      { id: 2, name: "오동나무", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png" },
+      { id: 3, name: "백제신라고구려", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png" },
+      { id: 4, name: "은나라금나라", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png" },
     ]);
 
     const priorities = ref([
