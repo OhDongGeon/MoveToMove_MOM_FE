@@ -1,67 +1,145 @@
 <template>
   <div class="contains">
-    <div class="kanban-column-title">
-      <font-awesome-icon :icon="['far', 'square-plus']" class="square-icon" />
-      <div class="title">타이틀</div>
+    <div class="kanban-column">
+      <font-awesome-icon :icon="['far', 'square-plus']" class="square-icon" @click="startEditing" />
+      <div class="title">
+        <input
+          v-if="isCardAdd"
+          type="text"
+          v-model="newCardTitle"
+          @keyup.enter="submitAddCardTitle"
+          @keydown.esc="cancelEditing"
+          @blur="cancelEditing"
+          ref="cardInput"
+          placeholder="칸반 카드 제목 입력"
+          class="title-input"
+        />
+        <span v-else class="column-title">{{ title }}</span>
+      </div>
     </div>
-    <div class="title-underline"></div>
+    <!-- 동적으로 backgroundColor 적용 -->
+    <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
+
     <div class="kanban-card-list">
-      <KanbanCard v-for="card in cards" :key="card.id" :card="card" @card-click="openKanbanCard" />
+      <!-- localCards를 사용하여 KanbanCardCompo에 데이터 전달 -->
+      <KanbanCard v-for="card in localCards" :key="card.id" :card="card" @card-click="openKanbanCard" />
     </div>
   </div>
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
+// import axios from '@/api/axiosInstance'; // Axios 인스턴스 가져오기
 import { useNavigationStore } from '@/stores/navigationStore'; // Navigation Store 가져오기
+import { computed, nextTick, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import KanbanCard from './KanbanCardCompo.vue';
 
 export default {
   components: {
     KanbanCard,
   },
-  setup() {
+  props: {
+    id: {
+      type: Number,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    cards: {
+      type: Array, // Object 대신 Array로 변경 (cards는 배열입니다)
+      default: () => [], // 기본값을 빈 배열로 설정
+    },
+    underlineColor: {
+      type: String,
+      default: '#6b9e9b',
+    },
+  },
+  setup(props) {
     const router = useRouter();
     const navigationStore = useNavigationStore();
 
+    // props.cards를 복사하여 로컬 상태로 사용
+    const localCards = ref([...props.cards]);
+
+    const newCardTitle = ref('');
+    const isCardAdd = ref(false);
+
+    const cardInput = ref(null); // input 요소를 참조하기 위한 ref
+
+    // 동적으로 backgroundColor를 적용
+    const dynamicUnderlineColor = computed(() => {
+      return props.underlineColor || '#6b9e9b'; // 기본값 설정
+    });
+
     const openKanbanCard = (idx) => {
       console.log(`칸반카드ID: ${idx}`);
-      navigationStore.setActiveItem('mypage'); // navigationStore 업데이트
-      router.push('kanbanCard'); // 'kanbanCard' 경로로 이동
+      navigationStore.setActiveItem('mypage');
+      router.push('kanbanCard');
+    };
+
+    // 칸반 카드 추가 (제목만 입력)
+    const startEditing = async () => {
+      isCardAdd.value = true;
+      newCardTitle.value = '';
+
+      // 다음 DOM 업데이트 후 input에 포커스 설정
+      await nextTick();
+      if (cardInput.value) {
+        cardInput.value.focus();
+      }
+    };
+
+    const cancelEditing = () => {
+      isCardAdd.value = false; // ESC 키나 다른 곳 클릭 시 호출
+    };
+
+    const submitAddCardTitle = async () => {
+      if (newCardTitle.value.trim()) {
+        try {
+          // 서버에 카드 저장 요청
+          // const response = await axios.post('/cards', {
+          //   title: newCardTitle.value, // 서버로 보낼 데이터
+          // });
+
+          // 서버로부터 받은 카드 데이터를 cards 배열에 추가
+          // cards.push(response.data);
+
+          // 로컬 상태(localCards)에 카드 추가
+          localCards.value.push({
+            id: 8,
+            title: newCardTitle.value,
+            priority: '낮음',
+            task_size: 'Small',
+          });
+
+          // 상태 초기화
+          newCardTitle.value = '';
+          isCardAdd.value = false;
+        } catch (error) {
+          console.error('Error adding card:', error);
+        }
+      }
     };
 
     return {
+      localCards, // 로컬 상태로 복사한 cards
+      newCardTitle,
+      isCardAdd,
+      startEditing,
+      submitAddCardTitle,
       openKanbanCard,
-    };
-  },
-  data() {
-    return {
-      cards: [
-        {
-          id: 0,
-          title: '데이터베이스 설계',
-          priority: '긴급',
-          task_size: 'Extra Large',
-          members: [
-            { avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png' },
-            { avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png' },
-          ],
-        },
-        { id: 1, title: 'Task 1', priority: '긴급', task_size: 'Medium' },
-        { id: 2, title: 'Task 2', priority: '높음', task_size: 'Large' },
-        { id: 3, title: 'Task 3', priority: '중간', task_size: 'Medium' },
-        { id: 4, title: 'Task 4', priority: '중간', task_size: 'Medium' },
-        { id: 5, title: 'Task 5', priority: '낮음', task_size: 'Extra Large' },
-        { id: 6, title: 'Task 6', priority: '중간', task_size: 'Extra Large' },
-        { id: 7, title: 'Task 7', priority: '낮음', task_size: 'Large' },
-      ],
+      cancelEditing,
+      cardInput,
+      dynamicUnderlineColor,
     };
   },
 };
 </script>
 
 <style scoped>
-.kanban-column-title {
+.kanban-column {
   display: flex;
   margin-top: 20px;
   align-items: center;
@@ -71,7 +149,8 @@ export default {
 
 .square-icon {
   margin-left: 10px;
-  font-size: 20px;
+  font-size: 30px;
+  cursor: pointer;
 }
 
 .title {
@@ -82,10 +161,23 @@ export default {
   font-weight: bold;
 }
 
+.title-input {
+  font-size: 20px;
+  padding: 5px;
+  width: 300px;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.column-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
 .title-underline {
   width: 80%;
   height: 1px;
-  background-color: #6b9e9b;
   margin: 10px auto 0;
 }
 
