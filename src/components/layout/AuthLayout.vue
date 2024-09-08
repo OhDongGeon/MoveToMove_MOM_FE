@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import axiosInstance from '@/api/axiosInstance.js';
 import { useRouter } from 'vue-router';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useAuthStore } from '@/stores/memberStore'; //pinia 스토어 임포트
@@ -211,7 +211,7 @@ const handleSubmit = async () => {
         password: password.value,
       };
 
-      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData, {
+      const response = await axiosInstance.post(`/api/members/login`, loginData, {
         withCredentials: true,
       });
 
@@ -264,7 +264,7 @@ const handleSubmit = async () => {
       }
 
       //TODO 공통 alert 창 만들어서 변경해야함
-      const response = await axios.post(`${API_BASE_URL}/api/members/sign-up`, formData);
+      const response = await axiosInstance.post(`/api/members/sign-up`, formData);
       console.log('회원가입 성공:', response.data);
       alert('회원가입이 완료되었습니다. 로그인 해주세요.');
       isLoginMode.value = true;
