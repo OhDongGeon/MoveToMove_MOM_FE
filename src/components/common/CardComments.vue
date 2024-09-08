@@ -55,14 +55,15 @@ export default {
 <style scoped>
 .card-comments {
   text-align: left;
-  padding: 10px;
+  /* padding: 10px; */
   border-radius: 8px;
 }
 
 h3 {
   text-align: left;
   font-size: 18px;
-  margin-bottom: 20px;
+  margin: 5px;
+  font-weight: bold;
 }
 
 .comment {
