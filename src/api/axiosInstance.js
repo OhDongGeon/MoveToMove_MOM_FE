@@ -4,8 +4,8 @@ import { useAuthStore } from '@/stores/memberStore';
 
 // 인스턴스 생성
 const axiosInstance = axios.create({
-  // baseURL: 'https://move-to-move.online', // 나중 API URL
-  baseURL: 'http://localhost:8080',
+  baseURL: 'https://move-to-move.online', // 나중 API URL
+  // baseURL: 'http://localhost:8080',
   headers: {
     'Content-Type': 'application/json',
   },
