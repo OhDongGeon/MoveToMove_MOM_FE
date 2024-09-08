@@ -188,6 +188,8 @@ h1 {
 .chart {
   padding: 20px;
   width: 100%;
+  min-height: 400px;
+  max-height: 400px;
   border-radius: 10px;
   border: 1.5px solid #6b9e9b;
 }
