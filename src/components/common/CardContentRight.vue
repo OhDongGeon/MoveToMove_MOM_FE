@@ -35,13 +35,15 @@
       </p>
     </div>
     <!-- 카드 삭제 버튼 -->
-    <CustomButton
-    :default-text="`카드 삭제`"
-    :width="130"
-    :height="35"
-    font-size="18"
-    @click="deleteCard"
-    ></CustomButton>
+    <div class="delete-button">
+      <CustomButton 
+      :default-text="`카드 삭제`"
+      :width="130"
+      :height="35"
+      font-size="18"
+      @click="deleteCard"
+      ></CustomButton>
+    </div>
   </div>
 </template>
 
@@ -142,6 +144,11 @@ export default {
 .date {
   font-weight: bold;
   padding: 4px 8px;
-
+}
+.delete-button {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 20px;
 }
 </style>
