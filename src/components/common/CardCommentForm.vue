@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h3>코멘트 작성</h3>
+    <div class="comment-label">
+      <img :src="avatar" alt="" class="avatar">
+      <h3 class="comment-header">코멘트 작성</h3>
+    </div>
     <div class="card-comment-form">
       <div class="header-container">
         <h3 class="header-title">작성</h3>
@@ -23,6 +26,7 @@ export default {
   },
   setup() {
     const newComment = ref('');
+    const avatar =  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg'
 
     // 댓글 제출 함수
     const submitComment = () => {
@@ -32,12 +36,29 @@ export default {
     return {
       newComment,
       submitComment,
+      avatar,
     };
   },
 };
 </script>
 
 <style scoped>
+.comment-label {
+  display: flex;
+  margin: 5px;
+  align-items: center;
+  gap: 5px;
+}
+.comment-header {
+  font-weight: bold;
+}
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 1px solid #6b9e9b;
+}
 .card-comment-form {
   background-color: white;
   padding: 0;
