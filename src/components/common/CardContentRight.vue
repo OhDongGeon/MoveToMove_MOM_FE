@@ -2,75 +2,149 @@
   <div>
     <div class="assign-details">
       <!-- 담당자 -->
-      <p>
-        <strong>담당자</strong> 
-        <span class="assignee-info">
-          <img :src="assignee.avatar" alt="Avatar" class="avatar" />
-          {{ assignee.name }}
-        </span>
-      </p>
-
+      <div @click="openModal('담당자 선택', users)">
+        <p>
+          <strong>담당자</strong>
+          <span class="assignee-info">
+            <img :src="assignee.avatar" alt="Avatar" class="avatar" />
+            {{ assignee.name }}
+          </span>
+        </p>
+      </div>
       <!-- 우선순위 -->
-      <p>
-        <strong>우선순위</strong> 
-        <span class="priority">{{ assignee.priority }}</span>
-      </p>
+      <div @click="openModal('우선순위 선택', priorities)">
+        <p>
+          <strong>우선순위</strong>
+          <span class="priority">
+            {{ assignee.priority }}
+          </span>
+        </p>
+      </div>
 
       <!-- 작업크기 -->
-      <p>
-        <strong>작업크기</strong> 
-        <span class="size">{{ assignee.size }}</span>
-      </p>
+      <div @click="openModal('작업크기 선택', sizes)">
+        <p>
+          <strong>작업크기</strong>
+          <span class="size">{{ assignee.size }}</span>
+        </p>
+      </div>
 
       <!-- 시작날짜 -->
       <p>
-        <strong>시작날짜</strong> 
+        <strong>시작날짜</strong>
         <span class="date">{{ assignee.startDate }}</span>
       </p>
 
       <!-- 종료날짜 -->
       <p>
-        <strong>종료날짜</strong> 
+        <strong>종료날짜</strong>
         <span class="date">{{ assignee.endDate }}</span>
       </p>
     </div>
     <!-- 카드 삭제 버튼 -->
     <div class="delete-button">
-      <CustomButton 
-      :default-text="`카드 삭제`"
-      :width="130"
-      :height="35"
-      font-size="18"
-      @click="deleteCard"
+      <CustomButton
+        :default-text="`카드 삭제`"
+        :width="130"
+        :height="35"
+        font-size="18"
+        @click="deleteCard"
       ></CustomButton>
     </div>
+    <!-- 공용 모달 컴포넌트 사용 -->
+    <CardCommonModal
+      :isVisible="isModalVisible"
+      :title="modalTitle"
+      :items="modalItems"
+      @close="closeModal"
+      @confirm="handleConfirm"
+      class="modal"
+    />
   </div>
 </template>
 
 <script>
-import CustomButton from '@/components/common/item/RoundButtonItem.vue';
+import { ref } from "vue";
+import CustomButton from "@/components/common/item/RoundButtonItem.vue";
+import CardCommonModal from "./item/CardCommonModal.vue";
 
 export default {
   name: "AssignInfo",
-  components:  {
-    CustomButton
+  components: {
+    CustomButton,
+    CardCommonModal,
   },
   setup() {
     const assignee = {
       name: "닉네임",
-      avatar:  "https://via.placeholder.com/30",
+      avatar: "https://via.placeholder.com/30",
       priority: "중간",
       size: "Large",
       startDate: "2024-08-13",
       endDate: "2024-08-23",
     };
+    const isModalVisible = ref(false);
+    const modalTitle = ref("");
+    const modalItems = ref([]);
 
+    const users = ref([
+      { id: 1, name: "닉네임", avatar: "https://via.placeholder.com/30" },
+      { id: 2, name: "파이리", avatar: "https://via.placeholder.com/30" },
+      { id: 3, name: "팬텀", avatar: "https://via.placeholder.com/30" },
+      { id: 4, name: "메타몽", avatar: "https://via.placeholder.com/30" },
+    ]);
+
+    const priorities = ref([
+      { id: 1, name: "낮음", avatar: "https://via.placeholder.com/30" },
+      { id: 2, name: "중간", avatar: "https://via.placeholder.com/30" },
+      { id: 3, name: "높음", avatar: "https://via.placeholder.com/30" },
+      { id: 4, name: "긴급", avatar: "https://via.placeholder.com/30" },
+    ]);
+
+    const sizes = ref([
+      { id: 1, name: "Small", avatar: "https://via.placeholder.com/30" },
+      { id: 2, name: "Medium", avatar: "https://via.placeholder.com/30" },
+      { id: 3, name: "Large", avatar: "https://via.placeholder.com/30" },
+      { id: 4, name: "Extra Large", avatar: "https://via.placeholder.com/30" },
+    ]);
+    const openModal = (title, items) => {
+      modalTitle.value = title;
+      modalItems.value = items;
+      isModalVisible.value = true;
+    };
+    const closeModal = () => {
+      isModalVisible.value = false;
+    };
+
+    const handleConfirm = (selectedItems) => {
+      console.log("선택된 항목:", selectedItems);
+      if (modalTitle.value === "담당자 선택") {
+        assignee.value.name = selectedItems[0]?.name || assignee.value.name;
+        assignee.value.avatar =
+          selectedItems[0]?.avatar || assignee.value.avatar;
+      } else if (modalTitle.value === "우선순위 선택") {
+        assignee.value.priority =
+          selectedItems[0]?.name || assignee.value.priority;
+      } else if (modalTitle.value === "작업크기 선택") {
+        assignee.value.size = selectedItems[0]?.name || assignee.value.size;
+      }
+      closeModal();
+    };
     // 카드 삭제 함수
     const deleteCard = () => {
       console.log("카드가 삭제되었습니다");
     };
     return {
       assignee,
+      isModalVisible,
+      modalTitle,
+      modalItems,
+      users,
+      priorities,
+      sizes,
+      openModal,
+      closeModal,
+      handleConfirm,
       deleteCard,
     };
   },
@@ -126,20 +200,18 @@ export default {
 .priority {
   display: inline-block;
   padding: 4px 8px;
-  background-color: #9BB8F0; /* 배경색 설정 */
+  background-color: #9bb8f0; /* 배경색 설정 */
   border-radius: 8px; /* 둥근 모서리 설정 */
   margin-left: 10px;
   font-weight: bold;
-
 }
 .size {
   display: inline-block;
   padding: 4px 8px;
-  background-color: #E0CEF2; /* 배경색 설정 */
+  background-color: #e0cef2; /* 배경색 설정 */
   border-radius: 8px; /* 둥근 모서리 설정 */
   margin-left: 10px;
   font-weight: bold;
-
 }
 .date {
   font-weight: bold;
@@ -150,5 +222,8 @@ export default {
   justify-content: flex-end;
   width: 100%;
   margin-top: 20px;
+}
+.modal {
+  margin: 10px;
 }
 </style>
