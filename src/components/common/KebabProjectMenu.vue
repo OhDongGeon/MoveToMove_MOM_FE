@@ -1,6 +1,6 @@
 <template>
   <div class="kebab-menu" v-if="showMenu" ref="menu" :style="menuStyle">
-    <div class="menu-item" v-if="isProjectLeader === 'Y'">
+    <div class="menu-item" v-if="isProjectLeader === 'Y'" @click="manage">
       <font-awesome-icon :icon="['fas', 'gear']" class="icon" />
       <span class="menu-text">프로젝트 관리</span>
     </div>
@@ -15,6 +15,7 @@
 
 <script>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import AlertOkCancel from './AlertOkCancel.vue';
 
 export default {
@@ -34,9 +35,16 @@ export default {
   },
   emits: ['closeMenu'],
   setup(props, { emit }) {
+    const router = useRouter();
     const isMenuReadyToClose = ref(false); // 외부 클릭 감지
     const menu = ref(null); // 메뉴 요소에 대한 참조
     const isModalVisible = ref(false); // 모달의 표시 여부
+
+    // 프로젝트 관리
+    const manage = () => {
+      // router.push({ name: '/move-to-move/manage-project', params: { projectId: props.projectId } }); // 페이지 이동
+      router.replace('/move-to-move/manage-project');
+    };
 
     // 프로젝트 나가기
     const leave = () => {
@@ -86,6 +94,7 @@ export default {
       menu,
       isMenuReadyToClose,
       isModalVisible,
+      manage,
       leave,
       closeModal,
     };
