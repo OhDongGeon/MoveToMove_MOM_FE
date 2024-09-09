@@ -25,17 +25,29 @@
                   class="custom-node-class"
                 >
                   <template #iconActive>
-                    <img :src="require(`../../assets/folders24.svg`)" alt="Folder Icon" width="12" height="12" />
+                    <img
+                      :src="require(`../../assets/folders24.svg`)"
+                      alt="Folder Icon"
+                      width="14"
+                      height="14"
+                      style="margin-right: 10px"
+                    />
                   </template>
                   <template #iconInactive>
-                    <font-awesome-icon :icon="['fas', 'folder']" />
+                    <font-awesome-icon :icon="['fas', 'folder']" style="margin-right: 10px" />
                   </template>
                 </Vue3Tree>
 
                 <!-- 폴더 생성 시 보여줄 input 박스 -->
                 <template v-if="creatingFolder">
                   <div class="new-folder">
-                    <img src="../../assets/folders24.svg" alt="New Folder Icon" width="12" height="12" />
+                    <img
+                      src="../../assets/folders24.svg"
+                      alt="New Folder Icon"
+                      width="14"
+                      height="14"
+                      style="margin-right: 10px"
+                    />
                     <input
                       type="text"
                       v-model="newFolderName"
@@ -47,15 +59,24 @@
                   </div>
                 </template>
               </div>
-            </v-expansion-panel-text>
 
-            <!-- 노드 추가를 위한 버튼 -->
-            <div class="add-buttons">
-              <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" :fontColor="'#112f4e'" backgroundColor="etc" @click="newFolder"
-                >폴더 생성 +</round-button-item
-              >
-              <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage">프로젝트 생성 +</round-button-item>
-            </div>
+              <!-- 노드 추가를 위한 버튼 -->
+              <div class="add-buttons">
+                <round-button-item
+                  :width="100"
+                  :height="30"
+                  :borderRadius="5"
+                  :fontSize="11"
+                  :fontColor="'#112f4e'"
+                  backgroundColor="etc"
+                  @click="newFolder"
+                  >폴더 생성 +</round-button-item
+                >
+                <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage"
+                  >프로젝트 생성 +</round-button-item
+                >
+              </div>
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
 
@@ -65,7 +86,9 @@
       <main class="main-content">
         <div v-if="projectId" class="kanbanborad">
           <div class="project-title">
-            <label>{{ projectName }}</label>
+            <div class="project-name">
+              <label>{{ projectName }}</label>
+            </div>
             <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" class="ellipsis" />
             <!-- 케밥 메뉴 -->
             <KebabProjectMenu :showMenu="showMenu" @closeMenu="closeMenu" isProjectLeader="Y" />
@@ -253,10 +276,12 @@ export default {
             task_size: 'Extra Large',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -267,10 +292,12 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -281,10 +308,12 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -295,10 +324,12 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -309,10 +340,12 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -329,10 +362,12 @@ export default {
             task_size: 'Large',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -349,10 +384,12 @@ export default {
             task_size: 'Small',
             members: [
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar:
+                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -414,7 +451,7 @@ h1 {
 
 /* 사이드바 스타일 */
 .sidebar {
-  width: 250px; /* 사이드바의 고정된 너비 설정 */
+  width: 270px; /* 사이드바의 고정된 너비 설정 */
   background-color: #ffffff; /* 연한 배경색 */
   border-radius: 10px;
   border: 1.5px solid #6b9e9b;
@@ -423,12 +460,10 @@ h1 {
 }
 
 .folder-contains {
-  border: 1.5px solid #6b9e9b;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 500px;
 }
 
 /* 패널 전체를 flex로 처리하여 상단과 하단을 분리 */
@@ -451,9 +486,10 @@ h1 {
 
 .add-buttons {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px; /* 패널 하단에서 약간의 여백을 추가 */
+  justify-content: center; /* 버튼들을 수평으로 가운데 정렬 */
+  gap: 10px; /* 버튼들 사이 간격 */
+  margin-top: 20px; /* 트리와 버튼 사이에 여백 추가 */
+  margin-bottom: 20px; /* 하단 여백 추가 */
 }
 
 .folder-title {
@@ -475,13 +511,25 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
-  height: 45px;
-  border-bottom: 1.5px solid #6b9e9b;
+  height: 50px;
+  /* border-bottom: 1.5px solid #6b9e9b; */
   border-radius: 10px;
   padding: 0 20px;
   margin-top: 5px;
+}
+
+.project-name {
+  display: inline-block; /* div의 너비가 label의 콘텐츠 길이에 맞게 변경됨 */
+  border-bottom: 5px solid;
+  border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="5" viewBox="0 0 100 5"><path fill="none" stroke="%23FFA07A" stroke-width="2" d="M0 5 Q 25 0, 50 5 T 100 5"></path></svg>')
+    30 round;
+  height: 48px;
+}
+
+.project-name label {
+  font-size: 35px;
 }
 
 .ellipsis {
@@ -494,6 +542,11 @@ h1 {
   gap: 10px; /* 컬럼들 사이의 간격 */
   margin-top: 10px;
   height: 92%;
+
+  /* 웹킷 기반 브라우저 (크롬, 사파리 등)에서 스크롤바 크기 조정 */
+  ::-webkit-scrollbar {
+    width: 0px;
+  }
 }
 
 .column {
@@ -501,7 +554,7 @@ h1 {
   height: 830px;
   margin-bottom: 3px;
   background: #ffffff;
-  border: 1px solid #6b9e9b;
+  /* border: 1px solid #6b9e9b; */
   border-radius: 10px;
 }
 
@@ -510,7 +563,7 @@ h1 {
   margin: 0px;
   padding: 0px;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
   color: #5a6d8c;
 }
 
@@ -530,7 +583,7 @@ h1 {
   padding: 4px;
   border-radius: 4px;
   width: 150px;
-  height: 20px;
-  font-size: 11px;
+  height: 25px;
+  font-size: 14px;
 }
 </style>

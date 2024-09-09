@@ -9,12 +9,18 @@
       <span class="menu-text">프로젝트 나가기</span>
     </div>
 
-    <alert-ok-cancel :isVisible="isModalVisible" @close="closeModal" message="해당 프로젝트를 나가시겠습니까?" locationFlag="project"> </alert-ok-cancel>
+    <alert-ok-cancel
+      :isVisible="isModalVisible"
+      @close="closeModal"
+      message="해당 프로젝트를 나가시겠습니까?"
+      locationFlag="project"
+    >
+    </alert-ok-cancel>
   </div>
 </template>
 
 <script>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AlertOkCancel from './AlertOkCancel.vue';
 
@@ -27,7 +33,7 @@ export default {
     },
     locationFlag: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   components: {

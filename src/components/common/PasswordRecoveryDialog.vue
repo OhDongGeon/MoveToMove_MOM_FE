@@ -5,24 +5,50 @@
       <v-card-text>
         <!-- 가입한 이메일 입력 필드 -->
         <label for="email" class="custom-label">가입한 이메일</label>
-        <v-text-field id="email" placeholder="가입한 이메일을 입력해주세요." v-model="email" outlined class="custom-input" />
+        <v-text-field
+          id="email"
+          placeholder="가입한 이메일을 입력해주세요."
+          v-model="email"
+          outlined
+          class="custom-input"
+        />
 
         <!-- 인증번호 입력 필드 및 인증 버튼 -->
         <div class="input-group">
           <div class="input-field">
             <label for="authCode" class="custom-label">인증번호</label>
-            <v-text-field id="authCode" placeholder="인증번호를 입력해주세요." v-model="authCode" outlined class="custom-input" />
+            <v-text-field
+              id="authCode"
+              placeholder="인증번호를 입력해주세요."
+              v-model="authCode"
+              outlined
+              class="custom-input"
+            />
           </div>
           <round-button-item type="button" class="auth-btn" :width="95" :height="35">인증</round-button-item>
         </div>
 
         <!-- 비밀번호 입력 필드 -->
         <label for="newPassword" class="custom-label">비밀번호</label>
-        <v-text-field id="newPassword" placeholder="비밀번호를 입력해주세요." type="password" v-model="newPassword" outlined class="custom-input" />
+        <v-text-field
+          id="newPassword"
+          placeholder="비밀번호를 입력해주세요."
+          type="password"
+          v-model="newPassword"
+          outlined
+          class="custom-input"
+        />
 
         <!-- 비밀번호 확인 입력 필드 -->
         <label for="confirmPassword" class="custom-label">비밀번호 확인</label>
-        <v-text-field id="confirmPassword" placeholder="비밀번호를 다시 입력해주세요." type="password" v-model="confirmPassword" outlined class="custom-input" />
+        <v-text-field
+          id="confirmPassword"
+          placeholder="비밀번호를 다시 입력해주세요."
+          type="password"
+          v-model="confirmPassword"
+          outlined
+          class="custom-input"
+        />
       </v-card-text>
 
       <!-- 비밀번호 변경 버튼 -->
@@ -96,6 +122,7 @@ export default {
   background-color: #f7faff; /* 부드러운 파란색 배경 */
   border-radius: 12px; /* 카드 모서리 둥글게 */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  border: 1.5px solid #6b9e9b;
 }
 
 .dialog-title {

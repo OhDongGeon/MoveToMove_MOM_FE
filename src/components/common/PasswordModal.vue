@@ -28,7 +28,13 @@
     </v-card>
 
     <!-- SweetAlert 알림 컴포넌트 -->
-    <AlertDialog :show="alertVisible" title="인증번호 발송!" text="이메일로 인증번호가 발송되었습니다." icon="success" @close="handleAlertClose" />
+    <AlertDialog
+      :show="alertVisible"
+      title="인증번호 발송!"
+      text="이메일로 인증번호가 발송되었습니다."
+      icon="success"
+      @close="handleAlertClose"
+    />
 
     <!-- 확인 모달창 -->
     <CheckMessage :isVisible="isModalVisible" @close="closeModal" />
@@ -132,7 +138,8 @@ export default {
 }
 .custom-background {
   background-color: #f0f8ff; /* 배경색 */
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 1.5px solid #6b9e9b;
 }
 .dialog-title {
   text-align: center;
