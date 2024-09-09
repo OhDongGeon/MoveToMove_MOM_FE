@@ -12,7 +12,7 @@
         </p>
         <!-- 담당자 선택 모달 -->
         <CardCommonModal
-          v-if="currentModal === 'assigneeModal'"
+          v-show="currentModal === 'assigneeModal'"  
           :isVisible="true"
           :title="modalTitle"
           :items="modalItems"
@@ -32,7 +32,7 @@
         </p>
         <!-- 우선순위 선택 모달 -->
         <CardCommonModal
-          v-if="currentModal === 'priorityModal'"
+          v-show="currentModal === 'priorityModal'"  
           :isVisible="true"
           :title="modalTitle"
           :items="modalItems"
@@ -50,7 +50,7 @@
         </p>
         <!-- 작업크기 선택 모달 -->
         <CardCommonModal
-          v-if="currentModal === 'sizeModal'"
+          v-show="currentModal === 'sizeModal'" 
           :isVisible="true"
           :title="modalTitle"
           :items="modalItems"
@@ -85,6 +85,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { ref } from "vue";
 import CustomButton from "@/components/common/item/RoundButtonItem.vue";

@@ -1,4 +1,5 @@
 <template>
+  <!-- 모달 오버레이: 이 부분을 클릭하면 모달이 닫힘 -->
   <div class="modal-overlay" v-if="isVisible" @click.self="closeModal">
     <div class="modal-content" @click.stop>
       <header class="modal-header">
@@ -17,30 +18,23 @@
 
         <!-- 동적으로 변경되는 요소 목록 -->
         <div class="item-list">
-          <div v-for="item in filteredItems" :key="item.id" class="item">
-            <input
-              type="checkbox"
-              :id="item.id"
-              :value="item"
-              v-model="selectedItems"
-            />
-            <label :for="item.id">
-              <img :src="item.avatar" alt="avatar" class="avatar" />
-              {{ item.name }}
-            </label>
+          <div 
+            v-for="item in filteredItems" 
+            :key="item.id" 
+            class="item" 
+            @click="selectItem(item)"
+          >
+            <img :src="item.avatar" alt="avatar" class="avatar" />
+            {{ item.name }}
           </div>
         </div>
       </div>
-      <footer class="modal-footer">
-        <button @click="confirmSelection">확인</button>
-        <button @click="closeModal">취소</button>
-      </footer>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from "vue";
+import { defineComponent, ref, computed } from "vue";
 
 export default defineComponent({
   props: {
@@ -60,17 +54,6 @@ export default defineComponent({
   emits: ["close", "confirm"],
   setup(props, { emit }) {
     const searchQuery = ref("");
-    const selectedItems = ref([]);
-
-    // 모달이 열리면 selectedItems 초기화
-    watch(
-      () => props.isVisible,
-      (newVal) => {
-        if (newVal) {
-          selectedItems.value = [];
-        }
-      }
-    );
 
     // 필터된 아이템 목록을 검색 쿼리에 따라 반환
     const filteredItems = computed(() => {
@@ -86,22 +69,22 @@ export default defineComponent({
       emit("close");
     };
 
-    // 선택 항목을 확인하고 부모 컴포넌트로 전달하는 메서드
-    const confirmSelection = () => {
-      emit("confirm", selectedItems.value);
-      closeModal();
+    // 항목을 클릭했을 때 선택하고 모달을 닫는 메서드
+    const selectItem = (item) => {
+      emit("confirm", [item]);  // 선택된 항목을 배열로 부모에게 전달
+      closeModal();  // 모달 닫기
     };
 
     return {
       searchQuery,
       filteredItems,
-      selectedItems,
       closeModal,
-      confirmSelection,
+      selectItem,
     };
   },
 });
 </script>
+
 
 <style scoped>
 .modal-overlay {
@@ -122,7 +105,6 @@ export default defineComponent({
   width: 100%; /* 부모 요소의 너비에 맞춤 */
   max-height: 400px; /* 최대 높이 설정을 키워 더 많은 내용이 보이도록 */
   overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
-  padding: 10px; /* 안쪽 여백 */
 }
 /* 스크롤 바 전체 */
 .modal-content::-webkit-scrollbar {
@@ -134,7 +116,7 @@ export default defineComponent({
 .modal-content::-webkit-scrollbar-thumb {
   background-color: #6b9e9b; /* 스크롤 바 색상 */
   border-radius: 10px; /* 스크롤 바의 둥근 모서리 */
-  border: 2px solid #F0F8FF; /* 스크롤 바 주위의 빈 공간과 배경색 */
+  border: 2px solid #f0f8ff; /* 스크롤 바 주위의 빈 공간과 배경색 */
 }
 
 /* 스크롤 바의 트랙(배경) */
@@ -142,8 +124,6 @@ export default defineComponent({
   background: #e0f7fa; /* 스크롤 바 트랙 배경색 */
   border-radius: 10px; /* 트랙의 둥근 모서리 */
 }
-
-
 
 .modal-header {
   display: flex;
@@ -167,7 +147,7 @@ export default defineComponent({
   align-items: center;
   justify-content: flex-start; /* 요소들을 왼쪽으로 정렬 */
   margin-bottom: 8px;
-  border: 2px solid #6B9E9B;
+  border: 2px solid #6b9e9b;
   border-radius: 10px;
   height: 45px;
   gap: 5px;
@@ -205,7 +185,7 @@ button {
 .divider {
   border: 0;
   height: 1px;
-  background: #6B9E9B; /* 구분선 색상 */
+  background: #6b9e9b; /* 구분선 색상 */
   margin-bottom: 15px;
 }
 </style>
