@@ -33,7 +33,7 @@
               <round-button-item
                 class="add-buttons"
                 :width="180"
-                :height="25"
+                :height="30"
                 :borderRadius="5"
                 :fontSize="13"
                 @click="newProjectPage"
@@ -42,6 +42,9 @@
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
+
+        <!-- 참여자 컴포넌트 -->
+        <project-member-compo></project-member-compo>
       </aside>
       <main class="main-content">
         <div class="project-title">
@@ -66,6 +69,7 @@ import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
 import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
+import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
 import KanbanColumn from './KanbanColumnCompo.vue';
 
 export default {
@@ -73,6 +77,7 @@ export default {
   components: {
     Vue3Tree, // Tree 컴포넌트 등록
     KanbanColumn,
+    ProjectMemberCompo,
   },
   setup() {
     // ref를 사용하여 상태를 정의합니다.
@@ -82,39 +87,19 @@ export default {
     const data = ref([
       {
         id: 1,
-        label: 'Electronics',
+        label: '나만의 폴더',
         nodes: [
           {
             id: 2,
-            label: 'Computers',
+            label: '사이드 프로젝트',
             nodes: [
               {
                 id: 4,
-                label: 'Laptops',
+                label: '프로젝트 1',
               },
               {
                 id: 5,
-                label: 'Desktops',
-              },
-            ],
-          },
-          {
-            id: 3,
-            label: 'Mobile Phones',
-            nodes: [
-              {
-                id: 6,
-                label: 'Smartphones',
-                nodes: [
-                  {
-                    id: 8,
-                    label: 'Android',
-                  },
-                  {
-                    id: 9,
-                    label: 'iOS',
-                  },
-                ],
+                label: '프로젝트 2',
               },
             ],
           },
