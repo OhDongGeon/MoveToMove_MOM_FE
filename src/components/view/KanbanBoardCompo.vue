@@ -11,6 +11,7 @@
               <!-- treeData가 유효할 때만 Vue3Tree를 렌더링 -->
               <div class="tree-container">
                 <Vue3Tree
+                  :key="data.length"
                   :nodes="data"
                   :search-text="searchText"
                   :use-checkbox="false"
@@ -24,12 +25,27 @@
                   class="custom-node-class"
                 >
                   <template #iconActive>
-                    <img src="../../assets/folders24.svg" alt="Folder Icon" width="12" height="12" />
+                    <img :src="require(`../../assets/folders24.svg`)" alt="Folder Icon" width="12" height="12" />
                   </template>
                   <template #iconInactive>
                     <font-awesome-icon :icon="['fas', 'folder']" />
                   </template>
                 </Vue3Tree>
+
+                <!-- 폴더 생성 시 보여줄 input 박스 -->
+                <template v-if="creatingFolder">
+                  <div class="new-folder">
+                    <img src="../../assets/folders24.svg" alt="New Folder Icon" width="12" height="12" />
+                    <input
+                      type="text"
+                      v-model="newFolderName"
+                      @keydown.enter="addNewFolder"
+                      @keydown.esc="cancelNewFolder"
+                      @blur="cancelNewFolder"
+                      placeholder="폴더 이름을 입력하세요"
+                    />
+                  </div>
+                </template>
               </div>
             </v-expansion-panel-text>
 
@@ -42,7 +58,7 @@
                 :fontSize="11"
                 :fontColor="'#112f4e'"
                 backgroundColor="etc"
-                @click="newProjectPage"
+                @click="newFolder"
                 >폴더 생성 +</round-button-item
               >
               <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage"
@@ -117,6 +133,8 @@ export default {
 
     const onUpdate = (nodes) => {
       console.log('nodes:', nodes);
+      console.log('트리 데이터가 업데이트되었습니다.', nodes);
+      data.value = [...nodes]; // 변경된 데이터로 업데이트
     };
 
     const onNodeClick = (node) => {
@@ -162,6 +180,39 @@ export default {
 
     const closeMenu = () => {
       showMenu.value = false;
+    };
+
+    /* 폴더 생성 */
+    // 새 폴더 생성 상태 및 이름을 저장할 ref
+    const creatingFolder = ref(false);
+    const newFolderName = ref('');
+
+    // 폴더 생성 취소
+    const cancelNewFolder = () => {
+      creatingFolder.value = false;
+      newFolderName.value = '';
+    };
+
+    // 폴더 생성 완료 시 데이터에 추가
+    const addNewFolder = () => {
+      if (newFolderName.value.trim()) {
+        const newFolder = {
+          id: Date.now(),
+          label: newFolderName.value,
+          project_info: {},
+          nodes: [],
+        };
+        data.value.push(newFolder);
+        onUpdate(data.value); // 데이터 변경을 알림
+      }
+      cancelNewFolder();
+    };
+
+    // 새 폴더 생성 버튼 클릭 시 호출
+    const newFolder = () => {
+      creatingFolder.value = true;
+      newFolderName.value = ''; // 폴더명 초기화
+      console.log(creatingFolder.value);
     };
 
     /* 데이터 바인딩 */
@@ -358,6 +409,11 @@ export default {
       toggleMenu,
       closeMenu,
       menuPosition,
+      creatingFolder,
+      newFolderName,
+      newFolder,
+      cancelNewFolder,
+      addNewFolder,
     };
   },
 };
@@ -494,5 +550,20 @@ h1 {
 .member {
   min-height: 390px;
   margin-bottom: 3px;
+}
+
+.new-folder {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.new-folder input {
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 4px;
+  width: 150px;
+  height: 20px;
+  font-size: 11px;
 }
 </style>
