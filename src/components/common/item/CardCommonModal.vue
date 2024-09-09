@@ -20,8 +20,9 @@
             :key="item.id" 
             class="item" 
             @click="toggleSelectItem(item)"
+            :class="{ 'selected-item': isSelected(item) }"
           >
-            <input type="checkbox" :checked="isSelected(item)" />
+            <input type="checkbox" :checked="isSelected(item)" style="display: none;" />
             <img :src="item.avatar" alt="avatar" class="avatar" />
             {{ item.name }}
           </div>
@@ -51,7 +52,11 @@ export default defineComponent({
     },
     items: {
       type: Array,
-      default: () => [],
+      default: () => [],  // items에 대한 기본값 설정
+    },
+    multiple: {  // 다중 선택 여부를 설정하는 props
+      type: Boolean,
+      default: false,
     },
   },
   emits: ["close", "confirm"],
@@ -59,6 +64,7 @@ export default defineComponent({
     const searchQuery = ref("");
     const selectedItems = ref([]);
 
+    // 검색어가 비어있거나 포함된 항목만 필터링
     const filteredItems = computed(() => {
       return searchQuery.value
         ? props.items.filter((item) =>
@@ -73,11 +79,15 @@ export default defineComponent({
 
     // 아이템 선택/해제 메서드
     const toggleSelectItem = (item) => {
-      const index = selectedItems.value.findIndex((selected) => selected.id === item.id);
-      if (index > -1) {
-        selectedItems.value.splice(index, 1); // 이미 선택된 경우 해제
-      } else {
-        selectedItems.value.push(item); // 선택되지 않은 경우 선택
+      if (props.multiple) {  // 다중 선택인 경우
+        const index = selectedItems.value.findIndex((selected) => selected.id === item.id);
+        if (index > -1) {
+          selectedItems.value.splice(index, 1); // 이미 선택된 경우 해제
+        } else {
+          selectedItems.value.push(item); // 선택되지 않은 경우 선택
+        }
+      } else {  // 단일 선택인 경우
+        selectedItems.value = [item];
       }
     };
 
@@ -103,7 +113,6 @@ export default defineComponent({
   },
 });
 </script>
-
 
 
 <style scoped>
@@ -172,15 +181,13 @@ export default defineComponent({
   height: 45px;
   gap: 5px;
   padding: 8px;
+  cursor: pointer; /* 클릭할 수 있도록 커서 추가 */
+}
+.item.selected-item {
+  background-color: #e0f7fa; /* 선택된 항목의 배경색 변경 */
 }
 .item input[type="checkbox"] {
-  margin: 0 10px; /* 체크박스와 다른 요소 간의 간격 */
-}
-.item label {
-  flex-grow: 1; /* 레이블이 남은 공간을 채우도록 */
-  display: flex;
-  align-items: center; /* 아이템 내 요소 수직 중앙 정렬 */
-  justify-content: flex-start; /* 아이템 내 요소 왼쪽 정렬 */
+  display: none; /* 체크박스 숨기기 */
 }
 .avatar {
   width: 30px;

@@ -4,7 +4,7 @@
       <!-- 담당자와 선택된 요소들을 Flexbox로 배치 -->
       <div class="assignee-container">
         <!-- 담당자 선택 버튼 -->
-        <div class="modal-trigger" @click="openModal('담당자 선택', users, 'assigneeModal')">
+        <div class="modal-trigger" @click="openModal('담당자 선택', users, 'assigneeModal', true)">
           <p>
             <strong>담당자</strong>
           </p>
@@ -21,6 +21,7 @@
             :isVisible="true"
             :title="modalTitle"
             :items="modalItems"
+            :multiple="true" 
             @close="closeModal"
             @confirm="handleConfirm"
             class="modal-position"
@@ -29,7 +30,7 @@
       </div>
 
       <!-- 우선순위 -->
-      <div class="modal-trigger" @click="openModal('우선순위 선택', priorities, 'priorityModal')">
+      <div class="modal-trigger" @click="openModal('우선순위 선택', priorities, 'priorityModal', false)">
         <p>
           <strong>우선순위</strong>
           <span class="priority">
@@ -42,6 +43,7 @@
           :isVisible="true"
           :title="modalTitle"
           :items="modalItems"
+          :multiple="false"  
           @close="closeModal"
           @confirm="handleConfirm"
           class="modal-position"
@@ -49,13 +51,21 @@
       </div>
 
       <!-- 작업크기 -->
-      <div class="modal-trigger" @click="openModal('작업크기 선택', sizes, 'sizeModal')">
+      <div class="modal-trigger" @click="openModal('작업크기 선택', sizes, 'sizeModal', false)">
         <p>
           <strong>작업크기</strong>
           <span class="size">{{ assignee.size }}</span>
         </p>
         <!-- 작업크기 선택 모달 -->
-        <CardCommonModal :isVisible="currentModal === 'sizeModal'" :title="modalTitle" :items="modalItems" @close="closeModal" @confirm="handleConfirm" class="modal-position" />
+        <CardCommonModal 
+          :isVisible="currentModal === 'sizeModal'" 
+          :title="modalTitle" 
+          :items="modalItems" 
+          :multiple="false"  
+          @close="closeModal" 
+          @confirm="handleConfirm" 
+          class="modal-position" 
+        />
       </div>
 
       <!-- 시작날짜 -->
@@ -106,6 +116,7 @@ export default {
     const modalTitle = ref('');
     const modalItems = ref([]);
     const currentModal = ref('');
+    const isMultiple = ref(false);  // 다중 선택 여부를 위한 변수 추가
 
     const users = ref([
       { id: 1, name: '팬텀', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg' },
@@ -128,13 +139,17 @@ export default {
       { id: 4, name: 'Extra Large', avatar: 'https://via.placeholder.com/30' },
     ]);
 
-    const openModal = (title, items, modalId) => {
+    const openModal = (title, items, modalId, multiple) => {
       modalTitle.value = title;
       modalItems.value = items.map((item) => ({
         ...item,
-        selected: assignee.value.selectedAssignees.some((assignee) => assignee.id === item.id), // 현재 선택된 담당자를 체크된 상태로 반영
+        selected:
+          modalId === 'assigneeModal'
+            ? assignee.value.selectedAssignees.some((assignee) => assignee.id === item.id)
+            : item.name === assignee.value.priority || item.name === assignee.value.size,
       }));
       currentModal.value = modalId;
+      isMultiple.value = multiple;  // multiple 값을 설정
     };
 
     const closeModal = () => {
@@ -151,13 +166,12 @@ export default {
           avatar: item.avatar,
         }));
       } else if (modalTitle.value === '우선순위 선택') {
-        assignee.value.priority = selectedItems[0]?.name;
+        assignee.value.priority = selectedItems[0]?.name; // 첫 번째 선택된 항목만 저장
       } else if (modalTitle.value === '작업크기 선택') {
-        assignee.value.size = selectedItems[0]?.name;
+        assignee.value.size = selectedItems[0]?.name; // 첫 번째 선택된 항목만 저장
       }
       closeModal();
     };
-
 
     const deleteCard = () => {
       console.log('카드가 삭제되었습니다');
@@ -175,10 +189,13 @@ export default {
       handleConfirm,
       deleteCard,
       currentModal,
+      isMultiple,  // isMultiple을 반환하여 사용 가능하도록 설정
     };
   },
 };
 </script>
+
+
 
 <style scoped>
 .assign-details {
