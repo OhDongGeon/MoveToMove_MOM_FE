@@ -2,7 +2,7 @@
   <div class="auth-layout">
     <div class="left-side">
       <!-- 배경 이미지 또는 기타 콘텐츠 -->
-      <img src="path/to/background-image.png" alt="Background" class="background-image" />
+      <img src="../../assets/login-background-image.png" alt="Background" class="background-image" />
     </div>
     <div class="right-side">
       <div class="form-container">
@@ -26,20 +26,38 @@
           <!-- 회원가입일 경우 닉네임 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="nickname">닉네임</label>
-            <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" @blur="validateNickname" />
+            <input
+              type="text"
+              id="nickname"
+              placeholder="닉네임을 입력하세요"
+              v-model="nickname"
+              @blur="validateNickname"
+            />
             <span v-if="nicknameError" class="error">{{ nicknameError }}</span>
           </div>
 
           <div class="form-group">
             <label for="password">비밀번호</label>
-            <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" @blur="validatePassword" />
+            <input
+              type="password"
+              id="password"
+              placeholder="비밀번호를 입력하세요"
+              v-model="password"
+              @blur="validatePassword"
+            />
             <span v-if="passwordError" class="error">{{ passwordError }}</span>
           </div>
 
           <!-- 회원가입일 경우 비밀번호 확인 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="confirm-password">비밀번호 확인</label>
-            <input type="password" id="confirm-password" placeholder="다시 비밀번호를 입력하세요" v-model="confirmPassword" @blur="validateConfirmPassword" />
+            <input
+              type="password"
+              id="confirm-password"
+              placeholder="다시 비밀번호를 입력하세요"
+              v-model="confirmPassword"
+              @blur="validateConfirmPassword"
+            />
             <span v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</span>
           </div>
 
@@ -82,16 +100,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { useAuthStore } from '@/stores/memberStore'; //pinia 스토어 임포트
+import { useNavigationStore } from '@/stores/navigationStore';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import PasswordModal from '@/components/common/PasswordModal.vue';
-import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
 import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
+import PasswordModal from '@/components/common/PasswordModal.vue';
+import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 
 // Pinia store 사용 설정
 const authStore = useAuthStore();
@@ -293,7 +311,7 @@ const handleKakaoLogin = () => {
 }
 
 .left-side {
-  flex: 1;
+  flex: 0.9;
   background-color: #f5f5f5;
   display: flex;
   align-items: center;
@@ -301,7 +319,7 @@ const handleKakaoLogin = () => {
 }
 
 .right-side {
-  flex: 1;
+  flex: 1.1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,8 +327,7 @@ const handleKakaoLogin = () => {
 
 .background-image {
   width: 100%;
-  height: auto;
-  max-width: 90%;
+  height: 1075px;
 }
 
 .form-container {

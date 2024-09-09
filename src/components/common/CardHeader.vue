@@ -22,9 +22,9 @@
 </template>
 
 <script>
+import { useNavigationStore } from '@/stores/navigationStore'; // Navigation Store 가져오기
 import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
-import { useNavigationStore } from '@/stores/navigationStore'; // Navigation Store 가져오기
 
 export default defineComponent({
   name: 'CardHeader',
@@ -41,7 +41,7 @@ export default defineComponent({
     const closeCard = () => {
       console.log('카드 Close');
       // 라우터 이동
-      navigationStore.setActiveItem('mypage');
+      navigationStore.setActiveItem('kanban');
       router.push('/move-to-move/kanban');
     };
 
@@ -80,19 +80,19 @@ p {
   margin: 5px;
 }
 .status {
-  background-color: #6B9E9B; /* 예시: 녹색 배경 */
+  background-color: #6b9e9b; /* 예시: 녹색 배경 */
   color: white;
   padding: 2px 15px;
   border-radius: 20px;
 }
 
 .nickname {
-  color: #333; 
+  color: #333;
   font-weight: bold;
 }
 
 .date {
-  color: #888; 
+  color: #888;
   font-size: 12px; /* 작은 글씨 */
 }
 
