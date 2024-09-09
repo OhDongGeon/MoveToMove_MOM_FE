@@ -7,8 +7,8 @@
         <div class="comment-info">
           <span class="author">{{ comment.author }}</span>
           <span class="date">{{ comment.date }}</span>
-          <button v-if="isAdmin" class="edit-button">수정</button>
-          <button v-if="isAdmin" class="delete-button">삭제</button>
+          <button v-if="comment.author === user.nickName" class="edit-button">수정</button>
+          <button v-if="comment.author === user.nickName" class="delete-button">삭제</button>
         </div>
         <div class="comment-actions">
           <p class="team-button">팀원</p>
@@ -22,21 +22,23 @@
 
 <script>
 import { useCommentStore } from '@/stores/commentStore';
+import { useAuthStore } from '@/stores/memberStore';
 import { computed } from 'vue';
 
 export default {
   name: 'CardComments',
 
   setup() {
-    const isAdmin = true;
     const commentStore = useCommentStore();
+    const authStore = useAuthStore();
 
     // 스토어에서 코멘트 목록을 가져오기
     const comments = computed(() => commentStore.getComments || null );
-
+    // 현재 로그인된 사용자 가져오기
+    const user = computed(() => authStore.getUser);
     return {
       comments,
-      isAdmin,
+      user,
     };
   },
 };

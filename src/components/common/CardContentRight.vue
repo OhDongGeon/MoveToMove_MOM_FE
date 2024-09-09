@@ -91,7 +91,12 @@ export default {
   },
   setup() {
     const assignee = ref({
-      selectedAssignees: [], // 여러 명의 담당자를 저장
+      selectedAssignees: [
+        {
+          name: '팬텀',
+          avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg',
+        },
+      ], // 여러 명의 담당자를 저장
       priority: '중간',
       size: 'Large',
       startDate: '2024-08-13',
@@ -124,15 +129,12 @@ export default {
     ]);
 
     const openModal = (title, items, modalId) => {
-      console.log(`Opening Modal: ${modalId}`); // Debugging log
-      if (currentModal.value === modalId) {
-        currentModal.value = ''; // 동일한 모달을 다시 클릭하면 닫음
-      } else {
-        modalTitle.value = title;
-        modalItems.value = items;
-        currentModal.value = modalId;
-      }
-      console.log(`Current Modal: ${currentModal.value}`); // Debugging log
+      modalTitle.value = title;
+      modalItems.value = items.map((item) => ({
+        ...item,
+        selected: assignee.value.selectedAssignees.some((assignee) => assignee.id === item.id), // 현재 선택된 담당자를 체크된 상태로 반영
+      }));
+      currentModal.value = modalId;
     };
 
     const closeModal = () => {
@@ -144,6 +146,7 @@ export default {
       if (modalTitle.value === '담당자 선택') {
         // 여러 명의 담당자를 선택하도록 수정
         assignee.value.selectedAssignees = selectedItems.map((item) => ({
+          id: item.id,
           name: item.name,
           avatar: item.avatar,
         }));
@@ -154,6 +157,7 @@ export default {
       }
       closeModal();
     };
+
 
     const deleteCard = () => {
       console.log('카드가 삭제되었습니다');
