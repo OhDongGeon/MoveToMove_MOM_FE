@@ -29,16 +29,7 @@
                 </template>
               </Vue3Tree>
               <!-- 노드 추가를 위한 버튼 -->
-
-              <round-button-item
-                class="add-buttons"
-                :width="180"
-                :height="30"
-                :borderRadius="5"
-                :fontSize="13"
-                @click="newProjectPage"
-                >프로젝트 생성 +</round-button-item
-              >
+              <round-button-item class="add-buttons" :width="180" :height="25" :borderRadius="5" :fontSize="13" @click="newProjectPage">프로젝트 생성 +</round-button-item>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -49,7 +40,9 @@
       <main class="main-content">
         <div class="project-title">
           <label>프로젝트 1</label>
-          <font-awesome-icon :icon="['fas', 'ellipsis']" />
+          <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" />
+          <!-- 케밥 메뉴 -->
+          <KebabProjectMenu :showMenu="showMenu" @closeMenu="closeMenu" isProjectLeader="Y" />
         </div>
         <div class="project-content">
           <div v-for="col in columns" :key="col.id" class="column">
@@ -71,6 +64,7 @@ import Vue3Tree from 'vue3-tree';
 import 'vue3-tree/dist/style.css';
 import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
 import KanbanColumn from './KanbanColumnCompo.vue';
+import KebabProjectMenu from '../common/KebabProjectMenu.vue';
 
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
@@ -78,11 +72,13 @@ export default {
     Vue3Tree, // Tree 컴포넌트 등록
     KanbanColumn,
     ProjectMemberCompo,
+    KebabProjectMenu,
   },
   setup() {
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
     const navigationStore = useNavigationStore(); // Pinia store 사용
+    const menuPosition = ref({ top: '0px', left: '0px' });
 
     const data = ref([
       {
@@ -120,12 +116,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -136,12 +130,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -152,12 +144,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -168,12 +158,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -184,12 +172,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -206,12 +192,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -228,12 +212,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -265,6 +247,26 @@ export default {
       router.replace('/move-to-move/new-project');
     };
 
+    // ref를 사용하여 상태를 정의합니다.
+    const showMenu = ref(false);
+
+    // 케밥 메뉴 토글 메소드
+    const toggleMenu = (event) => {
+      const target = event.target;
+      const rect = target.getBoundingClientRect();
+
+      // 메뉴 위치를 클릭된 아이콘의 아래에 설정
+      menuPosition.value = {
+        top: `${rect.bottom + window.scrollY}px`, // 아이콘의 bottom + scroll 위치
+        left: `${rect.left + window.scrollX}px`, // 아이콘의 left + scroll 위치
+      };
+      showMenu.value = !showMenu.value;
+    };
+
+    const closeMenu = () => {
+      showMenu.value = false;
+    };
+
     return {
       panel,
       data,
@@ -275,6 +277,10 @@ export default {
       onNodeClick,
       openKanbanCard,
       newProjectPage,
+      showMenu,
+      toggleMenu,
+      closeMenu,
+      menuPosition,
     };
   },
 };
