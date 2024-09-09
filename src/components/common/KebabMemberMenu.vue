@@ -9,7 +9,8 @@
       <span class="menu-text">내보내기</span>
     </div>
 
-    <alert-ok-cancel :isVisible="isModalVisible" @close="closeModal" message="프로젝트에서 내보시내겠습니까?" locationFlag="member"> </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isLeader" @close="closeLeader" message="팀장 권한을 이전 하시겠습니까?" locationFlag="member-leader"> </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isLeave" @close="closeLeave" message="프로젝트에서 내보시내겠습니까?" locationFlag="member-leave"> </alert-ok-cancel>
   </div>
 </template>
 
@@ -36,21 +37,27 @@ export default {
   setup(props, { emit }) {
     const isMenuReadyToClose = ref(false); // 외부 클릭 감지
     const menu = ref(null); // 메뉴 요소에 대한 참조
-    const isModalVisible = ref(false); // 모달의 표시 여부
+    const isLeader = ref(false); // 리더이전 모달
+    const isLeave = ref(false); // 내보내기 모달
 
     // 팀장 권한 이전
     const leader = () => {
-      console.log('권한 이전');
+      isLeader.value = true;
     };
 
     // 프로젝트 나가기
     const leave = () => {
-      isModalVisible.value = true;
+      isLeave.value = true;
     };
 
     // 닫기
-    const closeModal = () => {
-      isModalVisible.value = false;
+    const closeLeader = () => {
+      isLeader.value = false;
+    };
+
+    // 닫기
+    const closeLeave = () => {
+      isLeave.value = false;
     };
 
     // 외부 클릭 감지 준비
@@ -90,10 +97,12 @@ export default {
     return {
       menu,
       isMenuReadyToClose,
-      isModalVisible,
+      isLeader,
+      isLeave,
       leader,
       leave,
-      closeModal,
+      closeLeader,
+      closeLeave,
     };
   },
 };
