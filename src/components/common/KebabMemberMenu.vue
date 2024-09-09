@@ -9,16 +9,29 @@
       <span class="menu-text">내보내기</span>
     </div>
 
-    <alert-ok-cancel :isVisible="isLeader" @close="closeLeader" message="팀장 권한을 이전 하시겠습니까?" locationFlag="member-leader"> </alert-ok-cancel>
-    <alert-ok-cancel :isVisible="isLeave" @close="closeLeave" message="프로젝트에서 내보시내겠습니까?" locationFlag="member-leave"> </alert-ok-cancel>
+    <alert-ok-cancel
+      :isVisible="isLeader"
+      @close="closeLeader"
+      message="팀장 권한을 이전 하시겠습니까?"
+      locationFlag="member-leader"
+    >
+    </alert-ok-cancel>
+    <alert-ok-cancel
+      :isVisible="isLeave"
+      @close="closeLeave"
+      message="프로젝트에서 내보시내겠습니까?"
+      locationFlag="member-leave"
+    >
+    </alert-ok-cancel>
   </div>
 </template>
 
 <script>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import AlertOkCancel from './AlertOkCancel.vue';
 
 export default {
+  inheritAttrs: false,
   props: {
     showMenu: Boolean,
     isProjectLeader: {
@@ -27,13 +40,15 @@ export default {
     },
     locationFlag: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   components: {
     AlertOkCancel,
   },
+
   emits: ['closeMenu'],
+
   setup(props, { emit }) {
     const isMenuReadyToClose = ref(false); // 외부 클릭 감지
     const menu = ref(null); // 메뉴 요소에 대한 참조
@@ -118,7 +133,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   top: -3px;
   left: 212px;
-  z-index: 1000;
+  z-index: 9999;
   padding: 10px 20px;
 }
 

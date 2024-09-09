@@ -154,7 +154,7 @@ export default {
 
 .square-icon {
   margin-left: 10px;
-  font-size: 30px;
+  font-size: 20px;
   cursor: pointer;
 }
 
@@ -191,6 +191,14 @@ export default {
   height: 700px;
   overflow-y: auto;
   padding: 10px;
+
+  /* 웹킷 기반 브라우저에서 스크롤바 숨기기 (크롬, 사파리 등) */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 파이어폭스에서 스크롤바 숨기기 */
+  scrollbar-width: none;
 }
 
 .kanban-card {

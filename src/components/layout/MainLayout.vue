@@ -36,10 +36,24 @@
               <span class="user-nickname">{{ userNickName }}</span>
               <!-- 버튼 -->
               <div class="user-info-buttons">
-                <round-button-item @click="toInfoModify" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'" :borderRadius="5" backgroundColor="etc"
+                <round-button-item
+                  @click="toInfoModify"
+                  :width="60"
+                  :height="20"
+                  :fontSize="10"
+                  :fontColor="'#112f4e'"
+                  :borderRadius="5"
+                  backgroundColor="etc"
                   >정보수정</round-button-item
                 >
-                <round-button-item @click="toWithdraw" :width="60" :height="20" :fontSize="10" :fontColor="'#112f4e'" :borderRadius="5" backgroundColor="etc"
+                <round-button-item
+                  @click="toWithdraw"
+                  :width="60"
+                  :height="20"
+                  :fontSize="10"
+                  :fontColor="'#112f4e'"
+                  :borderRadius="5"
+                  backgroundColor="etc"
                   >회원탈퇴</round-button-item
                 >
               </div>
@@ -53,24 +67,39 @@
 
       <!-- 네비게이션 메뉴 -->
       <nav class="nav-menu">
-        <router-link to="/move-to-move/mypage" class="nav-item" :class="{ active: navigationStore.activeItem === 'mypage' }" @click="navigationStore.setActiveItem('mypage')">
+        <router-link
+          to="/move-to-move/mypage"
+          class="nav-item"
+          :class="{ active: navigationStore.activeItem === 'mypage' }"
+          @click="navigationStore.setActiveItem('mypage')"
+        >
           <!-- 아이콘과 텍스트를 별도의 flexbox로 구성 -->
           <div class="nav-icon-container">
             <span class="material-symbols-outlined nav-icon">dashboard</span>
           </div>
           <span class="nav-text">마이페이지</span>
         </router-link>
-        <router-link to="/move-to-move/kanban" class="nav-item" :class="{ active: navigationStore.activeItem === 'kanban' }" @click="navigationStore.setActiveItem('kanban')">
+        <router-link
+          to="/move-to-move/kanban"
+          class="nav-item"
+          :class="{ active: navigationStore.activeItem === 'kanban' }"
+          @click="navigationStore.setActiveItem('kanban')"
+        >
           <div class="nav-icon-container">
             <font-awesome-icon icon="fa-solid fa-clone" class="nav-icon" />
           </div>
           <span class="nav-text">칸반보드</span>
         </router-link>
-        <router-link to="/move-to-move/chat" class="nav-item" :class="{ active: navigationStore.activeItem === 'chat' }" @click="navigationStore.setActiveItem('chat')">
+        <router-link
+          to="/move-to-move/chat"
+          class="nav-item"
+          :class="{ active: navigationStore.activeItem === 'chat' }"
+          @click="navigationStore.setActiveItem('chat')"
+        >
           <div class="nav-icon-container">
-            <font-awesome-icon icon="fa-regular fa-comments" class="nav-icon" />
+            <font-awesome-icon icon="fa-regular fa-comments" class="nav-icon" style="display: none" />
           </div>
-          <span class="nav-text">채팅</span>
+          <span class="nav-text" style="display: none">채팅</span>
         </router-link>
       </nav>
     </aside>
@@ -212,7 +241,8 @@ export default {
 
 .notification-container {
   position: relative; /* 자식 요소의 절대 위치 설정을 위한 상대적 위치 */
-  display: inline-block;
+  /* display: inline-block; */
+  display: none;
 }
 
 .notification-icon {

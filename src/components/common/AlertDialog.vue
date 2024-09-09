@@ -5,7 +5,7 @@
 
 <script>
 import Swal from 'sweetalert2';
-import { defineComponent, watch, onMounted } from 'vue';
+import { defineComponent, onMounted, watch } from 'vue';
 
 export default defineComponent({
   name: 'AlertDialog',
