@@ -1,6 +1,6 @@
 <template>
   <div class="modal-overlay" v-if="isVisible" @click.self="closeModal">
-    <div class="modal-content">
+    <div class="modal-content" @click.stop>
       <header class="modal-header">
         <h3>{{ title }}</h3>
         <button @click="closeModal">X</button>
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, computed, watch } from "vue";
 
 export default defineComponent({
   props: {
@@ -62,19 +62,31 @@ export default defineComponent({
     const searchQuery = ref("");
     const selectedItems = ref([]);
 
-    const filteredItems = computed(() => {
-      if (searchQuery.value === "") {
-        return props.items;
+    // 모달이 열리면 selectedItems 초기화
+    watch(
+      () => props.isVisible,
+      (newVal) => {
+        if (newVal) {
+          selectedItems.value = [];
+        }
       }
-      return props.items.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-      );
+    );
+
+    // 필터된 아이템 목록을 검색 쿼리에 따라 반환
+    const filteredItems = computed(() => {
+      return searchQuery.value
+        ? props.items.filter((item) =>
+            item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+          )
+        : props.items;
     });
 
+    // 모달을 닫는 메서드
     const closeModal = () => {
       emit("close");
     };
 
+    // 선택 항목을 확인하고 부모 컴포넌트로 전달하는 메서드
     const confirmSelection = () => {
       emit("confirm", selectedItems.value);
       closeModal();
@@ -93,18 +105,46 @@ export default defineComponent({
 
 <style scoped>
 .modal-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: absolute; /* 클릭된 요소에 대해 절대 위치 */
+  top: 100%; /* 클릭된 요소 바로 아래에 표시 */
+  left: 0; /* 클릭된 요소의 왼쪽에 맞춤 */
+  width: 100%; /* 부모 요소의 너비에 맞춤 */
+  background-color: white; /* 모달 창 배경색 */
+  border: 1px solid #ddd; /* 테두리 설정 */
+  border-radius: 8px; /* 둥근 모서리 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+  z-index: 1000; /* 다른 요소보다 위에 표시 */
+  padding: 10px; /* 모달 안쪽 여백 */
+  max-width: 400px; /* 최대 너비 설정 */
 }
+
 .modal-content {
-  background: #F0F8FF;
-  border: 1px solid;
-  padding: 20px;
-  border-radius: 10px;
-  width: 350px;
-  max-width: 90%;
+  width: 100%; /* 부모 요소의 너비에 맞춤 */
+  max-height: 400px; /* 최대 높이 설정을 키워 더 많은 내용이 보이도록 */
+  overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
+  padding: 10px; /* 안쪽 여백 */
 }
+/* 스크롤 바 전체 */
+.modal-content::-webkit-scrollbar {
+  width: 8px; /* 세로 스크롤 바 너비 */
+  height: 8px; /* 가로 스크롤 바 높이 */
+}
+
+/* 스크롤 바 막대 */
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #6b9e9b; /* 스크롤 바 색상 */
+  border-radius: 10px; /* 스크롤 바의 둥근 모서리 */
+  border: 2px solid #F0F8FF; /* 스크롤 바 주위의 빈 공간과 배경색 */
+}
+
+/* 스크롤 바의 트랙(배경) */
+.modal-content::-webkit-scrollbar-track {
+  background: #e0f7fa; /* 스크롤 바 트랙 배경색 */
+  border-radius: 10px; /* 트랙의 둥근 모서리 */
+}
+
+
+
 .modal-header {
   display: flex;
   justify-content: space-between;
