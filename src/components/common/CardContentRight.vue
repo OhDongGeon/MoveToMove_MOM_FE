@@ -1,25 +1,31 @@
 <template>
   <div>
     <div class="assign-details">
-      <!-- 담당자 -->
-      <div class="modal-trigger" @click="openModal('담당자 선택', users, 'assigneeModal')">
-        <p>
-          <strong>담당자</strong>
-          <span class="assignee-info">
-            <img :src="assignee.avatar" alt="Avatar" class="avatar" />
-            {{ assignee.name }}
-          </span>
-        </p>
-        <!-- 담당자 선택 모달 -->
-        <CardCommonModal
-          v-show="currentModal === 'assigneeModal'"  
-          :isVisible="true"
-          :title="modalTitle"
-          :items="modalItems"
-          @close="closeModal"
-          @confirm="handleConfirm"
-          class="modal-position"
-        />
+      <!-- 담당자와 선택된 요소들을 Flexbox로 배치 -->
+      <div class="assignee-container">
+        <!-- 담당자 선택 버튼 -->
+        <div class="modal-trigger" @click="openModal('담당자 선택', users, 'assigneeModal')">
+          <p>
+            <strong>담당자</strong>
+          </p>
+          <!-- 선택된 담당자 목록 -->
+          <div class="assignee-list">
+            <div class="assignee-info" v-for="assignee in assignee.selectedAssignees" :key="assignee.name">
+              <img :src="assignee.avatar" alt="Avatar" class="avatar" />
+              {{ assignee.name }}
+            </div>
+          </div>
+          <!-- 담당자 선택 모달 -->
+          <CardCommonModal
+            v-show="currentModal === 'assigneeModal'"
+            :isVisible="true"
+            :title="modalTitle"
+            :items="modalItems"
+            @close="closeModal"
+            @confirm="handleConfirm"
+            class="modal-position"
+          />
+        </div>
       </div>
 
       <!-- 우선순위 -->
@@ -32,7 +38,7 @@
         </p>
         <!-- 우선순위 선택 모달 -->
         <CardCommonModal
-          v-show="currentModal === 'priorityModal'"  
+          v-show="currentModal === 'priorityModal'"
           :isVisible="true"
           :title="modalTitle"
           :items="modalItems"
@@ -49,15 +55,7 @@
           <span class="size">{{ assignee.size }}</span>
         </p>
         <!-- 작업크기 선택 모달 -->
-        <CardCommonModal
-          v-show="currentModal === 'sizeModal'" 
-          :isVisible="true"
-          :title="modalTitle"
-          :items="modalItems"
-          @close="closeModal"
-          @confirm="handleConfirm"
-          class="modal-position"
-        />
+        <CardCommonModal :isVisible="currentModal === 'sizeModal'" :title="modalTitle" :items="modalItems" @close="closeModal" @confirm="handleConfirm" class="modal-position" />
       </div>
 
       <!-- 시작날짜 -->
@@ -75,94 +73,90 @@
 
     <!-- 카드 삭제 버튼 -->
     <div class="delete-button">
-      <CustomButton
-        :default-text="`카드 삭제`"
-        :width="130"
-        :height="35"
-        font-size="18"
-        @click="deleteCard"
-      ></CustomButton>
+      <CustomButton :default-text="`카드 삭제`" :width="130" :height="35" font-size="18" @click="deleteCard"></CustomButton>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
-import CustomButton from "@/components/common/item/RoundButtonItem.vue";
-import CardCommonModal from "./item/CardCommonModal.vue";
+import { ref } from 'vue';
+import CustomButton from '@/components/common/item/RoundButtonItem.vue';
+import CardCommonModal from './item/CardCommonModal.vue';
 
 export default {
-  name: "AssignInfo",
+  name: 'AssignInfo',
   components: {
     CustomButton,
     CardCommonModal,
   },
   setup() {
     const assignee = ref({
-      name: "팬텀",
-      avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg",
-      priority: "중간",
-      size: "Large",
-      startDate: "2024-08-13",
-      endDate: "2024-08-23",
+      selectedAssignees: [], // 여러 명의 담당자를 저장
+      priority: '중간',
+      size: 'Large',
+      startDate: '2024-08-13',
+      endDate: '2024-08-23',
     });
 
-    const modalTitle = ref("");
+    const modalTitle = ref('');
     const modalItems = ref([]);
-    const currentModal = ref("");
+    const currentModal = ref('');
 
     const users = ref([
-      { id: 1, name: "팬텀", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg" },
-      { id: 2, name: "오동나무", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png" },
-      { id: 3, name: "백제신라고구려", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png" },
-      { id: 4, name: "은나라금나라", avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png" },
+      { id: 1, name: '팬텀', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg' },
+      { id: 2, name: '오동나무', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png' },
+      { id: 3, name: '백제신라고구려', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png' },
+      { id: 4, name: '은나라금나라', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png' },
     ]);
 
     const priorities = ref([
-      { id: 1, name: "낮음", avatar: "https://via.placeholder.com/30" },
-      { id: 2, name: "중간", avatar: "https://via.placeholder.com/30" },
-      { id: 3, name: "높음", avatar: "https://via.placeholder.com/30" },
-      { id: 4, name: "긴급", avatar: "https://via.placeholder.com/30" },
+      { id: 1, name: '낮음', avatar: 'https://via.placeholder.com/30' },
+      { id: 2, name: '중간', avatar: 'https://via.placeholder.com/30' },
+      { id: 3, name: '높음', avatar: 'https://via.placeholder.com/30' },
+      { id: 4, name: '긴급', avatar: 'https://via.placeholder.com/30' },
     ]);
 
     const sizes = ref([
-      { id: 1, name: "Small", avatar: "https://via.placeholder.com/30" },
-      { id: 2, name: "Medium", avatar: "https://via.placeholder.com/30" },
-      { id: 3, name: "Large", avatar: "https://via.placeholder.com/30" },
-      { id: 4, name: "Extra Large", avatar: "https://via.placeholder.com/30" },
+      { id: 1, name: 'Small', avatar: 'https://via.placeholder.com/30' },
+      { id: 2, name: 'Medium', avatar: 'https://via.placeholder.com/30' },
+      { id: 3, name: 'Large', avatar: 'https://via.placeholder.com/30' },
+      { id: 4, name: 'Extra Large', avatar: 'https://via.placeholder.com/30' },
     ]);
 
     const openModal = (title, items, modalId) => {
+      console.log(`Opening Modal: ${modalId}`); // Debugging log
       if (currentModal.value === modalId) {
-        currentModal.value = "";  // 동일한 모달을 다시 클릭하면 닫음
+        currentModal.value = ''; // 동일한 모달을 다시 클릭하면 닫음
       } else {
         modalTitle.value = title;
         modalItems.value = items;
         currentModal.value = modalId;
       }
+      console.log(`Current Modal: ${currentModal.value}`); // Debugging log
     };
 
     const closeModal = () => {
-      currentModal.value = "";
+      currentModal.value = '';
     };
 
     const handleConfirm = (selectedItems) => {
-      console.log("선택된 항목:", selectedItems);
-      if (selectedItems.length > 0) {
-        if (modalTitle.value === "담당자 선택") {
-          assignee.value.name = selectedItems[0].name;
-          assignee.value.avatar = selectedItems[0].avatar;
-        } else if (modalTitle.value === "우선순위 선택") {
-          assignee.value.priority = selectedItems[0].name;
-        } else if (modalTitle.value === "작업크기 선택") {
-          assignee.value.size = selectedItems[0].name;
-        }
+      console.log('선택된 항목:', selectedItems);
+      if (modalTitle.value === '담당자 선택') {
+        // 여러 명의 담당자를 선택하도록 수정
+        assignee.value.selectedAssignees = selectedItems.map((item) => ({
+          name: item.name,
+          avatar: item.avatar,
+        }));
+      } else if (modalTitle.value === '우선순위 선택') {
+        assignee.value.priority = selectedItems[0]?.name;
+      } else if (modalTitle.value === '작업크기 선택') {
+        assignee.value.size = selectedItems[0]?.name;
       }
       closeModal();
     };
 
     const deleteCard = () => {
-      console.log("카드가 삭제되었습니다");
+      console.log('카드가 삭제되었습니다');
     };
 
     return {
@@ -182,35 +176,6 @@ export default {
 };
 </script>
 
-
-<style scoped>
-/* 스타일은 그대로 유지 */
-.modal-overlay {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  padding: 10px;
-  max-width: 400px;
-}
-
-.modal-content {
-  width: 100%;
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-/* 나머지 스타일 유지 */
-</style>
-
-
-
 <style scoped>
 .assign-details {
   background-color: white;
@@ -225,7 +190,13 @@ export default {
   min-width: 350px; /* 박스 최소 너비 */
   min-height: 250px; /* 박스 최소 높이 */
 }
-
+.assignee-container {
+  display: flex; /* 가로로 정렬 */
+  align-items: center; /* 수직 가운데 정렬 */
+  gap: 20px; /* 담당자 선택 버튼과 선택된 목록 사이 간격 */
+  width: 100%; /* 부모 너비에 맞춤 */
+  margin-bottom: 15px; /* 아래 요소와 간격 추가 */
+}
 .modal-trigger {
   position: relative; /* 부모 컨테이너에 상대적인 위치 */
   width: 100%;
@@ -252,7 +223,7 @@ export default {
   line-height: 1.5; /* 줄 간격 설정 */
 }
 .avatar {
-  width: 30px;  /* 이미지 너비 */
+  width: 30px; /* 이미지 너비 */
   height: 30px; /* 이미지 높이 */
   border-radius: 50%; /* 원형으로 표시 */
   margin-right: 8px; /* 텍스트와 이미지 사이 간격 */
@@ -272,15 +243,19 @@ export default {
   margin-right: 10px; /* 레이블과 값 사이의 간격 */
 }
 
+.assignee-list {
+  display: flex;
+  flex-direction: column; /* 세로로 정렬 */
+  gap: 10px; /* 요소 간의 간격 */
+  margin-top: 10px; /* 목록 위쪽에 간격 추가 */
+}
+
 .assignee-info {
-  flex-grow: 1; /* 값의 너비를 유연하게 */
-  text-align: left; /* 값 왼쪽 정렬 */
-  font-size: 16px; /* 값의 글자 크기 키우기 */
-  padding: 4px 8px; /* 값의 안쪽 여백 설정 */
-  font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px; /* 이미지와 텍스트 사이 간격 */
+  padding: 4px 8px;
+  border-radius: 8px; /* 둥근 모서리 */
 }
 .priority {
   display: inline-block;
