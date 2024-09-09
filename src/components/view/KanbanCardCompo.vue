@@ -1,14 +1,13 @@
 <template>
-
   <div class="contains" @click="cardClick">
     <div class="card-member">
-      <ProfileImage 
-        v-for="(member, index) in card.members" 
-        :key="index" 
-        :src="member.avatar" 
-        alt="Member Avatar" 
-        :width="25" 
-        :height="25" 
+      <ProfileImage
+        v-for="(member, index) in card.members"
+        :key="index"
+        :src="member.avatar"
+        alt="Member Avatar"
+        :width="25"
+        :height="25"
       />
     </div>
     <div class="card-info">
@@ -22,8 +21,8 @@
 </template>
 
 <script>
-import { computed } from 'vue';
-import ProfileImage from '../common/item/ProfileImageItem.vue';
+import { computed } from "vue";
+import ProfileImage from "../common/item/ProfileImageItem.vue";
 
 export default {
   components: {
@@ -38,28 +37,28 @@ export default {
   setup(props, { emit }) {
     // 카드 클릭 시 이벤트 핸들러
     const cardClick = () => {
-      emit('card-click', props.card.id);
-    }
+      emit("card-click", props.card);
+    };
     // priority에 따른 배경색 결정
     const priorityStyle = computed(() => {
       let backgroundColor;
       let color;
       switch (props.card.priority) {
-        case '낮음':
-          backgroundColor = '#9BF09B';
+        case "낮음":
+          backgroundColor = "#9BF09B";
           break;
-        case '중간':
-          backgroundColor = '#9BB8F0';
+        case "중간":
+          backgroundColor = "#9BB8F0";
           break;
-        case '높음':
-          backgroundColor = '#E99BF0';
+        case "높음":
+          backgroundColor = "#E99BF0";
           break;
-        case '긴급':
-          backgroundColor = '#E45959';
-          color = '#ffffff';
+        case "긴급":
+          backgroundColor = "#E45959";
+          color = "#ffffff";
           break;
         default:
-          backgroundColor = '#e0e0e0'; // 기본 색상
+          backgroundColor = "#e0e0e0"; // 기본 색상
       }
       return { backgroundColor, color };
     });
@@ -68,20 +67,20 @@ export default {
     const taskSizeStyle = computed(() => {
       let backgroundColor;
       switch (props.card.task_size) {
-        case 'Small':
-          backgroundColor = '#CEF2CE';
+        case "Small":
+          backgroundColor = "#CEF2CE";
           break;
-        case 'Medium':
-          backgroundColor = '#CEE0F2';
+        case "Medium":
+          backgroundColor = "#CEE0F2";
           break;
-        case 'Large':
-          backgroundColor = '#E0CEF2';
+        case "Large":
+          backgroundColor = "#E0CEF2";
           break;
-        case 'Extra Large':
-          backgroundColor = '#F2CECE';
+        case "Extra Large":
+          backgroundColor = "#F2CECE";
           break;
         default:
-          backgroundColor = '#e0e0e0'; // 기본 색상
+          backgroundColor = "#e0e0e0"; // 기본 색상
       }
       return { backgroundColor };
     });

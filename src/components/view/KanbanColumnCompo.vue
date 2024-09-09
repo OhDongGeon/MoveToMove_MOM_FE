@@ -1,7 +1,11 @@
 <template>
   <div class="contains">
     <div class="kanban-column">
-      <font-awesome-icon :icon="['far', 'square-plus']" class="square-icon" @click="startEditing" />
+      <font-awesome-icon
+        :icon="['far', 'square-plus']"
+        class="square-icon"
+        @click="startEditing"
+      />
       <div class="title">
         <input
           v-if="isCardAdd"
@@ -18,21 +22,29 @@
       </div>
     </div>
     <!-- 동적으로 backgroundColor 적용 -->
-    <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
+    <div
+      class="title-underline"
+      :style="{ backgroundColor: dynamicUnderlineColor }"
+    ></div>
 
     <div class="kanban-card-list">
       <!-- localCards를 사용하여 KanbanCardCompo에 데이터 전달 -->
-      <KanbanCard v-for="card in localCards" :key="card.id" :card="card" @card-click="openKanbanCard" />
+      <KanbanCard
+        v-for="card in localCards"
+        :key="card.id"
+        :card="card"
+        @card-click="openKanbanCard"
+      />
     </div>
   </div>
 </template>
 
 <script>
 // import axios from '@/api/axiosInstance'; // Axios 인스턴스 가져오기
-import { useNavigationStore } from '@/stores/navigationStore'; // Navigation Store 가져오기
-import { computed, nextTick, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import KanbanCard from './KanbanCardCompo.vue';
+import { useNavigationStore } from "@/stores/navigationStore"; // Navigation Store 가져오기
+import { computed, nextTick, ref } from "vue";
+import { useRouter } from "vue-router";
+import KanbanCard from "./KanbanCardCompo.vue";
 
 export default {
   components: {
@@ -53,7 +65,7 @@ export default {
     },
     underlineColor: {
       type: String,
-      default: '#6b9e9b',
+      default: "#6b9e9b",
     },
   },
   setup(props) {
@@ -63,26 +75,31 @@ export default {
     // props.cards를 복사하여 로컬 상태로 사용
     const localCards = ref([...props.cards]);
 
-    const newCardTitle = ref('');
+    const newCardTitle = ref("");
     const isCardAdd = ref(false);
 
     const cardInput = ref(null); // input 요소를 참조하기 위한 ref
 
     // 동적으로 backgroundColor를 적용
     const dynamicUnderlineColor = computed(() => {
-      return props.underlineColor || '#6b9e9b'; // 기본값 설정
+      return props.underlineColor || "#6b9e9b"; // 기본값 설정
     });
 
-    const openKanbanCard = (idx) => {
-      console.log(`칸반카드ID: ${idx}`);
-      navigationStore.setActiveItem('mypage');
-      router.push('kanbanCard');
+    const openKanbanCard = (card) => {
+      console.log(`칸반카드ID: ${card.id}`);
+      console.log(`칸반카드: ${card}`);
+      navigationStore.setActiveItem("mypage");
+      // 라우터를 사용해 'kanbanCard'로 카드 ID와 제목을 전달
+      router.push({
+        name: "KanbanCardCompo",
+        query: { id: card, title: card.title },
+      });
     };
 
     // 칸반 카드 추가 (제목만 입력)
     const startEditing = async () => {
       isCardAdd.value = true;
-      newCardTitle.value = '';
+      newCardTitle.value = "";
 
       // 다음 DOM 업데이트 후 input에 포커스 설정
       await nextTick();
@@ -110,15 +127,15 @@ export default {
           localCards.value.push({
             id: 8,
             title: newCardTitle.value,
-            priority: '낮음',
-            task_size: 'Small',
+            priority: "낮음",
+            task_size: "Small",
           });
 
           // 상태 초기화
-          newCardTitle.value = '';
+          newCardTitle.value = "";
           isCardAdd.value = false;
         } catch (error) {
-          console.error('Error adding card:', error);
+          console.error("Error adding card:", error);
         }
       }
     };

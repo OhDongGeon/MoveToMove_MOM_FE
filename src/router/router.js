@@ -49,6 +49,7 @@ const routes = [
         path: 'kanbanCard',
         name: 'KanbanCardCompo',
         component: KanbanCard,
+        props: route => ({ id: route.query.id, title: route.query.title }),  // query 파라미터로 카드 ID와 제목 전달
       },
       {
         path: 'new-project',

@@ -76,8 +76,8 @@ export default {
   },
   setup() {
     const assignee = {
-      name: "닉네임",
-      avatar: "https://via.placeholder.com/30",
+      name: "팬텀",
+      avatar: "https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg",
       priority: "중간",
       size: "Large",
       startDate: "2024-08-13",
