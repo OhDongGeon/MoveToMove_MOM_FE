@@ -16,11 +16,11 @@ export default {
   name: 'CardContent',
   setup() {
     const description = '칸반 보드는 작업을 시작하고, 진행 중인 작업을 계획하여 효율을 최대화하는 애자일 프로젝트 관리 도구입니다.';
-    
+
     return {
       description,
     };
-  }
+  },
 };
 </script>
 
@@ -30,6 +30,7 @@ export default {
   flex-direction: column;
   align-items: flex-start; /* 중앙 정렬 */
   width: 100%;
+  padding: 5px;
 }
 .card-content {
   background-color: white;
@@ -61,7 +62,6 @@ export default {
 .edit-button:hover {
   background-color: white;
   color: #6b9e9b;
-  
 }
 
 .card-content p {

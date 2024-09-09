@@ -32,6 +32,7 @@
 import { ref, computed } from "vue";
 import CustomButton from "@/components/common/item/RoundButtonItem.vue";
 import { useAuthStore } from "@/stores/memberStore"; // Pinia 스토어 가져오기
+import { useCommentStore } from '@/stores/commentStore';
 
 export default {
   name: "CardCommentForm",
@@ -45,14 +46,24 @@ export default {
 
     // Pinia 스토어 사용
     const authStore = useAuthStore();
+    // Pinia 스토어 사용
+    const commentStore = useCommentStore();
 
     // 유저 정보 가져오기 (Pinia 스토어의 getter 사용)
     const user = computed(() => authStore.getUser);
 
     // 댓글 제출 함수
     const submitComment = () => {
-      console.log("댓글 내용: ", newComment.value);
-      newComment.value = "";
+      if(newComment.value.trim()) {
+        const comment = {
+          author: user.value.nickName || '피니아 유저 오류',
+          content: newComment.value,
+          date: new Date().toString(),
+        };
+        commentStore.addComment(comment);
+        newComment.value="";
+      }
+
     };
     return {
       newComment,

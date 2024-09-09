@@ -11,7 +11,8 @@
           <button v-if="isAdmin" class="delete-button">삭제</button>
         </div>
         <div class="comment-actions">
-          <p class="team-button">팀원</p> <!-- 정보 받아온 걸로  -->
+          <p class="team-button">팀원</p>
+          <!-- 정보 받아온 걸로  -->
         </div>
       </div>
       <p class="comment-content">{{ comment.content }}</p>
@@ -30,8 +31,7 @@ export default {
       {
         id: 1,
         author: '파이어리',
-        content:
-          '칸반 보드는 작업을 시작하고, 진행 중인 작업을 계획하여 효율을 최대화하는 애자일 프로젝트 관리 도구입니다.',
+        content: '칸반 보드는 작업을 시작하고, 진행 중인 작업을 계획하여 효율을 최대화하는 애자일 프로젝트 관리 도구입니다.',
         date: '2024-08-20 13:30',
         avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png',
       },
@@ -127,7 +127,7 @@ h3 {
   cursor: pointer;
   font-size: 12px;
 }
-.team-button{
+.team-button {
   border: 2px solid white;
   color: white;
   padding: 3px 8px;
