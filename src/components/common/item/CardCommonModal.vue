@@ -1,6 +1,7 @@
 <template>
+  <!-- 모달 오버레이: 이 부분을 클릭하면 모달이 닫힘 -->
   <div class="modal-overlay" v-if="isVisible" @click.self="closeModal">
-    <div class="modal-content">
+    <div class="modal-content" @click.stop>
       <header class="modal-header">
         <h3>{{ title }}</h3>
         <button @click="closeModal">X</button>
@@ -17,24 +18,17 @@
 
         <!-- 동적으로 변경되는 요소 목록 -->
         <div class="item-list">
-          <div v-for="item in filteredItems" :key="item.id" class="item">
-            <input
-              type="checkbox"
-              :id="item.id"
-              :value="item"
-              v-model="selectedItems"
-            />
-            <label :for="item.id">
-              <img :src="item.avatar" alt="avatar" class="avatar" />
-              {{ item.name }}
-            </label>
+          <div 
+            v-for="item in filteredItems" 
+            :key="item.id" 
+            class="item" 
+            @click="selectItem(item)"
+          >
+            <img :src="item.avatar" alt="avatar" class="avatar" />
+            {{ item.name }}
           </div>
         </div>
       </div>
-      <footer class="modal-footer">
-        <button @click="confirmSelection">확인</button>
-        <button @click="closeModal">취소</button>
-      </footer>
     </div>
   </div>
 </template>
@@ -60,51 +54,77 @@ export default defineComponent({
   emits: ["close", "confirm"],
   setup(props, { emit }) {
     const searchQuery = ref("");
-    const selectedItems = ref([]);
 
+    // 필터된 아이템 목록을 검색 쿼리에 따라 반환
     const filteredItems = computed(() => {
-      if (searchQuery.value === "") {
-        return props.items;
-      }
-      return props.items.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-      );
+      return searchQuery.value
+        ? props.items.filter((item) =>
+            item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+          )
+        : props.items;
     });
 
+    // 모달을 닫는 메서드
     const closeModal = () => {
       emit("close");
     };
 
-    const confirmSelection = () => {
-      emit("confirm", selectedItems.value);
-      closeModal();
+    // 항목을 클릭했을 때 선택하고 모달을 닫는 메서드
+    const selectItem = (item) => {
+      emit("confirm", [item]);  // 선택된 항목을 배열로 부모에게 전달
+      closeModal();  // 모달 닫기
     };
 
     return {
       searchQuery,
       filteredItems,
-      selectedItems,
       closeModal,
-      confirmSelection,
+      selectItem,
     };
   },
 });
 </script>
 
+
 <style scoped>
 .modal-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: absolute; /* 클릭된 요소에 대해 절대 위치 */
+  top: 100%; /* 클릭된 요소 바로 아래에 표시 */
+  left: 0; /* 클릭된 요소의 왼쪽에 맞춤 */
+  width: 100%; /* 부모 요소의 너비에 맞춤 */
+  background-color: white; /* 모달 창 배경색 */
+  border: 1px solid #ddd; /* 테두리 설정 */
+  border-radius: 8px; /* 둥근 모서리 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
+  z-index: 1000; /* 다른 요소보다 위에 표시 */
+  padding: 10px; /* 모달 안쪽 여백 */
+  max-width: 400px; /* 최대 너비 설정 */
 }
+
 .modal-content {
-  background: #F0F8FF;
-  border: 1px solid;
-  padding: 20px;
-  border-radius: 10px;
-  width: 350px;
-  max-width: 90%;
+  width: 100%; /* 부모 요소의 너비에 맞춤 */
+  max-height: 400px; /* 최대 높이 설정을 키워 더 많은 내용이 보이도록 */
+  overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
 }
+/* 스크롤 바 전체 */
+.modal-content::-webkit-scrollbar {
+  width: 8px; /* 세로 스크롤 바 너비 */
+  height: 8px; /* 가로 스크롤 바 높이 */
+}
+
+/* 스크롤 바 막대 */
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #6b9e9b; /* 스크롤 바 색상 */
+  border-radius: 10px; /* 스크롤 바의 둥근 모서리 */
+  border: 2px solid #f0f8ff; /* 스크롤 바 주위의 빈 공간과 배경색 */
+}
+
+/* 스크롤 바의 트랙(배경) */
+.modal-content::-webkit-scrollbar-track {
+  background: #e0f7fa; /* 스크롤 바 트랙 배경색 */
+  border-radius: 10px; /* 트랙의 둥근 모서리 */
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -127,7 +147,7 @@ export default defineComponent({
   align-items: center;
   justify-content: flex-start; /* 요소들을 왼쪽으로 정렬 */
   margin-bottom: 8px;
-  border: 2px solid #6B9E9B;
+  border: 2px solid #6b9e9b;
   border-radius: 10px;
   height: 45px;
   gap: 5px;
@@ -165,7 +185,7 @@ button {
 .divider {
   border: 0;
   height: 1px;
-  background: #6B9E9B; /* 구분선 색상 */
+  background: #6b9e9b; /* 구분선 색상 */
   margin-bottom: 15px;
 }
 </style>
