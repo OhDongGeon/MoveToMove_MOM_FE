@@ -1,5 +1,4 @@
 <template>
-  <!-- 모달 오버레이: 이 부분을 클릭하면 모달이 닫힘 -->
   <div class="modal-overlay" v-if="isVisible" @click.self="closeModal">
     <div class="modal-content" @click.stop>
       <header class="modal-header">
@@ -8,7 +7,6 @@
       </header>
       <hr class="divider" />
       <div class="modal-body">
-        <!-- 검색 입력 필드 -->
         <input
           type="text"
           v-model="searchQuery"
@@ -16,18 +14,24 @@
           class="search-input"
         />
 
-        <!-- 동적으로 변경되는 요소 목록 -->
         <div class="item-list">
           <div 
             v-for="item in filteredItems" 
             :key="item.id" 
             class="item" 
-            @click="selectItem(item)"
+            @click="toggleSelectItem(item)"
+            :class="{ 'selected-item': isSelected(item) }"
           >
+            <input type="checkbox" :checked="isSelected(item)" style="display: none;" />
             <img :src="item.avatar" alt="avatar" class="avatar" />
             {{ item.name }}
           </div>
         </div>
+      </div>
+
+      <!-- 확인 버튼 추가 -->
+      <div class="modal-footer">
+        <button @click="confirmSelection">확인</button>
       </div>
     </div>
   </div>
@@ -48,14 +52,19 @@ export default defineComponent({
     },
     items: {
       type: Array,
-      default: () => [],
+      default: () => [],  // items에 대한 기본값 설정
+    },
+    multiple: {  // 다중 선택 여부를 설정하는 props
+      type: Boolean,
+      default: false,
     },
   },
   emits: ["close", "confirm"],
   setup(props, { emit }) {
     const searchQuery = ref("");
+    const selectedItems = ref([]);
 
-    // 필터된 아이템 목록을 검색 쿼리에 따라 반환
+    // 검색어가 비어있거나 포함된 항목만 필터링
     const filteredItems = computed(() => {
       return searchQuery.value
         ? props.items.filter((item) =>
@@ -64,22 +73,42 @@ export default defineComponent({
         : props.items;
     });
 
-    // 모달을 닫는 메서드
     const closeModal = () => {
       emit("close");
     };
 
-    // 항목을 클릭했을 때 선택하고 모달을 닫는 메서드
-    const selectItem = (item) => {
-      emit("confirm", [item]);  // 선택된 항목을 배열로 부모에게 전달
-      closeModal();  // 모달 닫기
+    // 아이템 선택/해제 메서드
+    const toggleSelectItem = (item) => {
+      if (props.multiple) {  // 다중 선택인 경우
+        const index = selectedItems.value.findIndex((selected) => selected.id === item.id);
+        if (index > -1) {
+          selectedItems.value.splice(index, 1); // 이미 선택된 경우 해제
+        } else {
+          selectedItems.value.push(item); // 선택되지 않은 경우 선택
+        }
+      } else {  // 단일 선택인 경우
+        selectedItems.value = [item];
+      }
+    };
+
+    // 아이템이 선택되었는지 확인하는 메서드
+    const isSelected = (item) => {
+      return selectedItems.value.some((selected) => selected.id === item.id);
+    };
+
+    // 선택된 항목을 부모에게 전달
+    const confirmSelection = () => {
+      emit("confirm", selectedItems.value);
+      closeModal();
     };
 
     return {
       searchQuery,
       filteredItems,
       closeModal,
-      selectItem,
+      toggleSelectItem,
+      isSelected,
+      confirmSelection,
     };
   },
 });
@@ -96,7 +125,7 @@ export default defineComponent({
   border: 1px solid #ddd; /* 테두리 설정 */
   border-radius: 8px; /* 둥근 모서리 */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
-  z-index: 1000; /* 다른 요소보다 위에 표시 */
+  z-index: 9999; /* 다른 요소보다 위에 표시 */
   padding: 10px; /* 모달 안쪽 여백 */
   max-width: 400px; /* 최대 너비 설정 */
 }
@@ -152,15 +181,13 @@ export default defineComponent({
   height: 45px;
   gap: 5px;
   padding: 8px;
+  cursor: pointer; /* 클릭할 수 있도록 커서 추가 */
+}
+.item.selected-item {
+  background-color: #e0f7fa; /* 선택된 항목의 배경색 변경 */
 }
 .item input[type="checkbox"] {
-  margin: 0 10px; /* 체크박스와 다른 요소 간의 간격 */
-}
-.item label {
-  flex-grow: 1; /* 레이블이 남은 공간을 채우도록 */
-  display: flex;
-  align-items: center; /* 아이템 내 요소 수직 중앙 정렬 */
-  justify-content: flex-start; /* 아이템 내 요소 왼쪽 정렬 */
+  display: none; /* 체크박스 숨기기 */
 }
 .avatar {
   width: 30px;
