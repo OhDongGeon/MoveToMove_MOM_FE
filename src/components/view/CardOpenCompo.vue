@@ -33,7 +33,7 @@ export default {
 }
 .content-left {
   flex: 3;
-  padding: 20px;
+  padding: 10px;
 }
 .content-right {
   flex: 1;
