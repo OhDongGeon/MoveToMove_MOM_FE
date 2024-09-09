@@ -51,19 +51,10 @@
 
             <!-- 노드 추가를 위한 버튼 -->
             <div class="add-buttons">
-              <round-button-item
-                :width="100"
-                :height="30"
-                :borderRadius="5"
-                :fontSize="11"
-                :fontColor="'#112f4e'"
-                backgroundColor="etc"
-                @click="newFolder"
+              <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" :fontColor="'#112f4e'" backgroundColor="etc" @click="newFolder"
                 >폴더 생성 +</round-button-item
               >
-              <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage"
-                >프로젝트 생성 +</round-button-item
-              >
+              <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage">프로젝트 생성 +</round-button-item>
             </div>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -113,7 +104,6 @@ export default {
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
     const navigationStore = useNavigationStore(); // Pinia store 사용
-    const menuPosition = ref({ top: '0px', left: '0px' });
 
     // 프로젝트 아이디 변수
     const projectId = ref('');
@@ -166,15 +156,7 @@ export default {
     const showMenu = ref(false);
 
     // 케밥 메뉴 토글 메소드
-    const toggleMenu = (event) => {
-      const target = event.target;
-      const rect = target.getBoundingClientRect();
-
-      // 메뉴 위치를 클릭된 아이콘의 아래에 설정
-      menuPosition.value = {
-        top: `${rect.bottom + window.scrollY}px`, // 아이콘의 bottom + scroll 위치
-        left: `${rect.left + window.scrollX}px`, // 아이콘의 left + scroll 위치
-      };
+    const toggleMenu = () => {
       showMenu.value = !showMenu.value;
     };
 
@@ -271,12 +253,10 @@ export default {
             task_size: 'Extra Large',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -287,12 +267,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -303,12 +281,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -319,12 +295,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -335,12 +309,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -357,12 +329,10 @@ export default {
             task_size: 'Large',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -379,12 +349,10 @@ export default {
             task_size: 'Small',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
               },
             ],
           },
@@ -408,7 +376,6 @@ export default {
       showMenu,
       toggleMenu,
       closeMenu,
-      menuPosition,
       creatingFolder,
       newFolderName,
       newFolder,
