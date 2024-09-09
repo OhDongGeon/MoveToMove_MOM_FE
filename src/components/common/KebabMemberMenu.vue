@@ -1,21 +1,20 @@
 <template>
   <div class="kebab-menu" v-if="showMenu" ref="menu">
-    <div class="menu-item" v-if="isProjectLeader === 'Y'" @click="manage">
-      <font-awesome-icon :icon="['fas', 'gear']" class="icon" />
-      <span class="menu-text">프로젝트 관리</span>
+    <div class="menu-item" v-if="isProjectLeader === 'N'" @click="leader">
+      <font-awesome-icon :icon="['fas', 'crown']" class="icon" />
+      <span class="menu-text">팀장 권한 이전</span>
     </div>
     <div class="menu-item bracket" @click="leave">
-      <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="icon" />
-      <span class="menu-text">프로젝트 나가기</span>
+      <font-awesome-icon :icon="['fas', 'right-from-bracket']" />
+      <span class="menu-text">내보내기</span>
     </div>
 
-    <alert-ok-cancel :isVisible="isModalVisible" @close="closeModal" message="해당 프로젝트를 나가시겠습니까?" locationFlag="project"> </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isModalVisible" @close="closeModal" message="프로젝트에서 내보시내겠습니까?" locationFlag="member"> </alert-ok-cancel>
   </div>
 </template>
 
 <script>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
 import AlertOkCancel from './AlertOkCancel.vue';
 
 export default {
@@ -35,15 +34,13 @@ export default {
   },
   emits: ['closeMenu'],
   setup(props, { emit }) {
-    const router = useRouter();
     const isMenuReadyToClose = ref(false); // 외부 클릭 감지
     const menu = ref(null); // 메뉴 요소에 대한 참조
     const isModalVisible = ref(false); // 모달의 표시 여부
 
-    // 프로젝트 관리
-    const manage = () => {
-      // router.push({ name: '/move-to-move/manage-project', params: { projectId: props.projectId } }); // 페이지 이동
-      router.replace('/move-to-move/manage-project');
+    // 팀장 권한 이전
+    const leader = () => {
+      console.log('권한 이전');
     };
 
     // 프로젝트 나가기
@@ -94,7 +91,7 @@ export default {
       menu,
       isMenuReadyToClose,
       isModalVisible,
-      manage,
+      leader,
       leave,
       closeModal,
     };
@@ -106,12 +103,12 @@ export default {
 .kebab-menu {
   position: absolute;
   border-radius: 10px;
-  width: 220px;
+  width: 180px;
   background-color: #ffffff;
   border: 1.5px solid #6b9e9b;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  top: 164px;
-  right: 20px;
+  top: -3px;
+  left: 212px;
   z-index: 1000;
   padding: 10px 20px;
 }
@@ -121,7 +118,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 5px 0;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
@@ -134,6 +131,10 @@ export default {
   margin-left: 10px;
   text-align: right;
   flex-grow: 1;
+}
+
+.icon {
+  color: gold;
 }
 
 .bracket {

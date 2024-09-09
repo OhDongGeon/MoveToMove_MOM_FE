@@ -1,24 +1,23 @@
 <template>
   <div class="user-item">
-    <!-- Profile Image -->
+    <!-- 사용자 이미지 -->
     <ProfileImageItem :src="userData.profileUrl" :alt="userData.nickName" :width="40" :height="40" />
 
-    <!-- User Nickname -->
+    <!-- 닉네임 -->
     <span class="nickname">{{ userData.nickName }}</span>
+    <font-awesome-icon :icon="['fas', 'crown']" class="leader-icon" v-if="userData.leaderYN === 'Y'" />
+    <!-- <v-icon v-if="userData.leaderYN === 'Y'" class="leader-icon">mdi-crown</v-icon> -->
+    <!-- 매뉴 -->
+    <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" class="dots-menu" ref="dotsMenuIcon" v-if="userData.leaderYN === 'N'" @click="kebabMenu" />
 
-    <!-- Leader Icon -->
-    <v-icon v-if="userData.leaderYN === 'Y'" class="leader-icon">mdi-crown</v-icon>
-
-    <!-- Dots Menu (for example purposes) -->
-    <span class="dots-menu">⋮</span>
-    <!-- <kebab-menu></kebab-menu> -->
+    <KebabMemberMenu :showMenu="showMenu" @closeMenu="closeMenu" :isProjectLeader="userData.leaderYN" />
   </div>
 </template>
 
 <script>
-import { toRefs } from 'vue';
-// import KebabMenu from '../KebabMenu.vue';
+import { ref, toRefs } from 'vue';
 import ProfileImageItem from '../item/ProfileImageItem.vue';
+import KebabMemberMenu from '../KebabMemberMenu.vue';
 
 export default {
   name: 'UserItem',
@@ -30,14 +29,28 @@ export default {
   },
   components: {
     ProfileImageItem,
-    // KebabMenu,
+    KebabMemberMenu,
   },
   setup(props) {
     const { user } = toRefs(props);
+    const showMenu = ref(false);
+
+    // 케밥 메뉴
+    const kebabMenu = () => {
+      showMenu.value = !showMenu.value;
+    };
+
+    // 케밥 메뉴 닫기
+    const closeMenu = () => {
+      showMenu.value = false;
+    };
 
     // user를 userData라는 새로운 이름으로 반환
     return {
       userData: user,
+      showMenu,
+      kebabMenu,
+      closeMenu,
     };
   },
 };
@@ -48,12 +61,13 @@ export default {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
+  font-weight: bold;
+  position: relative;
 }
 
 .nickname {
   margin-left: 10px;
   font-size: 16px;
-  font-weight: bold;
 }
 
 .leader-icon {
