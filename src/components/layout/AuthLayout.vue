@@ -26,38 +26,20 @@
           <!-- 회원가입일 경우 닉네임 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="nickname">닉네임</label>
-            <input
-              type="text"
-              id="nickname"
-              placeholder="닉네임을 입력하세요"
-              v-model="nickname"
-              @blur="validateNickname"
-            />
+            <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" @blur="validateNickname" />
             <span v-if="nicknameError" class="error">{{ nicknameError }}</span>
           </div>
 
           <div class="form-group">
             <label for="password">비밀번호</label>
-            <input
-              type="password"
-              id="password"
-              placeholder="비밀번호를 입력하세요"
-              v-model="password"
-              @blur="validatePassword"
-            />
+            <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" @blur="validatePassword" />
             <span v-if="passwordError" class="error">{{ passwordError }}</span>
           </div>
 
           <!-- 회원가입일 경우 비밀번호 확인 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="confirm-password">비밀번호 확인</label>
-            <input
-              type="password"
-              id="confirm-password"
-              placeholder="다시 비밀번호를 입력하세요"
-              v-model="confirmPassword"
-              @blur="validateConfirmPassword"
-            />
+            <input type="password" id="confirm-password" placeholder="다시 비밀번호를 입력하세요" v-model="confirmPassword" @blur="validateConfirmPassword" />
             <span v-if="confirmPasswordError" class="error">{{ confirmPasswordError }}</span>
           </div>
 
@@ -249,7 +231,6 @@ const handleSubmit = async () => {
 
       // 응답 처리
       console.log('로그인 성공:', response.data);
-      alert('로그인에 성공했습니다.');
       router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
       navigationStore.setActiveItem('mypage');
     } catch (error) {

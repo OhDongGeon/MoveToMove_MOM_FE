@@ -3,7 +3,7 @@
     <div class="alert-content">
       <p class="alert-message">{{ message }}</p>
       <!-- 공용 버튼으로 수정 -->
-      <CommonButton @click="closeAlert" :width="100" :height="30" :fontSize="20" class="info-button" default-text="홈으로" />
+      <CommonButton @click="closeAlert" :width="100" :height="30" :fontSize="20" class="info-button" default-text="확인" />
     </div>
   </div>
 </template>
