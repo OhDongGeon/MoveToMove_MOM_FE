@@ -25,13 +25,7 @@
                   class="custom-node-class"
                 >
                   <template #iconActive>
-                    <img
-                      :src="require(`../../assets/folders24.svg`)"
-                      alt="Folder Icon"
-                      width="14"
-                      height="14"
-                      style="margin-right: 10px"
-                    />
+                    <img :src="require(`../../assets/folders24.svg`)" alt="Folder Icon" width="14" height="14" style="margin-right: 10px" />
                   </template>
                   <template #iconInactive>
                     <font-awesome-icon :icon="['fas', 'folder']" style="margin-right: 10px" />
@@ -41,13 +35,7 @@
                 <!-- 폴더 생성 시 보여줄 input 박스 -->
                 <template v-if="creatingFolder">
                   <div class="new-folder">
-                    <img
-                      src="../../assets/folders24.svg"
-                      alt="New Folder Icon"
-                      width="14"
-                      height="14"
-                      style="margin-right: 10px"
-                    />
+                    <img src="../../assets/folders24.svg" alt="New Folder Icon" width="14" height="14" style="margin-right: 10px" />
                     <input
                       type="text"
                       v-model="newFolderName"
@@ -62,19 +50,10 @@
 
               <!-- 노드 추가를 위한 버튼 -->
               <div class="add-buttons">
-                <round-button-item
-                  :width="100"
-                  :height="30"
-                  :borderRadius="5"
-                  :fontSize="11"
-                  :fontColor="'#112f4e'"
-                  backgroundColor="etc"
-                  @click="newFolder"
+                <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" :fontColor="'#112f4e'" backgroundColor="etc" @click="newFolder"
                   >폴더 생성 +</round-button-item
                 >
-                <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage"
-                  >프로젝트 생성 +</round-button-item
-                >
+                <round-button-item :width="100" :height="30" :borderRadius="5" :fontSize="11" @click="newProjectPage">프로젝트 생성 +</round-button-item>
               </div>
             </v-expansion-panel-text>
           </v-expansion-panel>
@@ -94,10 +73,14 @@
             <KebabProjectMenu :showMenu="showMenu" @closeMenu="closeMenu" isProjectLeader="Y" />
           </div>
           <div class="project-content">
-            <div v-for="col in columns" :key="col.id" class="column">
-              <!-- KanbanColumnCompo에 데이터 전달 -->
-              <kanban-column :id="col.id" :title="col.title" :cards="col.cards" />
-            </div>
+            <!-- 컬럼 기준으로 드래그 앤 드랍 가능하게 설정 -->
+            <draggable v-model="columns" group="columns" @end="onColumnDragEnd" class="columns-container" ghost-class="dragging" drag-class="drag-active">
+              <template v-slot:item="{ element: col }">
+                <div class="column">
+                  <kanban-column :id="col.id" :title="col.title" :cards="col.cards" />
+                </div>
+              </template>
+            </draggable>
           </div>
         </div>
       </main>
@@ -110,6 +93,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
 import Vue3Tree from 'vue3-tree';
+import draggable from 'vuedraggable'; // VueDraggableNext를 import
 import 'vue3-tree/dist/style.css';
 import KebabProjectMenu from '../common/KebabProjectMenu.vue';
 import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
@@ -122,6 +106,7 @@ export default {
     KanbanColumn,
     ProjectMemberCompo,
     KebabProjectMenu,
+    draggable, // 드래그 앤 드랍 컴포넌트 등록
   },
   setup() {
     // ref를 사용하여 상태를 정의합니다.
@@ -160,6 +145,12 @@ export default {
       console.log('projectName: ', projectName);
 
       console.log(node);
+    };
+
+    // 드래그 앤 드랍
+    const onDragEnd = (colId) => {
+      console.log('드래그 종료', colId);
+      // 드래그 종료 후 상태 업데이트 또는 API 호출 등 추가 처리
     };
 
     //칸반 카드 오픈
@@ -276,12 +267,10 @@ export default {
             task_size: 'Extra Large',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('니가필요해')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('이제알았어')}&background=random`,
               },
             ],
           },
@@ -292,12 +281,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('다거짓말')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('알러뷰')}&background=random`,
               },
             ],
           },
@@ -308,12 +295,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('사랑해')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('청소기')}&background=random`,
               },
             ],
           },
@@ -324,12 +309,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('안녕')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('친구들')}&background=random`,
               },
             ],
           },
@@ -340,12 +323,10 @@ export default {
             task_size: 'Medium',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('뽀')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('나나')}&background=random`,
               },
             ],
           },
@@ -362,12 +343,10 @@ export default {
             task_size: 'Large',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('뚜비')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('보라돌이')}&background=random`,
               },
             ],
           },
@@ -384,12 +363,10 @@ export default {
             task_size: 'Small',
             members: [
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/344b7017-c557-4624-9306-964c0bdcac2c.ea42ce6a.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('나나')}&background=random`,
               },
               {
-                avatar:
-                  'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/4b30c8ce-7d5e-4d29-8e6e-557173ad70f5.png',
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent('하하하')}&background=random`,
               },
             ],
           },
@@ -418,6 +395,7 @@ export default {
       newFolder,
       cancelNewFolder,
       addNewFolder,
+      onDragEnd, // 드래그 앤 드랍
     };
   },
 };
@@ -550,12 +528,32 @@ h1 {
 }
 
 .column {
-  flex: 0 0 32.7%;
+  flex: 0 0 32.7%; /* 고정된 크기로 각 컬럼을 배치 */
   height: 830px;
   margin-bottom: 3px;
   background: #ffffff;
-  /* border: 1px solid #6b9e9b; */
   border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #6b9e9b;
+}
+
+/* 드래그 중일 때 컬럼의 투명도를 조절하는 스타일 */
+.dragging {
+  opacity: 0.5; /* 원래 위치에 남아 있는 요소의 투명도 */
+}
+
+/* 실제로 드래그 중인 컬럼의 스타일 */
+.drag-active {
+  opacity: 100%; /* 드래그 중인 컬럼의 투명도를 80%로 설정 */
+  transform: scale(1.05); /* 드래그 중인 컬럼을 살짝 확대 */
+  border: 2px solid #ff3b3b; /* 드래그 중인 컬럼에 강조된 테두리 적용 */
+}
+
+.columns-container {
+  display: flex;
+  gap: 10px; /* 컬럼 간 간격 유지 */
+  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
+  width: 100%;
 }
 
 /* Deep Selector를 사용하여 Vue3Tree의 내부 스타일을 덮어씁니다. */
