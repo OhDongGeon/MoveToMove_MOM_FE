@@ -76,7 +76,7 @@
                         <!-- 컬럼 기준으로 드래그 앤 드랍 가능하게 설정 -->
                         <draggable v-model="columns" group="columns" @end="onDragEnd" class="columns-container" ghost-class="dragging" drag-class="drag-active">
                             <template v-slot:item="{ element: col }">
-                                <div class="column">
+                                <div class="column" :data-column-id="col.id">
                                     <kanban-column :id="col.id" :title="col.title" :cards="col.cards" />
                                 </div>
                             </template>

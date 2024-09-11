@@ -20,7 +20,7 @@
         <!-- 동적으로 backgroundColor 적용 -->
         <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
 
-        <draggable class="kanban-card-list" v-model="localCards" group="cards" @ended="onCardDrop">
+        <draggable class="kanban-card-list" v-model="localCards" group="cards" @end="onCardDrop">
             <template #item="{ element }">
                 <KanbanCard :card="element" @card-click="openKanbanCard" />
             </template>
@@ -35,6 +35,7 @@ import { computed, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import KanbanCard from './KanbanCardCompo.vue';
 import draggable from 'vuedraggable';
+// import axiosInstance from '@/api/axiosInstance.js';
 
 export default {
     components: {
@@ -81,10 +82,7 @@ export default {
             console.log(`칸반카드: ${card}`);
             navigationStore.setActiveItem('kanban');
             // 라우터를 사용해 'kanbanCard'로 카드 ID와 제목을 전달
-            router.push({
-                name: 'KanbanCardCompo',
-                query: { id: card, title: card.title },
-            });
+            router.push('/move-to-move/kanban-card');
         };
 
         // 칸반 카드 추가 (제목만 입력)
@@ -131,10 +129,33 @@ export default {
             }
         };
 
-        // 카드 드래그 앤 드롭
+        // 카드 드롭
         const onCardDrop = (event) => {
+            const id = props.id;
+            console.log(id);
+
+            const toColumnId = event.to.closest('.column').dataset.columnId; // 이동 후 컬럼 ID
+            console.log('to Column ID:', toColumnId);
+
+            const fromIndex = event.oldIndex; // 드래그 시작 위치
+            const toIndex = event.newIndex; // 드롭 위치
+            console.log(fromIndex);
+            console.log(toIndex);
             console.log('카드 드래그 앤 드롭', event);
+
+            // const form = { kanbanColumnId: toColumnId, cardSeq: toIndex };
+
+            // cardDragAndDrop(form);
         };
+
+        // // 칸반 카드 드래그 앤 드롭
+        // const cardDragAndDrop = async (form) => {
+        //     try {
+        //         await axiosInstance.put(`/api/kanban-cards/${props.id}/locations`, form);
+        //     } catch (error) {
+        //         console.error(error);
+        //     }
+        // };
 
         return {
             localCards, // 로컬 상태로 복사한 cards
