@@ -35,8 +35,13 @@ export default {
       };
     });
 
+    const computedAlt = computed(() => {
+      return props.alt || 'Default Alt Text';
+    });
+
     return {
       avatarStyle,
+      computedAlt,
       ...toRefs(props), // props를 반환하여 템플릿에서 직접 사용 가능하게 함
     };
   },

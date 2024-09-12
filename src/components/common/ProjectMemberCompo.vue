@@ -1,32 +1,27 @@
 <template>
-  <v-expansion-panels v-model="members" multiple>
-    <v-expansion-panel class="member-contains">
-      <v-expansion-panel-title>
-        <div class="header">
-          <span>참여자 ({{ localUsers.length }})</span>
-        </div>
-      </v-expansion-panel-title>
-      <v-expansion-panel-text>
-        <div class="user-list">
-          <UserItem v-for="(user, index) in localUsers" :key="index" :user="user" />
-        </div>
-        <!-- 초대 버튼 -->
-        <div class="invite-button">
-          <round-button-item
-            type="button"
-            :width="180"
-            :height="30"
-            :borderRadius="5"
-            :fontSize="13"
-            @click.stop="addMemberInvite"
-          >
-            참여자 초대 +
-          </round-button-item>
-        </div>
-      </v-expansion-panel-text>
-    </v-expansion-panel>
-  </v-expansion-panels>
-  <project-member-invite :isInviteModalOpen="isInviteModalOpen" @closeModal="closeModal" />
+  <div>
+    <v-expansion-panels v-model="members" multiple>
+      <v-expansion-panel class="member-contains">
+        <v-expansion-panel-title>
+          <div class="header">
+            <span>참여자 ({{ localUsers.length }})</span>
+          </div>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <div class="user-list">
+            <UserItem v-for="(user, index) in localUsers" :key="index" :user="user" />
+          </div>
+          <!-- 초대 버튼 -->
+          <div class="invite-button">
+            <round-button-item type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite">
+              참여자 초대 +
+            </round-button-item>
+          </div>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <project-member-invite :isInviteModalOpen="isInviteModalOpen" @closeModal="closeModal" />
+  </div>
 </template>
 
 <script>
