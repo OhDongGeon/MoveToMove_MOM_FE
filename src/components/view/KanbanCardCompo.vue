@@ -2,7 +2,7 @@
 <template>
   <div class="contains" @click="cardClick">
     <div class="card-member">
-      <ProfileImage v-for="(member, index) in card.members" :key="index" :profileUrl="member.profileUrl" :alt="member.nickName + ' Avatar'" :width="25" :height="25" />
+      <ProfileImage v-for="(member, index) in card.members" :key="index" :src="member.profileUrl" :alt="member.nickName + ' Avatar'" :width="25" :height="25" />
     </div>
     <div class="card-info">
       <div class="card-title">{{ card.title }}</div>

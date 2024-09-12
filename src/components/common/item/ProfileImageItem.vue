@@ -1,5 +1,5 @@
 <template>
-  <img :src="profileUrl" :alt="computedAlt" :style="avatarStyle" class="avatar" />
+  <img :src="src" :alt="computedAlt" :style="avatarStyle" class="avatar" />
 </template>
 
 <script>
@@ -7,7 +7,7 @@ import { computed, toRefs } from 'vue';
 
 export default {
   props: {
-    profileUrl: {
+    src: {
       type: String,
       required: true,
     },
