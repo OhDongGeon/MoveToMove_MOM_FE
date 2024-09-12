@@ -1,10 +1,5 @@
 <template>
-  <img
-    :src="src"
-    :alt="alt"
-    :style="avatarStyle"
-    class="avatar"
-  />
+  <img :src="src" :alt="computedAlt" :style="avatarStyle" class="avatar" />
 </template>
 
 <script>
@@ -30,7 +25,6 @@ export default {
     },
   },
   setup(props) {
-    // props를 쉽게 사용하기 위해 구조 분해(destructuring)
     const { width, height } = toRefs(props);
 
     // width와 height를 기반으로 아바타 스타일을 계산
@@ -43,7 +37,7 @@ export default {
 
     return {
       avatarStyle,
-      ...toRefs(props),  // props를 반환하여 템플릿에서 직접 사용 가능하게 함
+      ...toRefs(props), // props를 반환하여 템플릿에서 직접 사용 가능하게 함
     };
   },
 };
