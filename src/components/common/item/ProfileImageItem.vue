@@ -25,7 +25,7 @@ export default {
     },
   },
   setup(props) {
-    const { width, height, alt } = toRefs(props); // profileUrl은 따로 뽑지 않음
+    const { width, height } = toRefs(props);
 
     // width와 height를 기반으로 아바타 스타일을 계산
     const avatarStyle = computed(() => {
@@ -35,13 +35,9 @@ export default {
       };
     });
 
-    // alt가 빈 문자열일 경우 기본값 제공
-    const computedAlt = computed(() => alt.value || 'User Avatar');
-
     return {
       avatarStyle,
-      computedAlt,
-      ...toRefs(props), // 여기에서 profileUrl을 포함한 모든 props 반환
+      ...toRefs(props), // props를 반환하여 템플릿에서 직접 사용 가능하게 함
     };
   },
 };

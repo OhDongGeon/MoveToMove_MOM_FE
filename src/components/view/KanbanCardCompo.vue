@@ -1,4 +1,3 @@
-카드 컴포
 <template>
   <div class="contains" @click="cardClick">
     <div class="card-member">
