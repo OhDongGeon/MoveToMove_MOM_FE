@@ -1,7 +1,7 @@
 // src/stores/kanbanCardStore.js
+import axiosInstance from '@/api/axiosInstance'; // 인증이 설정된 axios 인스턴스 가져오기
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import axiosInstance from '@/api/axiosInstance'; // 인증이 설정된 axios 인스턴스 가져오기
 
 export const useKanbanCardStore = defineStore('kanbanCard', () => {
   const cards = ref([]);
@@ -28,7 +28,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       const response = await axiosInstance.get(`/api/kanban-cards/${cardId}/details`);
       const cardData = response.data;
 
-      console.log('Loaded card details:', cardData); // 디버깅용 로그 추가
+      // console.log('Loaded card details:', cardData); // 디버깅용 로그 추가
 
       return {
         id: cardData.kanbanColumnInCard.kanbanCardId,
@@ -40,11 +40,13 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         startAt: cardData.kanbanColumnInCard.startAt,
         endAt: cardData.kanbanColumnInCard.endAt,
         createdAt: cardData.kanbanColumnInCard.createdAt,
+
         members: cardData.cardMemberList.map((member) => ({
           memberId: member.memberId,
           nickName: member.nickName,
           profileUrl: member.profileUrl,
         })),
+
         comments: cardData.cardCommentList || [],
       };
     } catch (error) {
