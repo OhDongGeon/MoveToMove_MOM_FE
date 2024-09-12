@@ -19,15 +19,14 @@
     </div>
 
     <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
-
     <draggable class="kanban-card-list" :list="localCards" group="cards" @end="onCardDrop" itemKey="id">
       <template #item="{ element: card }">
         <KanbanCard :card="card" @card-click="openKanbanCard" />
       </template>
     </draggable>
-
     <!-- 칸반 카드 오픈 슬라이드 -->
-    <KanbanCardOpen :isVisible="isCardOpen" :card="selectedCard" @close="closeKanbanCard" />
+    <KanbanCardOpen :isVisible="isKanbanCardOpen" :card="selectedCard" @close="closeKanbanCard" />
+    <div v-if="isKanbanCardOpen" class="overlay"></div>
   </div>
 </template>
 
@@ -47,6 +46,7 @@ export default {
     draggable,
   },
   props: {
+    isCardOpen: Boolean,
     id: {
       type: Number,
       required: true,
@@ -64,6 +64,7 @@ export default {
       default: '#6b9e9b',
     },
   },
+  emits: ['open-card', 'close-card'],
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
     // const router = useRouter();
@@ -77,8 +78,7 @@ export default {
       const processedCards = await Promise.all(
         props.cards.map(async (card) => {
           const detailedCard = await kanbanCardStore.loadCardDetails(card.id); // 각 카드의 상세 정보를 로드
-
-          // console.log(detailedCard);
+          console.log('데이터', detailedCard);
           return detailedCard; // 상세 정보가 담긴 카드 객체 반환
         }),
       );
@@ -99,7 +99,7 @@ export default {
     });
 
     // KanbanCardOpenCompo와 관련된 상태
-    const isCardOpen = ref(false); // 모달의 가시성 상태
+    const isKanbanCardOpen = ref(false); // 모달의 가시성 상태
     const selectedCard = ref(null); // 선택한 카드
 
     const openKanbanCard = (card) => {
@@ -110,14 +110,17 @@ export default {
       //   name: 'KanbanCardCompo',
       //   query: { id: card.id, title: card.title },
       // });
+      console.log(card);
 
       selectedCard.value = card;
-      isCardOpen.value = true;
+      isKanbanCardOpen.value = true;
+      emit('open-card'); // 부모에게 슬라이드가 열렸음을 알림
     };
 
     const closeKanbanCard = () => {
-      isCardOpen.value = false;
+      isKanbanCardOpen.value = false;
       selectedCard.value = null;
+      emit('close-card'); // 부모에게 슬라이드가 닫혔음을 알림
     };
 
     const startEditing = async () => {
@@ -195,7 +198,7 @@ export default {
     };
 
     return {
-      isCardOpen,
+      isKanbanCardOpen,
       selectedCard,
       closeKanbanCard,
       localCards,
@@ -214,6 +217,17 @@ export default {
 </script>
 
 <style scoped>
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0); /* 투명 오버레이 */
+  z-index: 999; /* 슬라이드보다 낮고, 부모 상호작용 차단 */
+  pointer-events: all; /* 상호작용 차단 */
+}
+
 .kanban-column {
   display: flex;
   margin-top: 20px;

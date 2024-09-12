@@ -70,6 +70,7 @@
               ghost-class="dragging"
               drag-class="drag-active"
               itemKey="id"
+              :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
                 <div class="column">
@@ -77,7 +78,10 @@
                     :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
                     :cards="filteredCardsByColumn(col.kanbanColumnId)"
+                    :isCardOpen="isCardOpen"
                     @card-move="onCardMove"
+                    @open-card="openCard"
+                    @close-card="closeCard"
                   />
                 </div>
               </template>
@@ -293,6 +297,19 @@ export default {
       return cards.value.filter((card) => card.columnId === columnId);
     };
 
+    // 카드 열림 확인
+    const isCardOpen = ref(false);
+
+    // 카드가 열릴 때 호출
+    const openCard = () => {
+      isCardOpen.value = true;
+    };
+
+    // 카드가 닫힐 때 호출
+    const closeCard = () => {
+      isCardOpen.value = false;
+    };
+
     return {
       panel,
       folderStore, // Pinia 상태를 바로 사용
@@ -319,6 +336,9 @@ export default {
       cards,
       filteredCardsByColumn,
       onCardMove,
+      isCardOpen,
+      openCard,
+      closeCard,
     };
   },
 };
