@@ -137,10 +137,10 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
 import CardCommentForm from '@/components/common/CardCommentForm.vue';
 import CardComments from '@/components/common/CardComments.vue';
+import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
+import { ref } from 'vue';
 
 export default {
   components: {

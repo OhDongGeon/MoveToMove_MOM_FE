@@ -8,27 +8,14 @@
             <!-- 여기서 panel-flex 클래스로 flex 설정 -->
             <v-expansion-panel-title class="folder-title">프로젝트</v-expansion-panel-title>
             <v-expansion-panel-text class="panel-text">
-              <!-- treeData가 유효할 때만 Vue3Tree를 렌더링 -->
               <div class="tree-container">
                 <!-- 트리뷰에 draggable을 적용 -->
                 <draggable v-model="folderStore.folderData" :move="checkMove" group="folders" item-key="id" @end="onDragEnd">
                   <template #item="{ element }">
-                    <v-treeview
-                      :items="[element]"
-                      activatable
-                      open-on-click
-                      item-key="id"
-                      item-text="title"
-                      item-children="children"
-                      v-model:open="open"
-                      v-model:active="active"
-                      transition
-                      @click:open="onNodeClick"
-                    >
+                    <v-treeview :items="[element]" activatable open-on-click item-key="id" item-text="title" item-children="children" v-model="open" transition>
                       <!-- 폴더 아이콘 표시 -->
                       <template v-slot:prepend="{ item }">
-                        <v-icon v-if="item.children">mdi-folder</v-icon>
-                        <v-icon v-else>mdi-file</v-icon>
+                        <v-icon @click="onNodeClick(item)">{{ item.children ? 'mdi-folder' : 'mdi-file' }}</v-icon>
                       </template>
                     </v-treeview>
                   </template>
@@ -65,7 +52,7 @@
         <project-member-compo v-if="projectId" class="member"></project-member-compo>
       </aside>
       <main class="main-content">
-        <div v-if="projectId" class="kanbanborad">
+        <div v-if="projectId">
           <div class="project-title">
             <div class="project-name">
               <label>{{ projectName }}</label>
@@ -127,12 +114,19 @@ export default {
     VTreeview,
   },
   setup() {
+    const router = useRouter();
+
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
     const navigationStore = useNavigationStore(); // Pinia store 사용
     const kanbanColumnStore = useKanbanColumnStore(); // Pinia store 사용
     const kanbanCardStore = useKanbanCardStore();
     const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
+
+    // 컴포넌트에서 스토어 데이터를 computed로 가져오기
+    const columns = computed(() => kanbanColumnStore.columns);
+    const cards = computed(() => kanbanCardStore.cards);
+
     const open = ref([]);
     const active = ref([]);
 
@@ -140,38 +134,24 @@ export default {
     const folderData = ref([]);
 
     // 프로젝트 아이디 변수
-    const projectId = ref('1');
+    const projectId = ref(null);
 
     // 프로젝트 리더 유무 변수
-    const isProjectLeader = ref('');
+    const isProjectLeader = ref(false);
 
     // 프로젝트 명
     const projectName = ref('');
 
-    const router = useRouter();
-
     // 화면 열렸을 때 onMounted
     onMounted(async () => {
       try {
-        // 컬럼과 카드 데이터 로드
-        await kanbanColumnStore.loadColumns(projectId.value);
-        await kanbanCardStore.loadAllCards(projectId.value);
-        console.log('Columns loaded:', kanbanColumnStore.columns);
-        console.log('Cards loaded:', kanbanCardStore.cards);
-
         // 폴더 데이터 로드
         await folderStore.fetchFolders(); // 데이터를 Pinia에 저장
-        console.log('Updated folderData:', folderStore.folderData);
         folderData.value = folderStore.folderData; // Pinia store의 folderData를 ref에 저장
-        console.log(folderData.value);
       } catch (error) {
         console.error('데이터 로드 중 오류 발생', error);
       }
     });
-
-    // 컴포넌트에서 스토어 데이터를 computed로 가져오기
-    const columns = computed(() => kanbanColumnStore.columns);
-    const cards = computed(() => kanbanCardStore.cards);
 
     // checkMove 함수 정의
     const checkMove = (evt) => {
@@ -186,10 +166,28 @@ export default {
 
     // 폴더구조에서 파일 클릭 시
     // 노드 클릭 이벤트 처리
-    const onNodeClick = (node) => {
+    const onNodeClick = async (node) => {
       // 파일인지 확인 (children이 없으면 파일)
-      if (!node.children) {
+      if (!node.children || node.children.length === 0) {
         console.log('파일(프로젝트) 정보:', node);
+
+        console.log('node.id: ', node.id);
+
+        projectId.value = node.id;
+        projectName.value = node.title;
+        isProjectLeader.value = node.projectLeaderYN;
+
+        try {
+          // 컬럼과 카드 데이터 로드
+          await kanbanColumnStore.loadColumns(projectId.value);
+          await kanbanCardStore.loadAllCards(projectId.value);
+
+          // 컬럼과 카드 데이터를 로그로 출력
+          // console.log('로드된 컬럼 데이터:', columns.value);
+          // console.log('로드된 카드 데이터:', cards.value);
+        } catch (e) {
+          console.error('파일(프로젝트) 정보 로드 실패:', e);
+        }
       }
     };
 
@@ -331,7 +329,7 @@ export default {
 .mypage {
   background-color: #f0f8ff;
   border-radius: 8px;
-  height: 970px; /* 부모 컨테이너의 고정된 높이를 픽셀 값으로 설정 */
+  height: 100%; /* 부모 컨테이너의 고정된 높이를 픽셀 값으로 설정 */
   display: flex;
   flex-direction: column; /* 칸반보드 제목과 컨텐츠를 세로로 배치 */
 }
@@ -349,7 +347,8 @@ h1 {
   margin-top: 20px;
   width: 100%;
   flex-grow: 1; /* sub-content가 남은 공간을 차지하도록 설정 */
-  height: calc(100% - 20px); /* 패딩과 상단 여백을 고려한 높이 설정 */
+  /* height: calc(100% - 20px); 패딩과 상단 여백을 고려한 높이 설정 */
+  height: 870px;
 }
 
 /* 사이드바 스타일 */
@@ -358,7 +357,7 @@ h1 {
   background-color: #ffffff; /* 연한 배경색 */
   border-radius: 10px;
   border: 1.5px solid #6b9e9b;
-  height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
+  height: 98%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
 }
 
@@ -413,7 +412,7 @@ h1 {
   background-color: #ffffff; /* 흰색 배경색 */
   border-radius: 10px;
   border: 1.5px solid #6b9e9b;
-  height: 100%; /* 부모 폼 높이에 맞게 100%로 설정 */
+  height: 98%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
 }
 
@@ -448,20 +447,14 @@ h1 {
 
 .project-content {
   display: flex;
-  overflow-x: auto; /* 넘치는 경우 가로 스크롤 생성 */
-  gap: 10px; /* 컬럼들 사이의 간격 */
+  overflow-y: auto; /* 넘치는 경우 가로 스크롤 생성 */
   margin-top: 10px;
-  height: 92%;
-
-  /* 웹킷 기반 브라우저 (크롬, 사파리 등)에서 스크롤바 크기 조정 */
-  ::-webkit-scrollbar {
-    width: 0px;
-  }
+  height: 100%;
 }
 
 .column {
   flex: 0 0 32.7%; /* 고정된 크기로 각 컬럼을 배치 */
-  height: 830px;
+  height: 815px;
   margin-bottom: 3px;
   background: #ffffff;
   border-radius: 10px;
@@ -486,6 +479,8 @@ h1 {
   gap: 10px; /* 컬럼 간 간격 유지 */
   overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
   width: 100%;
+  height: 835px;
+  padding: 0;
 }
 
 /* Deep Selector를 사용하여 Vue3Tree의 내부 스타일을 덮어씁니다. */
@@ -498,7 +493,7 @@ h1 {
 }
 
 .member {
-  min-height: 390px;
+  height: 390px;
   margin-bottom: 3px;
 }
 

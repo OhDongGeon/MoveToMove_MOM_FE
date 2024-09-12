@@ -34,11 +34,11 @@
 <script>
 // import { useNavigationStore } from '@/stores/navigationStore';
 // import { useRouter } from 'vue-router';
-import { computed, nextTick, ref, onMounted } from 'vue';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
-import draggable from 'vuedraggable';
 
 export default {
   components: {
@@ -78,7 +78,7 @@ export default {
         props.cards.map(async (card) => {
           const detailedCard = await kanbanCardStore.loadCardDetails(card.id); // 각 카드의 상세 정보를 로드
 
-          console.log(detailedCard);
+          // console.log(detailedCard);
           return detailedCard; // 상세 정보가 담긴 카드 객체 반환
         }),
       );
@@ -103,8 +103,8 @@ export default {
     const selectedCard = ref(null); // 선택한 카드
 
     const openKanbanCard = (card) => {
-      console.log(`칸반카드ID: ${card.id}`);
-      console.log(`칸반카드: ${card}`);
+      // console.log(`칸반카드ID: ${card.id}`);
+      // console.log(`칸반카드: ${card}`);
       // navigationStore.setActiveItem('kanban');
       // router.push({
       //   name: 'KanbanCardCompo',
