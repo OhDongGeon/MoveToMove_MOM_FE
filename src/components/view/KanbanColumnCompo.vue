@@ -34,6 +34,7 @@ import { useRouter } from 'vue-router';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import KanbanCard from './KanbanCardCompo.vue';
 import draggable from 'vuedraggable';
+// import axiosInstance from '@/api/axiosInstance';
 
 export default {
   components: {
@@ -130,13 +131,30 @@ export default {
       }
     };
 
-    const onCardDrop = (event) => {
+    const onCardDrop = async (event) => {
+      // async를 추가하여 비동기 함수로 선언
       const { oldIndex, newIndex } = event;
       const movedCard = localCards.value[oldIndex];
 
       if (oldIndex !== newIndex) {
+        // 로컬에서 카드 순서 변경
         localCards.value.splice(oldIndex, 1);
         localCards.value.splice(newIndex, 0, movedCard);
+
+        // try {
+        //   // 서버에 순서 변경 요청 보내기 (비동기 작업)
+        //   await axiosInstance.put('/api/kanban-cards/order', {  // await로 비동기 작업 완료 대기
+        //     cardId: movedCard.id,
+        //     oldIndex: oldIndex,
+        //     newIndex: newIndex,
+        //   });
+        //   console.log('서버에 카드 순서가 성공적으로 업데이트되었습니다.');
+        // } catch (error) {
+        //   console.error('카드 순서 업데이트 실패:', error);
+        //   // 오류 발생 시, 원래 상태로 복구
+        //   localCards.value.splice(newIndex, 1);
+        //   localCards.value.splice(oldIndex, 0, movedCard);
+        // }
         emit('card-move', props.id, props.id, movedCard.id);
       }
     };

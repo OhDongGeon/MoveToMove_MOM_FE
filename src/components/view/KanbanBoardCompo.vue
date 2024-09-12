@@ -115,10 +115,13 @@ export default {
     const navigationStore = useNavigationStore(); // Pinia store 사용
     const kanbanColumnStore = useKanbanColumnStore(); // Pinia store 사용
     const kanbanCardStore = useKanbanCardStore();
+
     // 컬럼과 카드 데이터 로드
     onMounted(async () => {
       await kanbanColumnStore.loadColumns(projectId.value);
       await kanbanCardStore.loadAllCards(projectId.value);
+      console.log('Columns loaded:', kanbanColumnStore.columns);
+      console.log('Cards loaded:', kanbanCardStore.cards);
     });
     // 컴포넌트에서 스토어 데이터를 computed로 가져오기
     const columns = computed(() => kanbanColumnStore.columns);
@@ -243,14 +246,17 @@ export default {
      * onColumnDragEnd
      */
     // 컬럼 드래그 앤 드롭 핸들러
-    const onColumnDragEnd = (event) => {
-      const { oldIndex, newIndex } = event;
-      kanbanColumnStore.moveColumn(oldIndex, newIndex); // 컬럼 이동 처리
+    const onColumnDragEnd = ({ oldIndex, newIndex }) => {
+      if (oldIndex !== newIndex) {
+        kanbanColumnStore.moveColumn(oldIndex, newIndex); // 컬럼 이동 후 상태 저장
+      }
     };
+
     // 컬럼별로 필터링된 카드 반환 함수
     const filteredCardsByColumn = (columnId) => {
       return cards.value.filter((card) => card.columnId === columnId);
     };
+
     /* 데이터 바인딩 */
     // 폴더 데이터
     const data = ref([
