@@ -5,9 +5,8 @@
         <font-awesome-icon :icon="['fas', 'xmark']" class="close-icon" @click="closeSlide" />
 
         <div class="title-section">
-          <!-- 제목 수정 모드에 따른 제목과 입력 필드 전환 -->
           <template v-if="isEditingTitle">
-            <input v-model="newTitle" class="card-title card-title-input" />
+            <input v-model="modifyTitle" class="card-title card-title-input" />
             <div class="edit-card-button-group">
               <round-button-item :width="50" :height="28" :borderRadius="5" :fontSize="12" @click="saveTitle">저장</round-button-item>
               <round-button-item :width="50" :height="28" :borderRadius="5" :fontSize="12" :backgroundColor="'cancel'" @click="cancelEdit"
@@ -15,18 +14,16 @@
               >
             </div>
           </template>
-
           <template v-else>
-            <!-- 수정 모드가 아닐 때 제목 텍스트 -->
-            <h2 class="card-title">{{ cardTitle }}</h2>
+            <h2 class="card-title">{{ card.title }}</h2>
             <button class="edit-card-title" @click="editTitle">제목 수정</button>
           </template>
         </div>
 
         <div class="info-section">
           <span class="status-badge">진행중</span>
-          <span class="nickname">닉네임</span>
-          <span class="date">2일전</span>
+          <!-- <span class="nickname">닉네임</span> -->
+          <span class="title-date">2일전</span>
         </div>
       </div>
 
@@ -39,11 +36,11 @@
             <div class="card-header">
               <button class="edit-card-content">수정</button>
             </div>
-            <p></p>
+            <p>{{ card.content }}</p>
           </div>
 
           <!-- 코멘트 컴포넌트 -->
-          <CardComments />
+          <CardComments :commentList="card.comments" />
 
           <!-- 코멘트 작성 컴포넌트 -->
           <CardCommentForm />
@@ -61,9 +58,9 @@
                 <div class="division-member">
                   <span class="division-name-member">담당자</span>
                   <div class="assignee-list">
-                    <div class="assignee-info" v-for="assignee in assignee.selectedAssignees" :key="assignee.name">
-                      <img :src="assignee.avatar" alt="Avatar" class="avatar" />
-                      {{ assignee.name }}
+                    <div class="assignee-info" v-for="member in card.members" :key="member.memberId">
+                      <ProfileImage :src="member.profileUrl" :alt="member.nickName + ' Avatar'" :width="25" :height="25" />
+                      {{ member.nickName }}
                     </div>
                   </div>
                 </div>
@@ -84,9 +81,7 @@
             <div class="modal-trigger" @click="openModal('우선순위 선택', priorities, 'priorityModal', false)">
               <div class="division">
                 <span class="division-name">우선순위</span>
-                <span class="priority">
-                  {{ assignee.priority }}
-                </span>
+                <span class="priority" :style="priorityStyle">{{ priorityText }}</span>
               </div>
               <CardCommonModal
                 v-show="currentModal === 'priorityModal'"
@@ -104,7 +99,7 @@
             <div class="modal-trigger" @click="openModal('작업크기 선택', sizes, 'sizeModal', false)">
               <div class="division">
                 <span class="division-name">작업크기</span>
-                <span class="size">{{ assignee.size }}</span>
+                <span class="size" :style="taskSizeStyle">{{ taskSizeText }}</span>
               </div>
               <CardCommonModal
                 :isVisible="currentModal === 'sizeModal'"
@@ -119,11 +114,11 @@
 
             <div class="division">
               <span class="division-name">시작날짜</span>
-              <input type="date" v-model="assignee.startDate" class="date-input" />
+              <input type="date" v-model="startAtFormat" class="date-input" />
             </div>
             <div class="division">
               <span class="division-name">종료날짜</span>
-              <input type="date" v-model="assignee.endDate" class="date-input" />
+              <input type="date" v-model="endAtFormat" class="date-input" />
             </div>
           </div>
 
@@ -137,62 +132,167 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue';
+import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
 import CardCommentForm from '@/components/common/CardCommentForm.vue';
 import CardComments from '@/components/common/CardComments.vue';
-import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
-import { ref } from 'vue';
+import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 
 export default {
   components: {
     CardCommonModal,
     CardCommentForm,
     CardComments,
+    ProfileImage,
   },
   props: {
     isVisible: {
       type: Boolean,
       default: false,
     },
+    card: {
+      type: Object,
+      required: true, // 선택된 카드 정보를 받는 prop
+    },
   },
 
   emits: ['closeMenu'],
 
-  setup(_, { emit }) {
+  setup(props, { emit }) {
+    // 닫기
+    const closeSlide = () => {
+      emit('close');
+    };
+
+    // 조회
+    // priority
+    const priorityText = computed(() => {
+      switch (props.card.priority) {
+        case '3':
+          return '낮음';
+        case '2':
+          return '중간';
+        case '1':
+          return '높음';
+        case '0':
+          return '긴급';
+        default:
+          return '알 수 없음';
+      }
+    });
+
+    const priorityStyle = computed(() => {
+      let backgroundColor;
+      let color = '#000000'; // 기본 텍스트 색상
+      switch (props.card.priority) {
+        case '3': // 낮음
+          backgroundColor = '#9BF09B';
+          break;
+        case '2': // 중간
+          backgroundColor = '#9BB8F0';
+          break;
+        case '1': // 높음
+          backgroundColor = '#E99BF0';
+          break;
+        case '0': // 긴급
+          backgroundColor = '#E45959';
+          color = '#ffffff'; // 긴급일 때 흰색 텍스트
+          break;
+        default:
+          backgroundColor = '#e0e0e0'; // 기본 색상
+      }
+      return { backgroundColor, color };
+    });
+
+    // task_size
+    const taskSizeText = computed(() => {
+      switch (props.card.task_size) {
+        case '0':
+          return 'Small';
+        case '1':
+          return 'Medium';
+        case '2':
+          return 'Large';
+        case '3':
+          return 'Extra Large';
+        default:
+          return 'Unknown';
+      }
+    });
+
+    const taskSizeStyle = computed(() => {
+      let backgroundColor;
+      switch (props.card.task_size) {
+        case '0': // Small
+          backgroundColor = '#CEF2CE';
+          break;
+        case '1': // Medium
+          backgroundColor = '#CEE0F2';
+          break;
+        case '2': // Large
+          backgroundColor = '#E0CEF2';
+          break;
+        case '3': // Extra Large
+          backgroundColor = '#F2CECE';
+          break;
+        default:
+          backgroundColor = '#e0e0e0'; // 기본 색상
+      }
+      return { backgroundColor };
+    });
+
+    // 시작 날짜
+    const startAtFormat = computed({
+      get() {
+        return props.card.startAt.split('T')[0]; // "T"를 기준으로 문자열을 나눠서 날짜 부분만 가져옴
+      },
+      // set(newValue) {
+      //   // 사용자가 날짜를 변경하면 기존의 "T00:00:00"을 추가하여 처리
+      //   emit('update:startAt', `${newValue}T00:00:00`);
+      // },
+    });
+
+    // 종료 날짜
+    const endAtFormat = computed({
+      get() {
+        return props.card.startAt.split('T')[0]; // "T"를 기준으로 문자열을 나눠서 날짜 부분만 가져옴
+      },
+    });
+
+    // 저장 및 수정
+    const modifyTitle = ref('');
+    const isEditingTitle = ref(false);
+
+    // 제목 수정
+    const editTitle = () => {
+      modifyTitle.value = props.card.title;
+      isEditingTitle.value = true;
+    };
+
+    // 제목 저장
+    const saveTitle = () => {
+      // props.card.title = newTitle.value;
+      isEditingTitle.value = false;
+    };
+
+    // 제목 취소
+    const cancelEdit = () => {
+      modifyTitle.value = props.card.title;
+      isEditingTitle.value = false;
+    };
+
+    const defaultAvatar = 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/40066ef4-ccce-424b-9ac1-d89ab31a1650.ea42ce6a.png';
     const modalTitle = ref('');
     const modalItems = ref([]);
     const currentModal = ref('');
     const isMultiple = ref(false); // 다중 선택 여부를 위한 변수 추가
 
-    const cardTitle = ref('칸반카드 제목'); // 제목 상태
-    const newTitle = ref(cardTitle.value); // 입력 중일 때 사용되는 상태
-    const isEditingTitle = ref(false); // 제목 수정 모드 상태
-
-    // 슬라이드를 닫는 로직
-    const closeSlide = () => {
-      // 부모에게 'close' 이벤트를 보냄
-      emit('close');
-    };
-
-    // 제목 수정 모드로 전환
-    const editTitle = () => {
-      newTitle.value = cardTitle.value;
-      isEditingTitle.value = true;
-    };
-
-    // 제목 저장 및 수정 모드 종료
-    const saveTitle = () => {
-      cardTitle.value = newTitle.value;
-      isEditingTitle.value = false;
-    };
-
-    // 수정 취소 및 원래 제목 복구
-    const cancelEdit = () => {
-      newTitle.value = cardTitle.value; // 수정 중인 제목을 초기화
-      isEditingTitle.value = false;
-    };
-
     const assignee = ref({
       selectedAssignees: [
+        {
+          name: '팬텀',
+          avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg',
+        },
         {
           name: '팬텀',
           avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg',
@@ -264,6 +364,18 @@ export default {
     };
 
     return {
+      priorityText,
+      priorityStyle,
+      taskSizeText,
+      taskSizeStyle,
+      startAtFormat,
+      endAtFormat,
+
+      modifyTitle,
+      editTitle,
+      isEditingTitle,
+
+      defaultAvatar,
       closeSlide,
       assignee,
       modalTitle,
@@ -277,10 +389,6 @@ export default {
       deleteCard,
       currentModal,
       isMultiple, // isMultiple을 반환하여 사용 가능하도록 설정
-      isEditingTitle,
-      cardTitle,
-      editTitle,
-      newTitle,
       saveTitle,
       cancelEdit,
     };
@@ -289,14 +397,19 @@ export default {
 </script>
 
 <style scoped>
-/* 슬라이드 애니메이션 */
 .slide-enter-active,
 .slide-leave-active {
   transition: transform 0.5s ease;
 }
-.slide-enter,
+
+.slide-enter-from,
 .slide-leave-to {
   transform: translateX(100%);
+}
+
+.slide-enter-to,
+.slide-leave-from {
+  transform: translateX(0);
 }
 
 .contains {
@@ -309,11 +422,11 @@ export default {
 /* 슬라이드의 기본 스타일 */
 .slide-container {
   position: fixed;
-  top: 0;
+  bottom: 0;
   right: 0;
   margin-top: 109px;
   width: 60%;
-  height: 910px;
+  height: 88.1%;
   z-index: 1000;
   overflow-y: auto;
 }
@@ -391,7 +504,7 @@ export default {
   color: #000;
 }
 
-.date {
+.title-date {
   font-size: 10px;
   color: #a0a0a0;
 }

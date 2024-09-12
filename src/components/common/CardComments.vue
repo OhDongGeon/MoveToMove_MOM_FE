@@ -1,14 +1,14 @@
 <template>
   <div class="card-comments">
     <h3>코멘트</h3>
-    <div class="comment" v-for="comment in comments" :key="comment.id">
+    <div class="comment" v-for="comment in commentList" :key="comment.commentId">
       <div class="comment-header">
-        <img :src="comment.avatar" alt="avatar" class="avatar" />
+        <ProfileImage :src="comment.profileUrl" :alt="comment.nickName + ' Avatar'" :width="25" :height="25" class="avatar" />
         <div class="comment-info">
-          <span class="author">{{ comment.author }}</span>
+          <span class="author">{{ comment.nickName }}</span>
           <span class="date">{{ comment.date }}</span>
-          <button v-if="comment.author === user.nickName" class="edit-button">수정</button>
-          <button v-if="comment.author === user.nickName" class="delete-button">삭제</button>
+          <button v-if="comment.nickName === user.nickName" class="edit-button">수정</button>
+          <button v-if="comment.nickName === user.nickName" class="delete-button">삭제</button>
         </div>
         <div class="comment-actions">팀원</div>
       </div>
@@ -21,10 +21,19 @@
 import { useCommentStore } from '@/stores/commentStore';
 import { useAuthStore } from '@/stores/memberStore';
 import { computed } from 'vue';
+import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 
 export default {
   name: 'CardComments',
-
+  components: {
+    ProfileImage,
+  },
+  props: {
+    commentList: {
+      type: Array,
+      required: true,
+    },
+  },
   setup() {
     const commentStore = useCommentStore();
     const authStore = useAuthStore();
