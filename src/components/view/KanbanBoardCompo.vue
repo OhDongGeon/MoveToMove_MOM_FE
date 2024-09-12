@@ -10,27 +10,29 @@
             <v-expansion-panel-text class="panel-text">
               <!-- treeData가 유효할 때만 Vue3Tree를 렌더링 -->
               <div class="tree-container">
-                <Vue3Tree
-                  :key="data.length"
-                  :nodes="data"
-                  :search-text="searchText"
-                  :use-checkbox="false"
-                  :use-icon="true"
-                  :indentSize="10"
-                  :gap="5"
-                  use-row-delete
-                  @nodeExpanded="onNodeExpanded"
-                  @update:nodes="onUpdate"
-                  @nodeClick="onNodeClick"
-                  class="custom-node-class"
-                >
-                  <template #iconActive>
-                    <img :src="require(`../../assets/folders24.svg`)" alt="Folder Icon" width="14" height="14" style="margin-right: 10px" />
+                <!-- 트리뷰에 draggable을 적용 -->
+                <draggable v-model="folderStore.folderData" :move="checkMove" group="folders" item-key="id" @end="onDragEnd">
+                  <template #item="{ element }">
+                    <v-treeview
+                      :items="[element]"
+                      activatable
+                      open-on-click
+                      item-key="id"
+                      item-text="title"
+                      item-children="children"
+                      v-model:open="open"
+                      v-model:active="active"
+                      transition
+                      @click:open="onNodeClick"
+                    >
+                      <!-- 폴더 아이콘 표시 -->
+                      <template v-slot:prepend="{ item }">
+                        <v-icon v-if="item.children">mdi-folder</v-icon>
+                        <v-icon v-else>mdi-file</v-icon>
+                      </template>
+                    </v-treeview>
                   </template>
-                  <template #iconInactive>
-                    <font-awesome-icon :icon="['fas', 'folder']" style="margin-right: 10px" />
-                  </template>
-                </Vue3Tree>
+                </draggable>
 
                 <!-- 폴더 생성 시 보여줄 input 박스 -->
                 <template v-if="creatingFolder">
@@ -73,10 +75,23 @@
           </div>
           <div class="project-content">
             <!-- 컬럼 기준으로 드래그 앤 드랍 가능하게 설정 -->
-            <draggable v-model="columns" group="columns" @end="onColumnDragEnd" class="columns-container" ghost-class="dragging" drag-class="drag-active" itemKey="id">
+            <draggable
+              v-model="columns"
+              group="columns"
+              @end="onColumnDragEnd"
+              class="columns-container"
+              ghost-class="dragging"
+              drag-class="drag-active"
+              itemKey="id"
+            >
               <template #item="{ element: col }">
                 <div class="column">
-                  <kanban-column :id="col.kanbanColumnId" :title="col.kanbanColumnName" :cards="filteredCardsByColumn(col.kanbanColumnId)" @card-move="onCardMove" />
+                  <kanban-column
+                    :id="col.kanbanColumnId"
+                    :title="col.kanbanColumnName"
+                    :cards="filteredCardsByColumn(col.kanbanColumnId)"
+                    @card-move="onCardMove"
+                  />
                 </div>
               </template>
             </draggable>
@@ -88,26 +103,28 @@
 </template>
 
 <script>
+import { useFolderStore } from '@/stores/folderStrore';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { ref, onMounted, computed } from 'vue'; // Vue의 ref를 가져옵니다.
+import { computed, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
-import Vue3Tree from 'vue3-tree';
+import { VTreeview } from 'vuetify/labs/VTreeview';
+
 import draggable from 'vuedraggable'; // VueDraggableNext를 import
-import 'vue3-tree/dist/style.css';
+
+import { useKanbanCardStore } from '@/stores/kanbanCardStore';
+import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import KebabProjectMenu from '../common/KebabProjectMenu.vue';
 import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
 import KanbanColumn from './KanbanColumnCompo.vue';
-import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
-import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
   components: {
-    Vue3Tree, // Tree 컴포넌트 등록
     KanbanColumn,
     ProjectMemberCompo,
     KebabProjectMenu,
     draggable, // 드래그 앤 드랍 컴포넌트 등록
+    VTreeview,
   },
   setup() {
     // ref를 사용하여 상태를 정의합니다.
@@ -115,17 +132,12 @@ export default {
     const navigationStore = useNavigationStore(); // Pinia store 사용
     const kanbanColumnStore = useKanbanColumnStore(); // Pinia store 사용
     const kanbanCardStore = useKanbanCardStore();
+    const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
+    const open = ref([]);
+    const active = ref([]);
 
-    // 컬럼과 카드 데이터 로드
-    onMounted(async () => {
-      await kanbanColumnStore.loadColumns(projectId.value);
-      await kanbanCardStore.loadAllCards(projectId.value);
-      console.log('Columns loaded:', kanbanColumnStore.columns);
-      console.log('Cards loaded:', kanbanCardStore.cards);
-    });
-    // 컴포넌트에서 스토어 데이터를 computed로 가져오기
-    const columns = computed(() => kanbanColumnStore.columns);
-    const cards = computed(() => kanbanCardStore.cards);
+    // folderData 가져오기
+    const folderData = ref([]);
 
     // 프로젝트 아이디 변수
     const projectId = ref('1');
@@ -137,28 +149,54 @@ export default {
     const projectName = ref('');
 
     const router = useRouter();
-    const searchText = ref('');
-    const onNodeExpanded = (node, state) => {
-      console.log('state: ', state);
-      console.log('node: ', node);
+
+    // 화면 열렸을 때 onMounted
+    onMounted(async () => {
+      try {
+        // 컬럼과 카드 데이터 로드
+        await kanbanColumnStore.loadColumns(projectId.value);
+        await kanbanCardStore.loadAllCards(projectId.value);
+        console.log('Columns loaded:', kanbanColumnStore.columns);
+        console.log('Cards loaded:', kanbanCardStore.cards);
+
+        // 폴더 데이터 로드
+        await folderStore.fetchFolders(); // 데이터를 Pinia에 저장
+        console.log('Updated folderData:', folderStore.folderData);
+        folderData.value = folderStore.folderData; // Pinia store의 folderData를 ref에 저장
+        console.log(folderData.value);
+      } catch (error) {
+        console.error('데이터 로드 중 오류 발생', error);
+      }
+    });
+
+    // 컴포넌트에서 스토어 데이터를 computed로 가져오기
+    const columns = computed(() => kanbanColumnStore.columns);
+    const cards = computed(() => kanbanCardStore.cards);
+
+    // checkMove 함수 정의
+    const checkMove = (evt) => {
+      console.log(evt.dragged); // 드래그 중인 요소
+      console.log(evt.draggedContext); // 드래그 중인 요소의 컨텍스트 정보
+      console.log(evt.related); // 드래그된 요소가 드롭될 수 있는 관련 요소
+      console.log(evt.relatedContext); // 드래그된 요소가 드롭될 컨텍스트 정보
+      // 드래그 가능 여부를 확인하는 로직
+      // 예: 드래그하려는 노드가 특정 조건을 만족하는지 확인
+      return true; // 모든 드래그를 허용하는 기본 설정
     };
 
-    const onUpdate = (nodes) => {
-      console.log('nodes:', nodes);
-      console.log('트리 데이터가 업데이트되었습니다.', nodes);
-      data.value = [...nodes]; // 변경된 데이터로 업데이트
-    };
-
+    // 폴더구조에서 파일 클릭 시
+    // 노드 클릭 이벤트 처리
     const onNodeClick = (node) => {
-      projectId.value = node.project_info.projectId;
-      projectName.value = node.project_info.projectName;
-      isProjectLeader.value = node.project_info.projectLeader;
+      // 파일인지 확인 (children이 없으면 파일)
+      if (!node.children) {
+        console.log('파일(프로젝트) 정보:', node);
+      }
+    };
 
-      console.log('projectId: ', projectId);
-      console.log('isProjectLeader: ', isProjectLeader);
-      console.log('projectName: ', projectName);
-
-      console.log(node);
+    // 드래그 앤 드랍
+    const onDragEnd = (colId) => {
+      console.log('드래그 종료', colId);
+      // 드래그 종료 후 상태 업데이트 또는 API 호출 등 추가 처리
     };
 
     //칸반 카드 오픈
@@ -200,14 +238,14 @@ export default {
     // 폴더 생성 완료 시 데이터에 추가
     const addNewFolder = () => {
       if (newFolderName.value.trim()) {
-        const newFolder = {
-          id: Date.now(),
-          label: newFolderName.value,
-          project_info: {},
-          nodes: [],
-        };
-        data.value.push(newFolder);
-        onUpdate(data.value); // 데이터 변경을 알림
+        // const newFolder = {
+        //   id: Date.now(),
+        //   label: newFolderName.value,
+        //   project_info: {},
+        //   nodes: [],
+        // };
+        // folderData.value.push(newFolder);
+        // onUpdate(folderData.value); // 데이터 변경을 알림
       }
       cancelNewFolder();
     };
@@ -257,57 +295,15 @@ export default {
       return cards.value.filter((card) => card.columnId === columnId);
     };
 
-    /* 데이터 바인딩 */
-    // 폴더 데이터
-    const data = ref([
-      {
-        id: 1,
-        label: '나만의 폴더',
-        project_info: {},
-        nodes: [
-          {
-            id: 2,
-            label: '사이드 프로젝트',
-            project_info: {},
-            nodes: [
-              {
-                id: 4,
-                label: '프로젝트 1',
-                project_info: {
-                  projectId: 4,
-                  projectName: '프로젝트 1',
-                  description: '프로젝트 1',
-                  startDate: '2022-01-01',
-                  endDate: '2022-02-28',
-                  projectLeader: 'Y',
-                },
-              },
-              {
-                id: 5,
-                label: '프로젝트 2',
-                project_info: {
-                  projectId: 5,
-                  projectName: '프로젝트 2',
-                  description: '프로젝트 2',
-                  startDate: '2022-01-01',
-                  endDate: '2022-02-28',
-                  projectLeader: 'N',
-                },
-              },
-            ],
-          },
-        ],
-      },
-    ]);
-
     return {
       panel,
-      data,
+      folderStore, // Pinia 상태를 바로 사용
       columns, // 칸반 컬럼 데이터
-      searchText,
-      onNodeExpanded,
-      onUpdate,
+      onDragEnd, // 폴더 드래그 앤 드랍
+      checkMove,
       onNodeClick,
+      open,
+      active,
       openKanbanCard,
       newProjectPage,
       projectId,
@@ -316,8 +312,8 @@ export default {
       showMenu,
       toggleMenu,
       closeMenu,
-      creatingFolder,
       newFolderName,
+      creatingFolder,
       newFolder,
       cancelNewFolder,
       addNewFolder,
@@ -358,7 +354,7 @@ h1 {
 
 /* 사이드바 스타일 */
 .sidebar {
-  width: 270px; /* 사이드바의 고정된 너비 설정 */
+  width: 300px; /* 사이드바의 고정된 너비 설정 */
   background-color: #ffffff; /* 연한 배경색 */
   border-radius: 10px;
   border: 1.5px solid #6b9e9b;
@@ -387,8 +383,15 @@ h1 {
 }
 
 .tree-container {
+  max-height: 320px; /* 원하는 높이 설정 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
   margin-top: 0; /* 트리 컨테이너에 상단 마진을 없앰 */
   padding-top: 0; /* 트리 컨테이너의 상단 패딩을 없앰 */
+}
+
+/* 트리뷰의 인덴트를 줄이기 위한 스타일 */
+::v-deep .v-treeview-node__content {
+  padding-left: 3px !important; /* 기본 인덴트를 줄임 */
 }
 
 .add-buttons {
@@ -491,7 +494,7 @@ h1 {
   padding: 0px;
   font-weight: bold;
   font-size: 14px;
-  color: #5a6d8c;
+  color: #000;
 }
 
 .member {
