@@ -17,28 +17,33 @@
         <span v-else class="column-title">{{ title }}</span>
       </div>
     </div>
+
     <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
-    <!-- 드래그 가능한 카드 리스트 -->
+
     <draggable class="kanban-card-list" :list="localCards" group="cards" @end="onCardDrop" itemKey="id">
       <template #item="{ element: card }">
         <KanbanCard :card="card" @card-click="openKanbanCard" />
       </template>
     </draggable>
+
+    <!-- 칸반 카드 오픈 슬라이드 -->
+    <KanbanCardOpen :isVisible="isCardOpen" :card="selectedCard" @close="closeKanbanCard" />
   </div>
 </template>
 
 <script>
-import { useNavigationStore } from '@/stores/navigationStore';
+// import { useNavigationStore } from '@/stores/navigationStore';
+// import { useRouter } from 'vue-router';
 import { computed, nextTick, ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import KanbanCard from './KanbanCardCompo.vue';
+import KanbanCardOpen from './KanbanCardOpenCompo.vue';
 import draggable from 'vuedraggable';
-// import axiosInstance from '@/api/axiosInstance';
 
 export default {
   components: {
     KanbanCard,
+    KanbanCardOpen,
     draggable,
   },
   props: {
@@ -61,16 +66,19 @@ export default {
   },
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
-    const router = useRouter();
-    const navigationStore = useNavigationStore();
+    // const router = useRouter();
+    // const navigationStore = useNavigationStore();
 
     const localCards = ref([]); // 로컬 상태로 카드 데이터 관리
+    // const localCards = ref([...props.cards]);
 
     // 카드 상세 정보를 가져와서 localCards에 저장하는 함수
     const loadCardDetailsForAll = async () => {
       const processedCards = await Promise.all(
         props.cards.map(async (card) => {
           const detailedCard = await kanbanCardStore.loadCardDetails(card.id); // 각 카드의 상세 정보를 로드
+
+          console.log(detailedCard);
           return detailedCard; // 상세 정보가 담긴 카드 객체 반환
         }),
       );
@@ -90,14 +98,26 @@ export default {
       return props.underlineColor || '#6b9e9b';
     });
 
+    // KanbanCardOpenCompo와 관련된 상태
+    const isCardOpen = ref(false); // 모달의 가시성 상태
+    const selectedCard = ref(null); // 선택한 카드
+
     const openKanbanCard = (card) => {
       console.log(`칸반카드ID: ${card.id}`);
       console.log(`칸반카드: ${card}`);
-      navigationStore.setActiveItem('kanban');
-      router.push({
-        name: 'KanbanCardCompo',
-        query: { id: card.id, title: card.title },
-      });
+      // navigationStore.setActiveItem('kanban');
+      // router.push({
+      //   name: 'KanbanCardCompo',
+      //   query: { id: card.id, title: card.title },
+      // });
+
+      selectedCard.value = card;
+      isCardOpen.value = true;
+    };
+
+    const closeKanbanCard = () => {
+      isCardOpen.value = false;
+      selectedCard.value = null;
     };
 
     const startEditing = async () => {
@@ -156,10 +176,28 @@ export default {
         //   localCards.value.splice(oldIndex, 0, movedCard);
         // }
         emit('card-move', props.id, props.id, movedCard.id);
+
+        // const id = props.id;
+        // console.log(id);
+
+        // const toColumnId = event.to.closest('.column').dataset.columnId; // 이동 후 컬럼 ID
+        // console.log('to Column ID:', toColumnId);
+
+        // const fromIndex = event.oldIndex; // 드래그 시작 위치
+        // const toIndex = event.newIndex; // 드롭 위치
+        // console.log(fromIndex);
+        // console.log(toIndex);
+        // console.log('카드 드래그 앤 드롭', event);
+        // const form = { kanbanColumnId: toColumnId, cardSeq: toIndex };
+
+        // cardDragAndDrop(form);
       }
     };
 
     return {
+      isCardOpen,
+      selectedCard,
+      closeKanbanCard,
       localCards,
       newCardTitle,
       isCardAdd,
@@ -224,13 +262,12 @@ export default {
   overflow-y: auto;
   padding: 10px;
 
-  /* 웹킷 기반 브라우저에서 스크롤바 숨기기 (크롬, 사파리 등) */
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
   /* 파이어폭스에서 스크롤바 숨기기 */
   scrollbar-width: none;
+}
+
+.kanban-card-list ::-webkit-scrollbar {
+  display: none;
 }
 
 .kanban-card {
