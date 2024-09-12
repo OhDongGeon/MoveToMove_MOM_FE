@@ -1,10 +1,5 @@
 <template>
-  <img
-    :src="src"
-    :alt="alt"
-    :style="avatarStyle"
-    class="avatar"
-  />
+  <img :src="profileUrl" :alt="computedAlt" :style="avatarStyle" class="avatar" />
 </template>
 
 <script>
@@ -12,7 +7,7 @@ import { computed, toRefs } from 'vue';
 
 export default {
   props: {
-    src: {
+    profileUrl: {
       type: String,
       required: true,
     },
@@ -30,8 +25,7 @@ export default {
     },
   },
   setup(props) {
-    // props를 쉽게 사용하기 위해 구조 분해(destructuring)
-    const { width, height } = toRefs(props);
+    const { width, height, alt } = toRefs(props); // profileUrl은 따로 뽑지 않음
 
     // width와 height를 기반으로 아바타 스타일을 계산
     const avatarStyle = computed(() => {
@@ -41,9 +35,13 @@ export default {
       };
     });
 
+    // alt가 빈 문자열일 경우 기본값 제공
+    const computedAlt = computed(() => alt.value || 'User Avatar');
+
     return {
       avatarStyle,
-      ...toRefs(props),  // props를 반환하여 템플릿에서 직접 사용 가능하게 함
+      computedAlt,
+      ...toRefs(props), // 여기에서 profileUrl을 포함한 모든 props 반환
     };
   },
 };
