@@ -7,14 +7,38 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
 
   const loadAllCards = async (projectId) => {
     try {
-      const response = await axiosInstance.get(`/api/projects/${projectId}/kanban-cards`); //
+      const response = await axiosInstance.get(`/api/projects/${projectId}/kanban-cards`);
+
+      // response.data null일 경우 바로 리턴
+      if (!Array.isArray(response.data)) {
+        console.error('서버로 받는 응답 데이터가 없습니다.');
+        cards.value = [];
+        return;
+      }
+
       cards.value = response.data.map((card) => ({
-        id: card.kanbanCardId,
+        projectId: card.projectId,
+        projectName: card.projectName,
         columnId: card.kanbanColumnId,
+        columnName: card.kanbanColumnName,
+        columnSeq: card.columnSeq,
+        id: card.kanbanCardId,
         title: card.title,
+        content: card.content,
+        cardSeq: card.cardSeq,
         priority: card.priority,
         task_size: card.taskSize,
-        members: [],
+        startAt: card.startAt,
+        endAt: card.endAt,
+        createdAt: card.createdAt,
+        members: Array.isArray(card.cardMemberList)
+          ? card.cardMemberList.map((member) => ({
+              memberId: member.memberId,
+              email: member.email,
+              nickName: member.nickName,
+              profileUrl: member.profileUrl,
+            }))
+          : [], // cardMemberList가 null이거나 배열이 아닐 경우 빈 배열로 설정
       }));
     } catch (error) {
       console.error('Failed to load cards:', error);
