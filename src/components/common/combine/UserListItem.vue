@@ -9,13 +9,8 @@
     <font-awesome-icon :icon="['fas', 'crown']" class="leader-icon" v-if="userData.projectLeaderYN === 'Y'" />
 
     <!-- 매뉴 -->
-    <font-awesome-icon
-      :icon="['fas', 'ellipsis-vertical']"
-      class="dots-menu"
-      ref="dotsMenuIcon"
-      v-if="userData.projectLeaderYN === 'N' && userData.memberId !== authStore.user.memberId"
-      @click="kebabMenu"
-    />
+    <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" class="dots-menu" ref="dotsMenuIcon" v-if="userData.projectLeaderYN === 'N'" @click="kebabMenu" />
+    <!-- && userData.memberId !== authStore.user.memberId -->
 
     <KebabMemberMenu :showMenu="showMenu" @closeMenu="closeMenu" :isProjectLeader="userData.projectLeaderYN" class="kebab-menu" />
   </div>
@@ -76,7 +71,7 @@ export default {
   margin-bottom: 5px;
   font-weight: bold;
   position: relative;
-  z-index: 9999; /* 스크롤바보다 높은 z-index */
+  z-index: 1000; /* 스크롤바보다 높은 z-index */
 }
 
 .nickname {
@@ -95,6 +90,6 @@ export default {
 }
 
 .kebab-menu {
-  z-index: 9999; /* z-index 값을 높게 설정하여 메뉴가 상단에 표시되도록 */
+  z-index: 1000; /* z-index 값을 높게 설정하여 메뉴가 상단에 표시되도록 */
 }
 </style>
