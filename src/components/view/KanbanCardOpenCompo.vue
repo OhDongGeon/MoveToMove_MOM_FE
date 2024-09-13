@@ -134,12 +134,12 @@
 </template>
 
 <script>
+import { computed, ref, watch } from 'vue';
 import CardCommentForm from '@/components/common/CardCommentForm.vue';
 import CardComments from '@/components/common/CardComments.vue';
 import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
 import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import { computed, ref } from 'vue';
 
 export default {
   components: {
@@ -296,6 +296,37 @@ export default {
       modifyTitle.value = props.card.title;
       isEditingTitle.value = false;
     };
+
+    watch(
+      () => kanbanCardStore.cards, // Pinia store의 cards 배열 감시
+      (modifyCards) => {
+        if (props.card && props.card.id) {
+          const updatedCard = modifyCards.find((c) => c.id === props.card.id); // id가 일치하는 카드 찾기
+          if (updatedCard) {
+            Object.assign(props.card, updatedCard); // props.card에 업데이트된 값 할당
+          }
+        }
+      },
+      { deep: true }, // 깊은 감시 설정
+    );
+
+    // watch(
+    //   () => kanbanCardStore.cards,
+    //   (modifyCards) => {
+    //     if (props.card && props.card.id) {
+    //       // props.card와 props.card.id가 존재하는지 확인 후
+    //       const updatedCard = modifyCards.find((c) => c.id === props.card.id); // id가 일치하는 카드 찾기
+    //       if (updatedCard) {
+    //         Object.assign(props.card, updatedCard); // props.card에 업데이트된 값 할당
+    //       } else {
+    //         console.warn(`ID가 ${props.card.id}인 카드를 찾을 수 없습니다.`);
+    //       }
+    //     } else {
+    //       console.error(props.card);
+    //     }
+    //   },
+    //   { deep: true }, // 깊은 감시 설정
+    // );
 
     const defaultAvatar = 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/40066ef4-ccce-424b-9ac1-d89ab31a1650.ea42ce6a.png';
     const modalTitle = ref('');

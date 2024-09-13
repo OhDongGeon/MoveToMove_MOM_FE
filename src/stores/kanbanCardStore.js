@@ -95,30 +95,22 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
   // 칸반 카드 제목 수정
   const updateKanbanCardTitle = async (cardId, updateColumn, updateData) => {
     try {
-      // const form = {
-      //     updateColumn: updateColumn,
-      //     updateData: updateData,
-      // };
+      const form = {
+        updateColumn: updateColumn,
+        updateData: updateData,
+      };
 
-      // const response = await axiosInstance.patch(`/api/kanban-cards/${cardId}`, form);
-
-      console.log(cardId, updateColumn, updateData);
+      await axiosInstance.patch(`/api/kanban-cards/${cardId}`, form);
 
       const index = cards.value.findIndex((card) => card.id === cardId);
-      console.log(cards.value[index]);
-
-      console.log(index);
-
-      // if (index !== -1) {
-      //     cards.value[index] = {
-      //         ...cards.value[index], // 기존 카드 데이터 유지
-      //         ...(cards[index][updateColumn] = updateData),
-      //     };
-      // }
-
-      console.log('변경', cards.value[index]);
+      if (index !== -1) {
+        cards.value[index] = {
+          ...cards.value[index],
+          [updateColumn]: updateData,
+        };
+      }
     } catch (error) {
-      console.error('Failed to load card details:', error);
+      console.error(error);
     }
   };
 
