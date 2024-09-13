@@ -31,8 +31,8 @@ const handleLogin = async () => {
 
       // 로그인 후 WebSocket 연결 설정
       const memberId = authStore.user.memberId; // 사용자 ID 가져오기
-      webSocket.connectToProject(memberId); // WebSocket 연결 및 프로젝트별 구독 설정
-      
+      webSocket.connect(memberId); // WebSocket 연결 및 프로젝트별 구독 설정
+
       router.push('/move-to-move/mypage'); // 성공 후 페이지 이동
     } catch (err) {
       console.log('API 요청 실패:', err);
