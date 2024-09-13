@@ -38,6 +38,7 @@ import { computed, nextTick, onMounted, ref } from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
+import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   components: {
@@ -64,7 +65,7 @@ export default {
       default: '#6b9e9b',
     },
   },
-  emits: ['open-card', 'close-card'],
+  emits: ['open-card', 'close-card', 'card-move'],
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
     // const router = useRouter();
@@ -78,7 +79,6 @@ export default {
       const processedCards = await Promise.all(
         props.cards.map(async (card) => {
           const detailedCard = await kanbanCardStore.loadCardDetails(card.id); // 각 카드의 상세 정보를 로드
-          console.log('데이터', detailedCard);
           return detailedCard; // 상세 정보가 담긴 카드 객체 반환
         }),
       );
@@ -164,6 +164,18 @@ export default {
         localCards.value.splice(oldIndex, 1);
         localCards.value.splice(newIndex, 0, movedCard);
 
+        // WebSocket을 통해 서버로 카드 이동 정보를 전송
+        const message = {
+          projectId: props.id, // 현재 프로젝트 ID
+          cardId: movedCard.id, // 이동된 카드 ID
+          fromIndex: oldIndex, // 이동 전 위치
+          toIndex: newIndex, // 이동 후 위치
+          type: 'CARD_MOVE',
+        };
+        console.log('Card move message:', message); // 메시지 전송 전에 로그 출력
+        // WebSocket 스토어를 통해 메시지 전송
+        const webSocketStore = useWebSocketStore(); // WebSocket Store 사용
+        webSocketStore.sendMessageToProject(message); // 메시지 전송 함수 호출
         // try {
         //   // 서버에 순서 변경 요청 보내기 (비동기 작업)
         //   await axiosInstance.put('/api/kanban-cards/order', {  // await로 비동기 작업 완료 대기

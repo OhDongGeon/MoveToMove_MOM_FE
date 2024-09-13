@@ -62,6 +62,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         if (card.columnId === column.id) {
           // 카드의 columnId를 업데이트된 컬럼의 인덱스로 설정
           card.columnId = column.id;
+          console.log(`Updated Card ID: ${card.id} to Column ID: ${card.columnId}`);
         }
       });
     });

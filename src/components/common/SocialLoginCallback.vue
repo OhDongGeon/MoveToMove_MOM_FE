@@ -5,13 +5,15 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useAuthStore } from "@/stores/memberStore"; // Pinia 스토어 임포트
+import { onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/memberStore'; // Pinia 스토어 임포트
+import { useWebSocketStore } from '@/stores/webSocketStore'; // WebSocket 스토어 임포트
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore(); // Pinia 스토어 사용
+const webSocket = useWebSocketStore(); // WebSocket 스토어 사용
 
 const handleLogin = async () => {
   // 쿼리 파라미터에서 액세스 토큰 가져오기
@@ -19,22 +21,26 @@ const handleLogin = async () => {
 
   if (accessToken) {
     // 액세스 토큰을 로컬 스토리지에 저장 - access 토큰 이름 변경할 수 있음
-    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem('accessToken', accessToken);
     authStore.login({ accessToken }); // Pinia 스토어에 액세스 토큰 저장
 
     try {
       // 스토어에서 유저 정보 요청
       await authStore.fetchUser();
-      console.log("유저 정보", authStore.getUser);
+      console.log('유저 정보', authStore.getUser);
 
-      router.push("/move-to-move/mypage"); // 성공 후 페이지 이동
+      // 로그인 후 WebSocket 연결 설정
+      const memberId = authStore.user.memberId; // 사용자 ID 가져오기
+      webSocket.connect(memberId); // WebSocket 연결 및 프로젝트별 구독 설정
+
+      router.push('/move-to-move/mypage'); // 성공 후 페이지 이동
     } catch (err) {
-      console.log("API 요청 실패:", err);
-      router.push("/login"); // 실패 시 로그인 페이지로 리다이렉트
+      console.log('API 요청 실패:', err);
+      router.push('/login'); // 실패 시 로그인 페이지로 리다이렉트
     }
   } else {
-    console.log("로그인 실패: 액세스 토큰이 없습니다.");
-    router.push("/login"); // 실패 시 로그인 페이지로 리다이렉트
+    console.log('로그인 실패: 액세스 토큰이 없습니다.');
+    router.push('/login'); // 실패 시 로그인 페이지로 리다이렉트
   }
 };
 
