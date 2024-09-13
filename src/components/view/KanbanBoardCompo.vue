@@ -15,7 +15,9 @@
                     <v-treeview :items="[element]" activatable open-on-click item-key="id" item-text="title" item-children="children" v-model="open" transition>
                       <!-- 폴더 아이콘 표시 -->
                       <template v-slot:prepend="{ item }">
-                        <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{ item.children ? 'mdi-folder' : 'mdi-clipboard-text' }}</v-icon>
+                        <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{
+                          item.children ? 'mdi-folder' : 'mdi-clipboard-text'
+                        }}</v-icon>
                       </template>
                     </v-treeview>
                   </template>
@@ -107,6 +109,7 @@ import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import KebabProjectMenu from '../common/KebabProjectMenu.vue';
 import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
 import KanbanColumn from './KanbanColumnCompo.vue';
+import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
@@ -138,7 +141,7 @@ export default {
     const folderData = ref([]);
 
     // 프로젝트 아이디 변수
-    const projectId = ref(null);
+    const projectId = ref(0);
 
     // 프로젝트 리더 유무 변수
     const isProjectLeader = ref(false);
@@ -152,11 +155,29 @@ export default {
         // 폴더 데이터 로드
         await folderStore.fetchFolders(); // 데이터를 Pinia에 저장
         folderData.value = folderStore.folderData; // Pinia store의 folderData를 ref에 저장
+
+        // 프로젝트 구독을 위한 WebSocket 연결
+        if (projectId.value) {
+          useWebSocketStore.connect(projectId.value);
+          useWebSocketStore.stompClient.subscribe(`/topic/project/${projectId.value}`, (message) => {
+            handleIncomingMessage(projectId.value, JSON.parse(message.body)); // WebSocket 메시지 수신 후 처리
+          });
+        }
       } catch (error) {
         console.error('데이터 로드 중 오류 발생', error);
       }
     });
-
+    const handleIncomingMessage = (projectId, message) => {
+      if (message.type === 'CARD_MOVE') {
+        const { cardId, toIndex, toColumnId } = message;
+        const movedCardIndex = cards.value.findIndex((card) => card.id === cardId);
+        if (movedCardIndex === -1) return; // 카드가 존재하지 않는 경우 리턴
+        const [movedCard] = cards.value.splice(movedCardIndex, 1); // 카드 제거
+        movedCard.columnId = toColumnId;
+        const newColumnCards = cards.value.filter((card) => card.columnId === toColumnId);
+        newColumnCards.splice(toIndex, 0, movedCard);
+      }
+    };
     // checkMove 함수 정의
     const checkMove = (evt) => {
       console.log(evt.dragged); // 드래그 중인 요소

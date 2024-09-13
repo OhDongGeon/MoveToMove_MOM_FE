@@ -77,5 +77,19 @@ export const useWebSocketStore = defineStore('webSocket', {
 
       this.receivedMessages[projectId].push(message); // 프로젝트별 수신된 메시지 저장
     },
+
+    sendMessageToProject(message) {
+      const stompClient = this.projectConnections[message.projectId]; // 해당 프로젝트의 stompClient 가져오기
+      if (stompClient && this.isConnected) {
+        stompClient.send(
+          `/app/project/${message.projectId}/drag`, // 서버의 MessageMapping 경로와 일치해야 함
+          {},
+          JSON.stringify(message),
+        );
+      } else {
+        console.error('WebSocket 연결이 끊켰습니다.');
+      }
+    },
+    
   },
 });
