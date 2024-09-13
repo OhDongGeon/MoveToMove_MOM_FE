@@ -1,7 +1,8 @@
 import { Stomp } from '@stomp/stompjs';
 import { defineStore } from 'pinia';
 import SockJS from 'sockjs-client';
-import { axiosInstance } from '@/api/axiosInstance';
+import axiosInstance from '@/api/axiosInstance';
+
 export const useWebSocketStore = defineStore('webSocket', {
   state: () => ({
     stompClient: null,
