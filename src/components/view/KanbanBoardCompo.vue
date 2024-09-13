@@ -15,7 +15,9 @@
                     <v-treeview :items="[element]" activatable open-on-click item-key="id" item-text="title" item-children="children" v-model="open" transition>
                       <!-- 폴더 아이콘 표시 -->
                       <template v-slot:prepend="{ item }">
-                        <v-icon @click="onNodeClick(item)">{{ item.children ? 'mdi-folder' : 'mdi-file' }}</v-icon>
+                        <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{
+                          item.children ? (isOpen(item) ? 'mdi-folder-open' : 'mdi-folder') : 'mdi-clipboard-text'
+                        }}</v-icon>
                       </template>
                     </v-treeview>
                   </template>

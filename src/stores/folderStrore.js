@@ -10,7 +10,7 @@ export const useFolderStore = defineStore('folder', {
     async fetchFolders() {
       try {
         const response = await axios.get('/api/folders');
-        this.folderData = response.data;
+        this.folderData = response.data.totalFolderProjects;
       } catch (error) {
         console.error('폴더 데이터를 가져오는 중 오류 발생', error);
       }
