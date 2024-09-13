@@ -173,6 +173,7 @@ export default {
           toIndex: newIndex, // 이동 후 위치
           type: 'CARD_MOVE',
         };
+        console.log('Card move message:', message); // 메시지 전송 전에 로그 출력
         // WebSocket 스토어를 통해 메시지 전송
         const webSocketStore = useWebSocketStore(); // WebSocket Store 사용
         webSocketStore.sendMessageToProject(message); // 메시지 전송 함수 호출
