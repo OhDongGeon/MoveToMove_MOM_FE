@@ -16,30 +16,36 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         return;
       }
 
-      cards.value = response.data.map((card) => ({
-        projectId: card.projectId,
-        projectName: card.projectName,
-        columnId: card.kanbanColumnId,
-        columnName: card.kanbanColumnName,
-        columnSeq: card.columnSeq,
-        id: card.kanbanCardId,
-        title: card.title,
-        content: card.content,
-        cardSeq: card.cardSeq,
-        priority: card.priority,
-        task_size: card.taskSize,
-        startAt: card.startAt,
-        endAt: card.endAt,
-        createdAt: card.createdAt,
-        members: Array.isArray(card.cardMemberList)
-          ? card.cardMemberList.map((member) => ({
-              memberId: member.memberId,
-              email: member.email,
-              nickName: member.nickName,
-              profileUrl: member.profileUrl,
-            }))
-          : [], // cardMemberList가 null이거나 배열이 아닐 경우 빈 배열로 설정
-      }));
+      // 응답 데이터를 올바르게 매핑하여 상태로 저장
+      cards.value = response.data.map((item) => {
+        const projectCard = item.projectInCardDto; // 카드의 세부 정보를 포함한 객체
+        const members = item.cardMemberList; // 멤버 리스트
+
+        return {
+          projectId: projectCard.projectId,
+          projectName: projectCard.projectName,
+          columnId: projectCard.kanbanColumnId,
+          columnName: projectCard.kanbanColumnName,
+          columnSeq: projectCard.columnSeq,
+          id: projectCard.kanbanCardId,
+          title: projectCard.title,
+          content: projectCard.content,
+          cardSeq: projectCard.cardSeq,
+          priority: projectCard.priority,
+          taskSize: projectCard.taskSize,
+          startAt: projectCard.startAt,
+          endAt: projectCard.endAt,
+          createdAt: projectCard.createdAt,
+          members: Array.isArray(members)
+            ? members.map((member) => ({
+                memberId: member.memberId,
+                email: member.email,
+                nickName: member.nickName,
+                profileUrl: member.profileUrl,
+              }))
+            : [], // cardMemberList가 null이거나 배열이 아닐 경우 빈 배열로 설정
+        };
+      });
     } catch (error) {
       console.error('Failed to load cards:', error);
     }

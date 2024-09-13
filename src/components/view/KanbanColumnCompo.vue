@@ -34,7 +34,7 @@
 // import { useNavigationStore } from '@/stores/navigationStore';
 // import { useRouter } from 'vue-router';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
@@ -71,25 +71,9 @@ export default {
     // const router = useRouter();
     // const navigationStore = useNavigationStore();
 
-    const localCards = ref([]); // 로컬 상태로 카드 데이터 관리
+    const localCards = [...props.cards];
     // const localCards = ref([...props.cards]);
 
-    // 카드 상세 정보를 가져와서 localCards에 저장하는 함수
-    const loadCardDetailsForAll = async () => {
-      const processedCards = await Promise.all(
-        props.cards.map(async (card) => {
-          const detailedCard = await kanbanCardStore.loadCardDetails(card.id); // 각 카드의 상세 정보를 로드
-          return detailedCard; // 상세 정보가 담긴 카드 객체 반환
-        }),
-      );
-
-      localCards.value = processedCards; // 전처리된 카드 데이터를 localCards에 저장
-    };
-
-    // onMounted 훅에서 카드 상세 정보 로드 함수 호출
-    onMounted(() => {
-      loadCardDetailsForAll();
-    });
     const newCardTitle = ref('');
     const isCardAdd = ref(false);
     const cardInput = ref(null);
