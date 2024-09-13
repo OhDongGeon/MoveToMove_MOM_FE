@@ -71,7 +71,7 @@ export default {
     // const router = useRouter();
     // const navigationStore = useNavigationStore();
 
-    const localCards = kanbanCardStore.cards;
+    const localCards = [...props.cards];
     // const localCards = ref([...props.cards]);
 
     const newCardTitle = ref('');
