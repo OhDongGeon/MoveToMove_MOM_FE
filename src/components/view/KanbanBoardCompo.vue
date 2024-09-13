@@ -64,16 +64,16 @@
         <project-member-compo v-if="projectId" :projectId="projectId" class="member"></project-member-compo>
       </aside>
       <main class="main-content">
-        <div v-if="projectId">
+        <!-- 데이터 로드가 완료된 후 렌더링 -->
+        <div v-if="isDataLoaded && columns.length > 0">
           <div class="project-title">
             <div class="project-name">
               <label>{{ projectName }}</label>
             </div>
             <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" class="ellipsis" />
-            <KebabProjectMenu :showMenu="showMenu" @closeMenu="closeMenu" isProjectLeader="Y" />
+            <KebabProjectMenu v-if="showMenu !== null" :showMenu="showMenu" @closeMenu="closeMenu" isProjectLeader="Y" />
           </div>
           <div class="project-content">
-            <!-- 컬럼 기준으로 드래그 앤 드랍 가능하게 설정 -->
             <draggable
               v-model="columns"
               group="columns"
@@ -85,7 +85,7 @@
               :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
-                <div class="column" v-if="cards && cards.length > 0">
+                <div class="column" :key="col.kanbanColumnId">
                   <kanban-column
                     :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
@@ -100,6 +100,7 @@
             </draggable>
           </div>
         </div>
+        <div v-else></div>
       </main>
     </div>
   </div>
@@ -108,7 +109,7 @@
 <script>
 import { useFolderStore } from '@/stores/folderStrore';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { computed, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
+import { onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
 import { useRouter } from 'vue-router';
 import { VTreeview } from 'vuetify/labs/VTreeview';
 
@@ -119,7 +120,7 @@ import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import KebabProjectMenu from '../common/KebabProjectMenu.vue';
 import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
 import KanbanColumn from './KanbanColumnCompo.vue';
-import { useWebSocketStore } from '@/stores/webSocketStore';
+// import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   name: 'KanbanBoard', // 컴포넌트 이름 정의
@@ -140,9 +141,8 @@ export default {
     const kanbanCardStore = useKanbanCardStore();
     const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
 
-    // 컴포넌트에서 스토어 데이터를 computed로 가져오기
-    const columns = computed(() => kanbanColumnStore.columns);
-    const cards = computed(() => kanbanCardStore.cards);
+    const columns = ref([]);
+    const cards = ref([]);
 
     const open = ref([]);
     const active = ref([]);
@@ -159,35 +159,38 @@ export default {
     // 프로젝트 명
     const projectName = ref('');
 
+    // 컬럼 칸반 데이터 조회 v-if(66줄)
+    const isDataLoaded = ref(false);
+
     // 화면 열렸을 때 onMounted
     onMounted(async () => {
       try {
         // 폴더 데이터 로드
         await folderStore.fetchFolders(); // 데이터를 Pinia에 저장
         folderData.value = folderStore.folderData; // Pinia store의 folderData를 ref에 저장
-
         // 프로젝트 구독을 위한 WebSocket 연결
-        if (projectId.value) {
-          useWebSocketStore.connect(projectId.value);
-          useWebSocketStore.stompClient.subscribe(`/topic/project/${projectId.value}`, (message) => {
-            handleIncomingMessage(projectId.value, JSON.parse(message.body)); // WebSocket 메시지 수신 후 처리
-          });
-        }
+        // if (projectId.value) {
+        //   useWebSocketStore.connect(projectId.value);
+        //   useWebSocketStore.stompClient.subscribe(`/topic/project/${projectId.value}`, (message) => {
+        //     handleIncomingMessage(projectId.value, JSON.parse(message.body)); // WebSocket 메시지 수신 후 처리
+        //   });
+        // }
       } catch (error) {
         console.error('데이터 로드 중 오류 발생', error);
       }
     });
-    const handleIncomingMessage = (projectId, message) => {
-      if (message.type === 'CARD_MOVE') {
-        const { cardId, toIndex, toColumnId } = message;
-        const movedCardIndex = cards.value.findIndex((card) => card.id === cardId);
-        if (movedCardIndex === -1) return; // 카드가 존재하지 않는 경우 리턴
-        const [movedCard] = cards.value.splice(movedCardIndex, 1); // 카드 제거
-        movedCard.columnId = toColumnId;
-        const newColumnCards = cards.value.filter((card) => card.columnId === toColumnId);
-        newColumnCards.splice(toIndex, 0, movedCard);
-      }
-    };
+
+    // const handleIncomingMessage = (projectId, message) => {
+    //   if (message.type === 'CARD_MOVE') {
+    //     const { cardId, toIndex, toColumnId } = message;
+    //     const movedCardIndex = cards.value.findIndex((card) => card.id === cardId);
+    //     if (movedCardIndex === -1) return; // 카드가 존재하지 않는 경우 리턴
+    //     const [movedCard] = cards.value.splice(movedCardIndex, 1); // 카드 제거
+    //     movedCard.columnId = toColumnId;
+    //     const newColumnCards = cards.value.filter((card) => card.columnId === toColumnId);
+    //     newColumnCards.splice(toIndex, 0, movedCard);
+    //   }
+    // };
     // checkMove 함수 정의
     const checkMove = (evt) => {
       console.log(evt.dragged); // 드래그 중인 요소
@@ -216,25 +219,21 @@ export default {
         isProjectLeader.value = node.projectLeaderYN;
 
         try {
+          // 프로젝트 클릭 시 해당 데이터 서버 요청 후 화면 렌더링
           if (isProjectLeader.value) {
             // 컬럼과 카드 데이터 로드
             await kanbanColumnStore.loadColumns(projectId.value);
             await kanbanCardStore.loadAllCards(projectId.value);
+            columns.value = kanbanColumnStore.columns;
+            cards.value = kanbanCardStore.cards;
 
-            // 컬럼과 카드 데이터를 로그로 출력
-            // console.log('로드된 컬럼 데이터:', columns.value);
-            // console.log('로드된 카드 데이터:', cards.value);
+            isDataLoaded.value = columns.value.length > 0 && cards.value.length > 0;
           }
         } catch (e) {
           console.error('파일(프로젝트) 정보 로드 실패:', e);
+          isDataLoaded.value = false;
         }
       }
-    };
-
-    // 드래그 앤 드랍
-    const onDragEnd = (colId) => {
-      console.log('드래그 종료', colId);
-      // 드래그 종료 후 상태 업데이트 또는 API 호출 등 추가 처리
     };
 
     //칸반 카드 오픈
@@ -317,20 +316,28 @@ export default {
       }
     };
 
-    /**
-     * 칸반 컬럼 이동 메서드
-     * onColumnDragEnd
-     */
     // 컬럼 드래그 앤 드롭 핸들러
     const onColumnDragEnd = ({ oldIndex, newIndex }) => {
       if (oldIndex !== newIndex) {
         kanbanColumnStore.moveColumn(oldIndex, newIndex); // 컬럼 이동 후 상태 저장
+        cards.value = kanbanCardStore.cards;
+
+        // 카드 데이터 로그로 출력
+        console.log('Updated cards after column move:');
+        cards.value.forEach((card) => {
+          console.log(`Card ID: ${card.id}, Column ID: ${card.columnId}`);
+        });
       }
     };
 
     // 컬럼별로 필터링된 카드 반환 함수
     const filteredCardsByColumn = (columnId) => {
-      return cards.value.filter((card) => card.columnId === columnId);
+      if (!cards.value || cards.value.length === 0) return [];
+      const filteredCards = cards.value.filter((card) => card.columnId === columnId);
+
+      // 필터링된 카드 확인
+      console.log(`Filtered cards for column ${columnId}:`, filteredCards);
+      return filteredCards;
     };
 
     // 카드 열림 확인
@@ -350,7 +357,6 @@ export default {
       panel,
       folderStore, // Pinia 상태를 바로 사용
       columns, // 칸반 컬럼 데이터
-      onDragEnd, // 폴더 드래그 앤 드랍
       folderClick,
       checkMove,
       onNodeClick,
@@ -376,6 +382,7 @@ export default {
       isCardOpen,
       openCard,
       closeCard,
+      isDataLoaded,
     };
   },
 };

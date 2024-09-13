@@ -79,7 +79,6 @@ export default {
       const processedCards = await Promise.all(
         props.cards.map(async (card) => {
           const detailedCard = await kanbanCardStore.loadCardDetails(card.id); // 각 카드의 상세 정보를 로드
-          console.log('데이터', detailedCard);
           return detailedCard; // 상세 정보가 담긴 카드 객체 반환
         }),
       );
