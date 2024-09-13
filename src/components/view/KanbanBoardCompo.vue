@@ -36,7 +36,7 @@
                 <!-- 폴더 생성 시 보여줄 input 박스 -->
                 <template v-if="creatingFolder">
                   <div class="new-folder">
-                    <img src="../../assets/folders24.svg" alt="New Folder Icon" width="14" height="14" style="margin-right: 10px" />
+                    <v-icon class="mdi mdi-folder" :color="'#ff5722'" width="18" height="18" style="margin-right: 10px"></v-icon>
                     <input
                       type="text"
                       v-model="newFolderName"
@@ -109,7 +109,8 @@
 <script>
 import { useFolderStore } from '@/stores/folderStrore';
 import { useNavigationStore } from '@/stores/navigationStore';
-import { onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
+import { nextTick, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
+
 import { useRouter } from 'vue-router';
 import { VTreeview } from 'vuetify/labs/VTreeview';
 
@@ -273,16 +274,21 @@ export default {
     };
 
     // 폴더 생성 완료 시 데이터에 추가
-    const addNewFolder = () => {
+    const addNewFolder = async () => {
       if (newFolderName.value.trim()) {
-        // const newFolder = {
-        //   id: Date.now(),
-        //   label: newFolderName.value,
-        //   project_info: {},
-        //   nodes: [],
-        // };
-        // folderData.value.push(newFolder);
-        // onUpdate(folderData.value); // 데이터 변경을 알림
+        // 바디 부분
+        const newFolder = {
+          folderId: null,
+          folderName: newFolderName.value,
+        };
+
+        try {
+          // 폴더 생성 비동기
+          await folderStore.addNewFolder(newFolder);
+          console.log('폴더가 생성되었습니다.');
+        } catch (e) {
+          console.error('폴더 생성 실패:', e);
+        }
       }
       cancelNewFolder();
     };
@@ -292,6 +298,17 @@ export default {
       creatingFolder.value = true;
       newFolderName.value = ''; // 폴더명 초기화
       console.log(creatingFolder.value);
+
+      nextTick(() => {
+        const folderContainer = document.querySelector('.tree-container');
+        if (folderContainer) {
+          folderContainer.scrollTo({
+            top: folderContainer.scrollHeight, // 맨 아래로 이동
+            behavior: 'smooth', // 부드럽게 스크롤
+          });
+          console.log('부드러운 스크롤 이동 완료');
+        }
+      });
     };
 
     const onCardMove = (event) => {
@@ -450,6 +467,7 @@ h1 {
   overflow-y: auto; /* 세로 스크롤 활성화 */
   margin-top: 0; /* 트리 컨테이너에 상단 마진을 없앰 */
   padding-top: 0; /* 트리 컨테이너의 상단 패딩을 없앰 */
+  scroll-behavior: smooth; /* 부드러운 스크롤 적용 */
 }
 
 /* 트리뷰의 인덴트를 줄이기 위한 스타일 */
@@ -571,8 +589,9 @@ h1 {
   border: 1px solid #ccc;
   padding: 4px;
   border-radius: 4px;
-  width: 150px;
-  height: 25px;
-  font-size: 14px;
+  width: 180px;
+  height: 35px;
+  font-size: 16px;
+  padding: 5px;
 }
 </style>

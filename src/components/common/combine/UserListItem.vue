@@ -9,8 +9,13 @@
     <font-awesome-icon :icon="['fas', 'crown']" class="leader-icon" v-if="userData.projectLeaderYN === 'Y'" />
 
     <!-- 매뉴 -->
-    <font-awesome-icon :icon="['fas', 'ellipsis-vertical']" class="dots-menu" ref="dotsMenuIcon" v-if="userData.projectLeaderYN === 'N'" @click="kebabMenu" />
-    <!-- && userData.memberId !== authStore.user.memberId -->
+    <font-awesome-icon
+      :icon="['fas', 'ellipsis-vertical']"
+      class="dots-menu"
+      ref="dotsMenuIcon"
+      v-if="userData.projectLeaderYN === 'N' && userData.memberId !== authStore.user.memberId"
+      @click="kebabMenu"
+    />
 
     <KebabMemberMenu :showMenu="showMenu" @closeMenu="closeMenu" :isProjectLeader="userData.projectLeaderYN" class="kebab-menu" />
   </div>
