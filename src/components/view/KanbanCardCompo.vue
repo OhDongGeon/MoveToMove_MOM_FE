@@ -75,7 +75,7 @@ export default {
     // task_size에 따른 배경색 및 텍스트 결정
     const taskSizeStyle = computed(() => {
       let backgroundColor;
-      switch (props.card.task_size) {
+      switch (props.card.taskSize) {
         case '0': // Small
           backgroundColor = '#CEF2CE';
           break;
@@ -95,7 +95,7 @@ export default {
     });
 
     const taskSizeText = computed(() => {
-      switch (props.card.task_size) {
+      switch (props.card.taskSize) {
         case '0':
           return 'Small';
         case '1':
