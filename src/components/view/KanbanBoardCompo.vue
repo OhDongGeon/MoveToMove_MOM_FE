@@ -12,7 +12,17 @@
                 <!-- 트리뷰에 draggable을 적용 -->
                 <draggable v-model="folderStore.folderData" :move="checkMove" group="folders" item-key="id" @end="onDragEnd">
                   <template #item="{ element }">
-                    <v-treeview :items="[element]" activatable open-on-click item-key="id" item-text="title" item-children="children" v-model="open" transition>
+                    <v-treeview
+                      :items="[element]"
+                      activatable
+                      open-on-click
+                      item-key="id"
+                      item-text="title"
+                      item-children="children"
+                      v-model="open"
+                      transition
+                      @click:open="folderClick"
+                    >
                       <!-- 폴더 아이콘 표시 -->
                       <template v-slot:prepend="{ item }">
                         <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{
@@ -51,7 +61,7 @@
         </v-expansion-panels>
 
         <!-- 참여자 컴포넌트 -->
-        <project-member-compo v-if="projectId" class="member"></project-member-compo>
+        <project-member-compo v-if="projectId" :projectId="projectId" class="member"></project-member-compo>
       </aside>
       <main class="main-content">
         <div v-if="projectId">
@@ -75,7 +85,7 @@
               :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
-                <div class="column">
+                <div class="column" v-if="cards && cards.length > 0">
                   <kanban-column
                     :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
@@ -189,27 +199,32 @@ export default {
       return true; // 모든 드래그를 허용하는 기본 설정
     };
 
-    // 폴더구조에서 파일 클릭 시
-    // 노드 클릭 이벤트 처리
+    const folderClick = () => {
+      projectId.value = null;
+    };
+
+    // 폴더구조에서 프로젝트 아이콘 클릭 시
     const onNodeClick = async (node) => {
       // 파일인지 확인 (children이 없으면 파일)
       if (!node.children || node.children.length === 0) {
-        console.log('파일(프로젝트) 정보:', node);
+        // console.log('파일(프로젝트) 정보:', node);
 
-        console.log('node.id: ', node.id);
+        // console.log('node.id: ', node.id);
 
         projectId.value = node.id;
         projectName.value = node.title;
         isProjectLeader.value = node.projectLeaderYN;
 
         try {
-          // 컬럼과 카드 데이터 로드
-          await kanbanColumnStore.loadColumns(projectId.value);
-          await kanbanCardStore.loadAllCards(projectId.value);
+          if (isProjectLeader.value) {
+            // 컬럼과 카드 데이터 로드
+            await kanbanColumnStore.loadColumns(projectId.value);
+            await kanbanCardStore.loadAllCards(projectId.value);
 
-          // 컬럼과 카드 데이터를 로그로 출력
-          // console.log('로드된 컬럼 데이터:', columns.value);
-          // console.log('로드된 카드 데이터:', cards.value);
+            // 컬럼과 카드 데이터를 로그로 출력
+            // console.log('로드된 컬럼 데이터:', columns.value);
+            // console.log('로드된 카드 데이터:', cards.value);
+          }
         } catch (e) {
           console.error('파일(프로젝트) 정보 로드 실패:', e);
         }
@@ -336,6 +351,7 @@ export default {
       folderStore, // Pinia 상태를 바로 사용
       columns, // 칸반 컬럼 데이터
       onDragEnd, // 폴더 드래그 앤 드랍
+      folderClick,
       checkMove,
       onNodeClick,
       open,
