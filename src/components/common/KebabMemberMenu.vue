@@ -9,20 +9,8 @@
       <span class="menu-text">내보내기</span>
     </div>
 
-    <alert-ok-cancel
-      :isVisible="isLeader"
-      @close="closeLeader"
-      message="팀장 권한을 이전 하시겠습니까?"
-      locationFlag="member-leader"
-    >
-    </alert-ok-cancel>
-    <alert-ok-cancel
-      :isVisible="isLeave"
-      @close="closeLeave"
-      message="프로젝트에서 내보시내겠습니까?"
-      locationFlag="member-leave"
-    >
-    </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isLeader" @close="closeLeader" message="팀장 권한을 이전 하시겠습니까?" locationFlag="member-leader"> </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isLeave" @close="closeLeave" message="프로젝트에서 내보시내겠습니까?" locationFlag="member-leave"> </alert-ok-cancel>
   </div>
 </template>
 
@@ -131,9 +119,9 @@ export default {
   background-color: #ffffff;
   border: 1.5px solid #6b9e9b;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  top: -3px;
-  left: 212px;
-  z-index: 9999;
+  top: -2px;
+  left: 248px;
+  z-index: 2000;
   padding: 10px 20px;
 }
 
@@ -141,6 +129,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: #ffffff;
   padding: 5px 0;
   font-size: 16px;
   cursor: pointer;

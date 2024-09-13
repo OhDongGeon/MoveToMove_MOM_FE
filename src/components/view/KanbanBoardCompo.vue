@@ -25,7 +25,9 @@
                     >
                       <!-- 폴더 아이콘 표시 -->
                       <template v-slot:prepend="{ item }">
-                        <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{ item.children ? 'mdi-folder' : 'mdi-clipboard-text' }}</v-icon>
+                        <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{
+                          item.children ? 'mdi-folder' : 'mdi-clipboard-text'
+                        }}</v-icon>
                       </template>
                     </v-treeview>
                   </template>
@@ -83,7 +85,7 @@
               :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
-                <div class="column">
+                <div class="column" v-if="cards && cards.length > 0">
                   <kanban-column
                     :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
@@ -186,9 +188,9 @@ export default {
     const onNodeClick = async (node) => {
       // 파일인지 확인 (children이 없으면 파일)
       if (!node.children || node.children.length === 0) {
-        console.log('파일(프로젝트) 정보:', node);
+        // console.log('파일(프로젝트) 정보:', node);
 
-        console.log('node.id: ', node.id);
+        // console.log('node.id: ', node.id);
 
         projectId.value = node.id;
         projectName.value = node.title;
