@@ -13,9 +13,7 @@
           </div>
           <!-- 초대 버튼 -->
           <div class="invite-button">
-            <round-button-item type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite">
-              참여자 초대 +
-            </round-button-item>
+            <round-button-item type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite"> 참여자 초대 + </round-button-item>
           </div>
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -25,7 +23,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'; // Vue의 ref를 가져옵니다.
+import { onMounted, ref, watch } from 'vue'; // Vue의 ref를 가져옵니다.
+import axios from '@/api/axiosInstance';
+
 import UserItem from '../common/combine/UserListItem.vue';
 import ProjectMemberInvite from './ProjectMemberInvite.vue';
 
@@ -34,9 +34,45 @@ export default {
     UserItem,
     ProjectMemberInvite,
   },
-  setup() {
+  props: {
+    projectId: {
+      type: Number,
+      required: true,
+    },
+  },
+  setup(props) {
     const members = ref([0]);
+    const localUsers = ref([]);
     const isInviteModalOpen = ref(false);
+
+    onMounted(() => {
+      if (props.projectId) {
+        fetchMembers(); // projectId가 존재할 때만 데이터를 조회합니다.
+      }
+    });
+
+    // projectId가 변경될 때마다 멤버 조회를 다시 수행
+    watch(
+      () => props.projectId,
+      (newProjectId) => {
+        if (newProjectId) {
+          fetchMembers(newProjectId);
+        }
+      },
+    );
+
+    const fetchMembers = async () => {
+      try {
+        if (props.projectId) {
+          const response = await axios.get(`/api/projects/${props.projectId}/members`);
+          console.log(response.data);
+
+          localUsers.value = response.data;
+        }
+      } catch (e) {
+        console.error('Error occurred during fetching users', e);
+      }
+    };
 
     // 프로젝트 멤버 초대 모달 열기
     const addMemberInvite = (event) => {
@@ -48,34 +84,6 @@ export default {
     const closeModal = () => {
       isInviteModalOpen.value = false;
     };
-
-    // 로컬 데이터로 users 배열을 생성, 이름을 localUsers로 변경
-    const localUsers = ref([
-      {
-        id: 1,
-        nickName: '피카츄',
-        profileUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent('pikachu')}&background=random`,
-        leaderYN: 'Y',
-      },
-      {
-        id: 2,
-        nickName: '파이리',
-        profileUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent('charmander')}&background=random`,
-        leaderYN: 'N',
-      },
-      {
-        id: 3,
-        nickName: '메타몽',
-        profileUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent('ditto')}&background=random`,
-        leaderYN: 'N',
-      },
-      {
-        id: 4,
-        nickName: '팬텀',
-        profileUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent('phantom')}&background=random`,
-        leaderYN: 'N',
-      },
-    ]);
 
     return {
       members,
