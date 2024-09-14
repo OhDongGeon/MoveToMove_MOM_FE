@@ -32,7 +32,7 @@
 
 <script>
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import { computed, nextTick, ref } from 'vue';
+import {computed, nextTick, onMounted, ref} from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
@@ -72,9 +72,12 @@ export default {
     const kanbanCardStore = useKanbanCardStore();
 
     // props.cards를 참조하는 computed 속성 사용
-    const computedCards = computed(() => {
-      return props.cards;
+    const computedCards = ref([]);
+    // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
+    onMounted(() => {
+      computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
     });
+    // const computedCards = kanbanCardStore.cards;
     const newCardTitle = ref('');
     const isCardAdd = ref(false);
     const cardInput = ref(null);
@@ -140,6 +143,7 @@ export default {
       // 같은 컬럼 내에서 카드 이동
       if (from === to && oldIndex !== newIndex) {
         emit('card-move', { oldIndex, newIndex, columnId: props.id });
+        computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
       }
       // 다른 컬럼으로 카드 이동
       else if (from !== to) {

@@ -108,16 +108,16 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
 
   // 컬럼 이동 시 호출하는 함수 columnId 업데이트
   const updateCardsByColumnId = (oldColumnId, newColumnId) => {
-    cards.value.forEach(card => {
-      if(card.columnId === oldColumnId) {
+    cards.value.forEach((card) => {
+      if (card.columnId === oldColumnId) {
         card.columnId = newColumnId;
       }
-    })
+    });
   };
 
   // 같은 컬럼 내에서의 카드 이동
   const moveCardWithinColumn = (columnId, oldIndex, newIndex) => {
-    const columnCards = cards.value.filter(card => card.columnId === columnId);
+    const columnCards = cards.value.filter((card) => card.columnId === columnId);
     const movedCard = columnCards.splice(oldIndex, 1)[0];
     columnCards.splice(newIndex, 0, movedCard);
 
@@ -125,19 +125,31 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     columnCards.forEach((card, index) => {
       card.sequence = index + 1; // 카드 시퀀스 업데이트
     });
+    // 전체 cards 배열에서 해당 컬럼의 카드 시퀀스 업데이트
+    cards.value = cards.value.map((card) => {
+      if (card.columnId === columnId) {
+        const updatedCard = columnCards.find((c) => c.id === card.id);
+        return updatedCard ? { ...card, sequence: updatedCard.sequence } : card;
+      }
+      return card;
+    });
+
+    // cards 배열을 시퀀스에 따라 정렬
+    cards.value.sort((a, b) => a.sequence - b.sequence);
 
     console.log(`Moved card within column ${columnId} from ${oldIndex} to ${newIndex}`);
+    
   };
 
   // 다른 컬럼으로의 카드 이동
   const moveCardToAnotherColumn = (cardId, fromColumnId, toColumnId, newIndex) => {
-    const cardIndex = cards.value.findIndex(card => card.id === cardId && card.columnId === fromColumnId);
+    const cardIndex = cards.value.findIndex((card) => card.id === cardId && card.columnId === fromColumnId);
     if (cardIndex !== -1) {
       const [movedCard] = cards.value.splice(cardIndex, 1);
       movedCard.columnId = toColumnId; // 컬럼 ID 업데이트
 
       // 새로운 컬럼의 위치에 카드 삽입
-      const toColumnCards = cards.value.filter(card => card.columnId === toColumnId);
+      const toColumnCards = cards.value.filter((card) => card.columnId === toColumnId);
       toColumnCards.splice(newIndex, 0, movedCard);
 
       // 시퀀스 업데이트
@@ -149,5 +161,14 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     }
   };
 
-  return { cards, loadAllCards, loadCardDetails, getCardsByColumnId, updateKanbanCardTitle, updateCardsByColumnId, moveCardWithinColumn, moveCardToAnotherColumn };
+  return {
+    cards,
+    loadAllCards,
+    loadCardDetails,
+    getCardsByColumnId,
+    updateKanbanCardTitle,
+    updateCardsByColumnId,
+    moveCardWithinColumn,
+    moveCardToAnotherColumn,
+  };
 });
