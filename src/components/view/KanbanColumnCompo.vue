@@ -25,7 +25,7 @@
       </template>
     </draggable>
     <!-- 칸반 카드 오픈 슬라이드 -->
-    <KanbanCardOpen :isVisible="isKanbanCardOpen" :card="selectedCard" @close="closeKanbanCard" />
+    <KanbanCardOpen :isVisible="isKanbanCardOpen" :card="selectedCard" @close="closeKanbanCard" @delete-card="deleteCard" />
     <div v-if="isKanbanCardOpen" class="overlay"></div>
   </div>
 </template>
@@ -67,7 +67,7 @@ export default {
       default: null,
     },
   },
-  emits: ['open-card', 'close-card', 'card-move'],
+  emits: ['open-card', 'close-card', 'card-move', 'delete-card'],
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
 
@@ -165,6 +165,11 @@ export default {
       }
     };
 
+    // 칸반 카드 삭제 (보드에게 전달)
+    const deleteCard = (projectId) => {
+      emit('delete-card', projectId);
+    };
+
     return {
       isKanbanCardOpen,
       selectedCard,
@@ -179,6 +184,7 @@ export default {
       dynamicUnderlineColor,
       onCardDrop,
       computedCards,
+      deleteCard,
     };
   },
 };
