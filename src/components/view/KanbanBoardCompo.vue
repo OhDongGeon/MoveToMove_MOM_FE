@@ -95,11 +95,12 @@
               :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
-                <div class="column" :key="col.kanbanColumnId">
+                <div class="column kanban-column" :key="col.kanbanColumnId" :data-column-id="col.kanbanColumnId">
                   <kanban-column
                     :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
                     :cards="filteredCardsByColumn(col.kanbanColumnId)"
+                    :columnId="col.kanbanColumnId"
                     :isCardOpen="isCardOpen"
                     @card-move="onCardMove"
                     @open-card="openCard"
@@ -379,24 +380,15 @@ export default {
 
     // 칸반 카드 이동 시
     const onCardMove = (event) => {
-      const { oldIndex, newIndex, element } = event;
-
-      if (!element) {
-        console.error('Error: moved card data is undefined.');
-        return;
-      }
-
-      const movedCard = element;
-
-      // 카드가 정상적으로 이동된 경우에만 처리
-      if (movedCard && movedCard.columnId !== undefined) {
-        // 카드의 이동을 반영
-        kanbanCardStore.moveCard(movedCard.columnId, movedCard.columnId, movedCard.id);
-
-        // 필요 시 서버에 카드 이동 사항을 업데이트할 수 있습니다.
-        console.log(`Card moved from position ${oldIndex} to ${newIndex}`, movedCard);
-      } else {
-        console.error('Error: Moved card is invalid or missing columnId.');
+      const { oldIndex, newIndex, columnId, cardId, fromColumnId, toColumnId } = event;
+      if (fromColumnId && toColumnId && fromColumnId !== toColumnId) {
+        // 컬럼 간 카드 이동 처리
+        console.log(`Card ${cardId} moved from column ${fromColumnId} to column ${toColumnId}`);
+        kanbanCardStore.moveCardToAnotherColumn(cardId, fromColumnId, toColumnId, newIndex);
+      } else if (columnId) {
+        // 같은 컬럼 내 카드 이동 처리
+        console.log(`Card moved in column ${columnId} from ${oldIndex} to ${newIndex}`);
+        kanbanCardStore.moveCardWithinColumn(columnId, oldIndex, newIndex);
       }
     };
 

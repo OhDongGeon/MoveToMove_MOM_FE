@@ -63,16 +63,12 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
     sortColumns();
     // TODO: 변경된 컬럼을 서버에 저장하거나 필요한 작업
 
-    updateCardsForMovedColumn();
   };
   // 컬럼 순서대로 정렬
   const sortColumns = () => {
     columns.value.sort((a, b) => a.sequence - b.sequence);
   };
 
-  const updateCardsForMovedColumn = () => {
-    kanbanCardStore.updateCardsForMovedColumn(columns.value);
-  };
 
   return {
     columns,

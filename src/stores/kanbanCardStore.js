@@ -84,20 +84,6 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     return cards.value.filter((card) => card.columnId === columnId);
   };
 
-  // 칸반 컬럼 움직임에 따른 카드 움직임
-  const updateCardsForMovedColumn = (updatedColumns) => {
-    // 각 컬럼의 새로운 인덱스와 함께 카드 업데이트
-    updatedColumns.forEach((column) => {
-      cards.value.forEach((card) => {
-        if (card.columnId === column.id) {
-          // 카드의 columnId를 업데이트된 컬럼의 인덱스로 설정
-          card.columnId = column.id;
-          console.log(`Updated Card ID: ${card.id} to Column ID: ${card.columnId}`);
-        }
-      });
-    });
-  };
-
   // 칸반 카드 제목 수정
   const updateKanbanCardTitle = async (cardId, updateColumn, updateData) => {
     try {
@@ -127,6 +113,41 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         card.columnId = newColumnId;
       }
     })
-  }
-  return { cards, loadAllCards, loadCardDetails, getCardsByColumnId, updateCardsForMovedColumn, updateKanbanCardTitle, updateCardsByColumnId };
+  };
+
+  // 같은 컬럼 내에서의 카드 이동
+  const moveCardWithinColumn = (columnId, oldIndex, newIndex) => {
+    const columnCards = cards.value.filter(card => card.columnId === columnId);
+    const movedCard = columnCards.splice(oldIndex, 1)[0];
+    columnCards.splice(newIndex, 0, movedCard);
+
+    // 시퀀스 업데이트
+    columnCards.forEach((card, index) => {
+      card.sequence = index + 1; // 카드 시퀀스 업데이트
+    });
+
+    console.log(`Moved card within column ${columnId} from ${oldIndex} to ${newIndex}`);
+  };
+
+  // 다른 컬럼으로의 카드 이동
+  const moveCardToAnotherColumn = (cardId, fromColumnId, toColumnId, newIndex) => {
+    const cardIndex = cards.value.findIndex(card => card.id === cardId && card.columnId === fromColumnId);
+    if (cardIndex !== -1) {
+      const [movedCard] = cards.value.splice(cardIndex, 1);
+      movedCard.columnId = toColumnId; // 컬럼 ID 업데이트
+
+      // 새로운 컬럼의 위치에 카드 삽입
+      const toColumnCards = cards.value.filter(card => card.columnId === toColumnId);
+      toColumnCards.splice(newIndex, 0, movedCard);
+
+      // 시퀀스 업데이트
+      toColumnCards.forEach((card, index) => {
+        card.sequence = index + 1; // 카드 시퀀스 업데이트
+      });
+
+      console.log(`Moved card ${cardId} from column ${fromColumnId} to column ${toColumnId} at position ${newIndex}`);
+    }
+  };
+
+  return { cards, loadAllCards, loadCardDetails, getCardsByColumnId, updateKanbanCardTitle, updateCardsByColumnId, moveCardWithinColumn, moveCardToAnotherColumn };
 });
