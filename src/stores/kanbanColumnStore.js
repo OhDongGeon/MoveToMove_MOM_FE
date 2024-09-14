@@ -11,7 +11,7 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
   // 서버에서 컬럼 데이터 로드
   const loadColumns = async (projectId) => {
     try {
-      console.log('store', projectId);
+      // console.log('store', projectId);
 
       const response = await axiosInstance.get(`/api/projects/${projectId}/kanban-columns`); // axiosInstance 사용
       columns.value = response.data;

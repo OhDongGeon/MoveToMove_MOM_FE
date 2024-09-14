@@ -1,18 +1,25 @@
 <template>
   <div class="modal-overlay" v-if="isVisible" @click.self="closeModal">
-    <div class="modal-content" @click.stop>
+    <div @click.stop>
       <header class="modal-header">
         <h3>{{ title }}</h3>
-        <button @click="closeModal">X</button>
+        <font-awesome-icon :icon="['fas', 'xmark']" class="close-icon" @click="closeModal" />
       </header>
+
       <hr class="divider" />
+
       <div class="modal-body">
         <input type="text" v-model="searchQuery" placeholder="검색" class="search-input" />
 
-        <div class="item-list">
-          <div v-for="item in filteredItems" :key="item.id" class="item" @click="toggleSelectItem(item)" :class="{ 'selected-item': isSelected(item) }">
-            <input type="checkbox" :checked="isSelected(item)" style="display: none" />
-            <img :src="item.avatar" alt="avatar" class="avatar" />
+        <div class="item-list modal-content">
+          <div v-for="item in filteredItems" :key="item.id" @click="toggleSelectItem(item)" class="item" :class="{ 'selected-item': isItemSelected(item) }">
+            <input type="checkbox" :checked="isItemSelected(item)" />
+            <template v-if="multiple">
+              <ProfileImage :src="item.avatar" :alt="item.name + ' Avatar'" :width="25" :height="25" />
+            </template>
+            <template v-else>
+              <font-awesome-icon :icon="['fas', 'circle-dot']" :style="{ color: item.color }" />
+            </template>
             {{ item.name }}
           </div>
         </div>
@@ -27,9 +34,13 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, watch } from 'vue';
+import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 
 export default defineComponent({
+  components: {
+    ProfileImage,
+  },
   props: {
     title: {
       type: String,
@@ -54,20 +65,17 @@ export default defineComponent({
     const searchQuery = ref('');
     const selectedItems = ref([]);
 
-    // 검색어가 비어있거나 포함된 항목만 필터링
+    // 필터링
     const filteredItems = computed(() => {
       return searchQuery.value ? props.items.filter((item) => item.name.toLowerCase().includes(searchQuery.value.toLowerCase())) : props.items;
     });
-
-    const closeModal = () => {
-      emit('close');
-    };
 
     // 아이템 선택/해제 메서드
     const toggleSelectItem = (item) => {
       if (props.multiple) {
         // 다중 선택인 경우
         const index = selectedItems.value.findIndex((selected) => selected.id === item.id);
+
         if (index > -1) {
           selectedItems.value.splice(index, 1); // 이미 선택된 경우 해제
         } else {
@@ -79,24 +87,38 @@ export default defineComponent({
       }
     };
 
-    // 아이템이 선택되었는지 확인하는 메서드
-    const isSelected = (item) => {
-      return selectedItems.value.some((selected) => selected.id === item.id);
-    };
+    // 선택 확인
+    const isItemSelected = computed(() => {
+      const selectedItemIds = selectedItems.value.map((item) => item.id);
+      return (item) => selectedItemIds.includes(item.id);
+    });
 
     // 선택된 항목을 부모에게 전달
     const confirmSelection = () => {
       emit('confirm', selectedItems.value);
-      closeModal();
     };
+
+    // 모달 창 닫기
+    const closeModal = () => {
+      emit('close');
+    };
+
+    // props.items가 변경될 때마다 selectedItems를 업데이트
+    watch(
+      () => props.items,
+      (newItems) => {
+        selectedItems.value = newItems.filter((item) => item.selected);
+      },
+      { immediate: true }, // 컴포넌트가 마운트될 때 즉시 실행
+    );
 
     return {
       searchQuery,
       filteredItems,
       closeModal,
       toggleSelectItem,
-      isSelected,
       confirmSelection,
+      isItemSelected,
     };
   },
 });
@@ -104,102 +126,107 @@ export default defineComponent({
 
 <style scoped>
 .modal-overlay {
-  position: absolute; /* 클릭된 요소에 대해 절대 위치 */
-  top: 100%; /* 클릭된 요소 바로 아래에 표시 */
-  left: 0; /* 클릭된 요소의 왼쪽에 맞춤 */
-  width: 100%; /* 부모 요소의 너비에 맞춤 */
-  background-color: white; /* 모달 창 배경색 */
-  border: 1px solid #ddd; /* 테두리 설정 */
-  border-radius: 8px; /* 둥근 모서리 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* 그림자 효과 */
-  z-index: 9999; /* 다른 요소보다 위에 표시 */
-  padding: 10px; /* 모달 안쪽 여백 */
-  max-width: 400px; /* 최대 너비 설정 */
-}
-
-.modal-content {
-  width: 100%; /* 부모 요소의 너비에 맞춤 */
-  max-height: 400px; /* 최대 높이 설정을 키워 더 많은 내용이 보이도록 */
-  overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
-}
-/* 스크롤 바 전체 */
-.modal-content::-webkit-scrollbar {
-  width: 8px; /* 세로 스크롤 바 너비 */
-  height: 8px; /* 가로 스크롤 바 높이 */
-}
-
-/* 스크롤 바 막대 */
-.modal-content::-webkit-scrollbar-thumb {
-  background-color: #6b9e9b; /* 스크롤 바 색상 */
-  border-radius: 10px; /* 스크롤 바의 둥근 모서리 */
-  border: 2px solid #f0f8ff; /* 스크롤 바 주위의 빈 공간과 배경색 */
-}
-
-/* 스크롤 바의 트랙(배경) */
-.modal-content::-webkit-scrollbar-track {
-  background: #e0f7fa; /* 스크롤 바 트랙 배경색 */
-  border-radius: 10px; /* 트랙의 둥근 모서리 */
+  width: 100%;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid #6b9e9b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 5px;
+}
+
+.close-icon {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  font-size: 20px;
+  color: #d63f3f;
+  cursor: pointer;
+}
+
+.divider {
+  border: 0;
+  height: 1px;
+  background: #6b9e9b; /* 구분선 색상 */
   margin-bottom: 10px;
 }
-.modal-body {
-  margin-top: 20px;
-}
+
 .search-input {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin-bottom: 10px;
   border: 1px solid black;
-  border-radius: 8px;
-  height: 50px;
+  border-radius: 5px;
+  height: 30px;
+  font-size: 15px;
 }
+
 .item {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* 요소들을 왼쪽으로 정렬 */
-  margin-bottom: 8px;
-  border: 2px solid #6b9e9b;
-  border-radius: 10px;
-  height: 45px;
+  margin-bottom: 10px;
+  border: 1.5px solid #6b9e9b;
+  border-radius: 5px;
+  height: 40px;
   gap: 5px;
-  padding: 8px;
-  cursor: pointer; /* 클릭할 수 있도록 커서 추가 */
+  padding: 10px;
+  cursor: pointer;
 }
+
 .item.selected-item {
+  width: 100%;
   background-color: #e0f7fa; /* 선택된 항목의 배경색 변경 */
 }
+
 .item input[type='checkbox'] {
-  display: none; /* 체크박스 숨기기 */
+  /* display: none; 체크박스 숨기기 */
+  margin-right: 10px;
 }
+
+.modal-content {
+  max-height: 200px; /* 최대 높이 설정을 키워 더 많은 내용이 보이도록 */
+  overflow-y: auto; /* 내용이 많을 경우 스크롤 가능 */
+}
+
 .avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
   margin-right: 10px;
 }
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
 }
-button {
-  margin-left: 10px;
-  padding: 5px 10px;
-  border: none;
-  background-color: #d63f3f;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
+
+/* 이미지 */
+.avatar {
+  margin-right: 10px;
+  border: 1.5px solid #6b9e9b;
 }
-.divider {
-  border: 0;
-  height: 1px;
-  background: #6b9e9b; /* 구분선 색상 */
-  margin-bottom: 15px;
+
+/* 스크롤 바 전체 */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* 스크롤 바 막대 */
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #6b9e9b;
+  border-radius: 10px;
+  border: 2px solid #ffffff;
+}
+
+/* 스크롤 바의 트랙(배경) */
+.modal-content::-webkit-scrollbar-track {
+  border-radius: 10px;
 }
 </style>

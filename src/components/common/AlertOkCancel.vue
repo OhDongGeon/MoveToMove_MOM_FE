@@ -31,9 +31,7 @@ export default {
   setup(props, { emit }) {
     // 확인 (locationFlag 기준으로 각각 개발 진행)
     const ok = () => {
-      if (props.locationFlag === 'project') {
-        console.log('프로젝트 나가기');
-      }
+      emit('ok');
     };
 
     // 닫기

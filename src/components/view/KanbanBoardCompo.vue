@@ -81,7 +81,13 @@
               <label>{{ projectName }}</label>
             </div>
             <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" class="ellipsis" />
-            <KebabProjectMenu v-if="showMenu !== null" :showMenu="showMenu" @closeMenu="closeMenu" isProjectLeader="Y" />
+            <KebabProjectMenu
+              v-if="showMenu !== null"
+              :showMenu="showMenu"
+              @closeMenu="closeMenu"
+              @projectDeleted="handleProjectDeleted"
+              :isProjectLeader="isProjectLeader"
+            />
           </div>
           <div class="project-content">
             <draggable
@@ -119,7 +125,11 @@
 
 <script>
 import { useFolderStore } from '@/stores/folderStrore';
+import { useKanbanCardStore } from '@/stores/kanbanCardStore';
+import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import { useNavigationStore } from '@/stores/navigationStore';
+import { useProjectStore } from '@/stores/projectStore';
+
 import { nextTick, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
 
 import { useRouter } from 'vue-router';
@@ -127,8 +137,6 @@ import { VTreeview } from 'vuetify/labs/VTreeview';
 
 import draggable from 'vuedraggable'; // VueDraggableNext를 import
 
-import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import KebabProjectMenu from '../common/KebabProjectMenu.vue';
 import ProjectMemberCompo from '../common/ProjectMemberCompo.vue';
 import KanbanColumn from './KanbanColumnCompo.vue';
@@ -152,6 +160,7 @@ export default {
     const kanbanColumnStore = useKanbanColumnStore(); // 칸반 컬럼 Pinia store 사용
     const kanbanCardStore = useKanbanCardStore(); // 칸반 카드 Pinia store 사용
     const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
+    const projectStore = useProjectStore(); // Pinia 스토어 인스턴스 생성
 
     const columns = ref([]);
     const cards = ref([]);
@@ -171,6 +180,9 @@ export default {
     // 프로젝트 명
     const projectName = ref('');
 
+    // 폴더인지 프로젝트인지 구분자
+    const folderProjectType = ref('');
+
     // 컬럼 칸반 데이터 조회 v-if(66줄)
     const isDataLoaded = ref(false);
 
@@ -187,9 +199,9 @@ export default {
         // 프로젝트 생성 화면에서 전달된 projectId (쿼리 파라미터에서 가져오기)
         const queriedProjectId = router.currentRoute.value.query.projectId || null;
 
-        console.log('쿼리 파라미터:', queriedProjectId);
+        // console.log('쿼리 파라미터:', queriedProjectId);
 
-        console.log('ddddd: ', folderData.value);
+        // console.log('ddddd: ', folderData.value);
 
         if (queriedProjectId && folderData.value) {
           console.log('들어옴');
@@ -250,7 +262,7 @@ export default {
 
     // 폴더구조에서 프로젝트 아이콘 클릭 시
     const onNodeClick = async (node) => {
-      console.log('선택된 노드', node);
+      // console.log('선택된 노드', node);
 
       // 클릭된 항목의 ID를 저장
       selectedNodeId.value = node.id;
@@ -264,10 +276,15 @@ export default {
         projectId.value = node.id;
         projectName.value = node.title;
         isProjectLeader.value = node.projectLeaderYN;
+        folderProjectType.value = node.type;
+
+        // console.log('type: ', isProjectLeader.value);
+        // Pinia 스토어에 프로젝트 데이터 객체로 저장
+        projectStore.setProjectData(node);
 
         try {
           // 프로젝트 클릭 시 해당 데이터 서버 요청 후 화면 렌더링
-          if (isProjectLeader.value) {
+          if (folderProjectType.value === 'project') {
             // 컬럼과 카드 데이터 로드
             await kanbanColumnStore.loadColumns(projectId.value);
             await kanbanCardStore.loadAllCards(projectId.value);
@@ -283,6 +300,24 @@ export default {
           isDataLoaded.value = false;
         }
       }
+    };
+
+    // 프로젝트 나가기
+    const handleProjectDeleted = () => {
+      console.log('프로젝트 나가기함');
+
+      // 폴더 스토어에서 해당 프로젝트 삭제
+      folderStore.deleteByIdAndType(projectId.value, folderProjectType.value);
+
+      // 프로젝트 관련 상태 초기화
+      projectId.value = null;
+      projectName.value = '';
+      isProjectLeader.value = false;
+      folderProjectType.value = '';
+      isDataLoaded.value = false;
+      columns.value = [];
+      cards.value = [];
+      showMenu.value = false;
     };
 
     /* 폴더 부분 */
@@ -464,6 +499,7 @@ export default {
       openCard,
       closeCard,
       isDataLoaded,
+      handleProjectDeleted, // 프로젝트 나가기
     };
   },
 };

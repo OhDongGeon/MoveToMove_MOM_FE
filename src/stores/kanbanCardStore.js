@@ -84,8 +84,31 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     return cards.value.filter((card) => card.columnId === columnId);
   };
 
-  // 칸반 카드 제목 수정
-  const updateKanbanCardTitle = async (cardId, updateColumn, updateData) => {
+  // 칸반 컬럼 움직임에 따른 카드 움직임
+  const updateCardsForMovedColumn = (updatedColumns) => {
+    // 각 컬럼의 새로운 인덱스와 함께 카드 업데이트
+    updatedColumns.forEach((column) => {
+      cards.value.forEach((card) => {
+        if (card.columnId === column.id) {
+          // 카드의 columnId를 업데이트된 컬럼의 인덱스로 설정
+          card.columnId = column.id;
+          console.log(`Updated Card ID: ${card.id} to Column ID: ${card.columnId}`);
+        }
+      });
+    });
+  };
+
+  // 컬럼 이동 시 호출하는 함수 columnId 업데이트
+  const updateCardsByColumnId = (oldColumnId, newColumnId) => {
+    cards.value.forEach((card) => {
+      if (card.columnId === oldColumnId) {
+        card.columnId = newColumnId;
+      }
+    });
+  };
+
+  // 칸반 카드 수정
+  const updateKanbanCard = async (cardId, updateColumn, updateData) => {
     try {
       const form = {
         updateColumn: updateColumn,
@@ -93,6 +116,14 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       };
 
       await axiosInstance.patch(`/api/kanban-cards/${cardId}`, form);
+
+      if (updateColumn === 'task_size') {
+        updateColumn = 'taskSize';
+      } else if (updateColumn === 'start_at') {
+        updateColumn = 'startAt';
+      } else if (updateColumn === 'end_at') {
+        updateColumn = 'endAt';
+      }
 
       const index = cards.value.findIndex((card) => card.id === cardId);
       if (index !== -1) {
@@ -104,15 +135,6 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     } catch (error) {
       console.error(error);
     }
-  };
-
-  // 컬럼 이동 시 호출하는 함수 columnId 업데이트
-  const updateCardsByColumnId = (oldColumnId, newColumnId) => {
-    cards.value.forEach((card) => {
-      if (card.columnId === oldColumnId) {
-        card.columnId = newColumnId;
-      }
-    });
   };
 
   // 같은 컬럼 내에서의 카드 이동
@@ -138,7 +160,6 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     cards.value.sort((a, b) => a.sequence - b.sequence);
 
     console.log(`Moved card within column ${columnId} from ${oldIndex} to ${newIndex}`);
-    
   };
 
   // 다른 컬럼으로의 카드 이동
@@ -161,14 +182,43 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     }
   };
 
+  // 칸반 카드 담당자 수정
+  const updateKanbanCardMember = async (cardId, members) => {
+    try {
+      const memberIdList = members.map((member) => member.id);
+
+      const form = {
+        memberIds: memberIdList,
+      };
+
+      await axiosInstance.patch(`/api/kanban-cards/${cardId}/members`, form);
+
+      const updatedColumn = members.map((member) => ({
+        memberId: member.id,
+        email: member.email,
+        nickName: member.name,
+        profileUrl: member.avatar,
+      }));
+
+      const index = cards.value.findIndex((card) => card.id === cardId);
+      if (index !== -1) {
+        cards.value[index].members = updatedColumn;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return {
     cards,
     loadAllCards,
     loadCardDetails,
     getCardsByColumnId,
-    updateKanbanCardTitle,
-    updateCardsByColumnId,
     moveCardWithinColumn,
     moveCardToAnotherColumn,
+    updateCardsForMovedColumn,
+    updateCardsByColumnId,
+    updateKanbanCard,
+    updateKanbanCardMember,
   };
 });
