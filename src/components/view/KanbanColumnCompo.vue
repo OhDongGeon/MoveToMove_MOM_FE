@@ -31,14 +31,12 @@
 </template>
 
 <script>
-// import { useNavigationStore } from '@/stores/navigationStore';
-// import { useRouter } from 'vue-router';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import { computed, nextTick, ref } from 'vue';
+import {computed, nextTick, onMounted, ref} from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
-import { useWebSocketStore } from '@/stores/webSocketStore';
+// import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   components: {
@@ -64,19 +62,22 @@ export default {
       type: String,
       default: '#6b9e9b',
     },
+    columnId: {
+      type: String,
+      default: null,
+    },
   },
   emits: ['open-card', 'close-card', 'card-move'],
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
-    // const router = useRouter();
-    // const navigationStore = useNavigationStore();
 
-    const localCards = [...props.cards];
-    // const localCards = ref([...props.cards]);
     // props.cards를 참조하는 computed 속성 사용
-    const computedCards = computed(() => {
-      return props.cards;
+    const computedCards = ref([]);
+    // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
+    onMounted(() => {
+      computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
     });
+    // const computedCards = kanbanCardStore.cards;
     const newCardTitle = ref('');
     const isCardAdd = ref(false);
     const cardInput = ref(null);
@@ -90,13 +91,6 @@ export default {
     const selectedCard = ref(null); // 선택한 카드
 
     const openKanbanCard = (card) => {
-      // console.log(`칸반카드ID: ${card.id}`);
-      // console.log(`칸반카드: ${card}`);
-      // navigationStore.setActiveItem('kanban');
-      // router.push({
-      //   name: 'KanbanCardCompo',
-      //   query: { id: card.id, title: card.title },
-      // });
       console.log(card);
 
       selectedCard.value = card;
@@ -135,7 +129,6 @@ export default {
           members: [],
         };
         kanbanCardStore.addCard(props.id, newCard.title); // 수정된 부분
-        localCards.value.push(newCard);
         newCardTitle.value = '';
         isCardAdd.value = false;
       }
@@ -143,56 +136,32 @@ export default {
 
     const onCardDrop = async (event) => {
       // async를 추가하여 비동기 함수로 선언
-      const { oldIndex, newIndex } = event;
-      const movedCard = localCards.value[oldIndex];
+      const { from, to, oldIndex, newIndex, item } = event;
 
-      if (oldIndex !== newIndex) {
-        // 로컬에서 카드 순서 변경
-        localCards.value.splice(oldIndex, 1);
-        localCards.value.splice(newIndex, 0, movedCard);
+      console.log('onCardDrop event:', event); // 이벤트 로그 출력
 
-        // WebSocket을 통해 서버로 카드 이동 정보를 전송
-        const message = {
-          projectId: props.id, // 현재 프로젝트 ID
-          cardId: movedCard.id, // 이동된 카드 ID
-          fromIndex: oldIndex, // 이동 전 위치
-          toIndex: newIndex, // 이동 후 위치
-          type: 'CARD_MOVE',
-        };
-        console.log('Card move message:', message); // 메시지 전송 전에 로그 출력
-        // WebSocket 스토어를 통해 메시지 전송
-        const webSocketStore = useWebSocketStore(); // WebSocket Store 사용
-        webSocketStore.sendMessageToProject(message); // 메시지 전송 함수 호출
-        // try {
-        //   // 서버에 순서 변경 요청 보내기 (비동기 작업)
-        //   await axiosInstance.put('/api/kanban-cards/order', {  // await로 비동기 작업 완료 대기
-        //     cardId: movedCard.id,
-        //     oldIndex: oldIndex,
-        //     newIndex: newIndex,
-        //   });
-        //   console.log('서버에 카드 순서가 성공적으로 업데이트되었습니다.');
-        // } catch (error) {
-        //   console.error('카드 순서 업데이트 실패:', error);
-        //   // 오류 발생 시, 원래 상태로 복구
-        //   localCards.value.splice(newIndex, 1);
-        //   localCards.value.splice(oldIndex, 0, movedCard);
-        // }
-        emit('card-move', props.id, props.id, movedCard.id);
+      // 같은 컬럼 내에서 카드 이동
+      if (from === to && oldIndex !== newIndex) {
+        emit('card-move', { oldIndex, newIndex, columnId: props.id });
+        computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+      }
+      // 다른 컬럼으로 카드 이동
+      else if (from !== to) {
+        const fromColumnId = props.columnId; // 현재 컬럼의 ID를 사용
 
-        // const id = props.id;
-        // console.log(id);
+        // `to` 요소의 상위 `.column` 요소에서 `data-column-id` 속성을 가져옴
+        const toColumnElement = to.closest('.column'); // `.column`으로 부모 요소를 찾음
+        const toColumnId = toColumnElement?.dataset?.columnId; // `data-column-id` 접근
 
-        // const toColumnId = event.to.closest('.column').dataset.columnId; // 이동 후 컬럼 ID
-        // console.log('to Column ID:', toColumnId);
+        if (!toColumnId) {
+          console.error('Cannot determine toColumnId from dataset.');
+          return;
+        }
 
-        // const fromIndex = event.oldIndex; // 드래그 시작 위치
-        // const toIndex = event.newIndex; // 드롭 위치
-        // console.log(fromIndex);
-        // console.log(toIndex);
-        // console.log('카드 드래그 앤 드롭', event);
-        // const form = { kanbanColumnId: toColumnId, cardSeq: toIndex };
+        const cardId = item.dataset.cardId; // 이동된 카드 ID
 
-        // cardDragAndDrop(form);
+        // 컬럼 간 카드 이동 이벤트를 상위 컴포넌트로 전송
+        emit('card-move', { cardId, fromColumnId, toColumnId, oldIndex, newIndex });
       }
     };
 
@@ -200,7 +169,6 @@ export default {
       isKanbanCardOpen,
       selectedCard,
       closeKanbanCard,
-      localCards,
       newCardTitle,
       isCardAdd,
       startEditing,
