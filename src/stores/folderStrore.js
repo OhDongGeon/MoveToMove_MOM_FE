@@ -67,5 +67,27 @@ export const useFolderStore = defineStore('folder', {
           return a.children ? -1 : 1;
         });
     },
+    // 폴더 또는 프로젝트를 삭제하는 함수
+    deleteByIdAndType(id, type) {
+      console.log('폴더스토어 삭제 데이터: ', id, type);
+
+      const deleteRecursive = (data) => {
+        return data.filter((item) => {
+          // 프로젝트나 폴더가 일치하지 않는 경우 유지
+          if (item.id !== id || item.type !== type) {
+            // 자식이 있는 폴더일 경우 하위 폴더/프로젝트도 확인
+            if (item.children && item.children.length > 0) {
+              item.children = deleteRecursive(item.children);
+            }
+            return true;
+          }
+          // 일치하는 경우 삭제
+          return false;
+        });
+      };
+
+      // 최상위 폴더 및 프로젝트에서 삭제 실행
+      this.folderData = deleteRecursive(this.folderData);
+    },
   },
 });
