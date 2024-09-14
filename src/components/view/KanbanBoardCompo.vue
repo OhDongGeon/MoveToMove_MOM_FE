@@ -10,7 +10,7 @@
             <v-expansion-panel-text class="panel-text">
               <div class="tree-container">
                 <!-- 트리뷰에 draggable을 적용 -->
-                <draggable v-model="folderStore.folderData" :move="checkMove" group="folders" item-key="id" @end="onDragEnd">
+                <draggable v-model="folderStore.folderData" :move="checkMove" group="folders" item-key="id" @end="onFolderDragEnd">
                   <template #item="{ element }">
                     <v-treeview
                       :items="[element]"
@@ -23,11 +23,21 @@
                       transition
                       @click:open="folderClick"
                     >
-                      <!-- 폴더 아이콘 표시 -->
+                      <!-- 폴더 아이콘 표시  -->
                       <template v-slot:prepend="{ item }">
-                        <v-icon @click="onNodeClick(item)" :color="item.children ? '#ff5722' : '#2196f3'">{{
-                          item.children ? 'mdi-folder' : 'mdi-clipboard-text'
-                        }}</v-icon>
+                        <div class="folder-icon" @click="onNodeClick(item)">
+                          <v-icon :color="item.children ? '#ff5722' : '#2196f3'" :class="{ 'selected-node': item.id === selectedNodeId }">{{
+                            item.children ? 'mdi-folder' : 'mdi-clipboard-text'
+                          }}</v-icon>
+                        </div>
+                      </template>
+
+                      <!-- 폴더일 때만 수정 및 삭제 아이콘 추가 -->
+                      <template v-slot:append="{ item }">
+                        <template v-if="item.children">
+                          <font-awesome-icon icon="pencil" class="icon-hover" @click="editFolder(item)" />
+                          <font-awesome-icon icon="trash" class="icon-hover" @click="deleteFolder(item)" />
+                        </template>
                       </template>
                     </v-treeview>
                   </template>
@@ -137,9 +147,9 @@ export default {
 
     // ref를 사용하여 상태를 정의합니다.
     const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
-    const navigationStore = useNavigationStore(); // Pinia store 사용
-    const kanbanColumnStore = useKanbanColumnStore(); // Pinia store 사용
-    const kanbanCardStore = useKanbanCardStore();
+    const navigationStore = useNavigationStore(); // 메뉴 클릭 Pinia store 사용
+    const kanbanColumnStore = useKanbanColumnStore(); // 칸반 컬럼 Pinia store 사용
+    const kanbanCardStore = useKanbanCardStore(); // 칸반 카드 Pinia store 사용
     const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
 
     const columns = ref([]);
@@ -163,12 +173,37 @@ export default {
     // 컬럼 칸반 데이터 조회 v-if(66줄)
     const isDataLoaded = ref(false);
 
+    // 클릭된 노드를 추적할 상태
+    const selectedNodeId = ref(null);
+
     // 화면 열렸을 때 onMounted
     onMounted(async () => {
       try {
         // 폴더 데이터 로드
         await folderStore.fetchFolders(); // 데이터를 Pinia에 저장
         folderData.value = folderStore.folderData; // Pinia store의 folderData를 ref에 저장
+
+        // 프로젝트 생성 화면에서 전달된 projectId (쿼리 파라미터에서 가져오기)
+        const queriedProjectId = router.currentRoute.value.query.projectId || null;
+
+        console.log('쿼리 파라미터:', queriedProjectId);
+
+        console.log('ddddd: ', folderData.value);
+
+        if (queriedProjectId && folderData.value) {
+          console.log('들어옴');
+
+          const selectedProject = folderData.value
+            .filter((item) => item.type === 'project') // 프로젝트만 필터링
+            .find((project) => project.id === parseInt(queriedProjectId)); // projectId와 일치하는 프로젝트 찾기
+
+          console.log('선택된 프로젝트 :', selectedProject);
+
+          if (selectedProject) {
+            onNodeClick(selectedProject);
+          }
+        }
+
         // 프로젝트 구독을 위한 WebSocket 연결
         // if (projectId.value) {
         //   useWebSocketStore.connect(projectId.value);
@@ -203,12 +238,22 @@ export default {
       return true; // 모든 드래그를 허용하는 기본 설정
     };
 
+    // 폴더 클릭 시
     const folderClick = () => {
       projectId.value = null;
     };
 
+    const folderSelect = () => {
+      console.log('프로젝트 선택');
+    };
+
     // 폴더구조에서 프로젝트 아이콘 클릭 시
     const onNodeClick = async (node) => {
+      console.log('선택된 노드', node);
+
+      // 클릭된 항목의 ID를 저장
+      selectedNodeId.value = node.id;
+
       // 파일인지 확인 (children이 없으면 파일)
       if (!node.children || node.children.length === 0) {
         // console.log('파일(프로젝트) 정보:', node);
@@ -228,7 +273,7 @@ export default {
             columns.value = kanbanColumnStore.columns;
             cards.value = kanbanCardStore.cards;
 
-            isDataLoaded.value = columns.value.length > 0 && cards.value.length > 0;
+            isDataLoaded.value = columns.value.length > 0 && cards.value.length >= 0;
 
             await nextTick();
           }
@@ -239,16 +284,35 @@ export default {
       }
     };
 
-    //칸반 카드 오픈
-    const openKanbanCard = (idx) => {
-      console.log(`칸반카드ID: ${idx}`);
-      navigationStore.setActiveItem('mypage');
-      router.push('kanbanCard');
+    /* 폴더 부분 */
+    // 폴더 드래그 앤 드랍
+    const onFolderDragEnd = (colId) => {
+      console.log('드래그 종료', colId);
+      // 드래그 종료 후 상태 업데이트 또는 API 호출 등 추가 처리
+    };
+
+    // 폴더 수정 함수
+    const editFolder = (item) => {
+      console.log('수정할 폴더:', item);
+      // 폴더명을 변경하는 로직 구현
+    };
+
+    // 폴더 삭제 함수
+    const deleteFolder = (item) => {
+      console.log('삭제할 폴더:', item);
+      folderStore.folderData = folderStore.folderData.filter((folder) => folder.id !== item.id);
     };
 
     // 프로젝트 생성
     const newProjectPage = () => {
       router.replace('/move-to-move/new-project');
+    };
+
+    //칸반 카드 오픈
+    const openKanbanCard = (idx) => {
+      console.log(`칸반카드ID: ${idx}`);
+      navigationStore.setActiveItem('mypage');
+      router.push('kanbanCard');
     };
 
     /* 프로젝트 케밥 메뉴 */
@@ -313,6 +377,7 @@ export default {
       });
     };
 
+    // 칸반 카드 이동 시
     const onCardMove = (event) => {
       const { oldIndex, newIndex, element } = event;
 
@@ -377,10 +442,15 @@ export default {
       folderStore, // Pinia 상태를 바로 사용
       columns, // 칸반 컬럼 데이터
       folderClick,
+      folderSelect,
+      editFolder,
+      deleteFolder,
       checkMove,
-      onNodeClick,
+      onNodeClick, // 클릭 이벤트 처리 함수
+      selectedNodeId, // 클릭된 노드를 추적하는 상태
       open,
       active,
+      onFolderDragEnd,
       openKanbanCard,
       newProjectPage,
       projectId,
@@ -595,5 +665,29 @@ h1 {
   height: 35px;
   font-size: 16px;
   padding: 5px;
+}
+
+/* 수정, 삭제 아이콘 hover 시 색상 및 크기 변화 */
+.icon-hover {
+  font-size: 12px; /* 아이콘 크기 줄이기 */
+  margin-left: 8px;
+  color: gray;
+  opacity: 0.6; /* 기본 투명도 설정 */
+  transition: color 0.3s, transform 0.3s, opacity 0.3s;
+  cursor: pointer;
+}
+
+.icon-hover:hover {
+  color: #2196f3; /* hover 시 색상 변경 */
+  transform: scale(1.2); /* hover 시 크기 약간 증가 */
+  opacity: 1; /* hover 시 투명도 제거 */
+}
+
+.selected-node {
+  color: #4caf50 !important; /* 클릭된 노드의 색상 변경 */
+}
+
+.folder-icon {
+  width: 60px;
 }
 </style>
