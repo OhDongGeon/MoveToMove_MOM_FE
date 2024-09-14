@@ -98,8 +98,17 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     });
   };
 
-  // 칸반 카드 제목 수정
-  const updateKanbanCardTitle = async (cardId, updateColumn, updateData) => {
+  // 컬럼 이동 시 호출하는 함수 columnId 업데이트
+  const updateCardsByColumnId = (oldColumnId, newColumnId) => {
+    cards.value.forEach((card) => {
+      if (card.columnId === oldColumnId) {
+        card.columnId = newColumnId;
+      }
+    });
+  };
+
+  // 칸반 카드 수정
+  const updateKanbanCard = async (cardId, updateColumn, updateData) => {
     try {
       const form = {
         updateColumn: updateColumn,
@@ -107,6 +116,14 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       };
 
       await axiosInstance.patch(`/api/kanban-cards/${cardId}`, form);
+
+      if (updateColumn === 'task_size') {
+        updateColumn = 'taskSize';
+      } else if (updateColumn === 'start_at') {
+        updateColumn = 'startAt';
+      } else if (updateColumn === 'end_at') {
+        updateColumn = 'endAt';
+      }
 
       const index = cards.value.findIndex((card) => card.id === cardId);
       if (index !== -1) {
@@ -120,13 +137,41 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     }
   };
 
-  // 컬럼 이동 시 호출하는 함수 columnId 업데이트
-  const updateCardsByColumnId = (oldColumnId, newColumnId) => {
-    cards.value.forEach(card => {
-      if(card.columnId === oldColumnId) {
-        card.columnId = newColumnId;
+  // 칸반 카드 담당자 수정
+  const updateKanbanCardMember = async (cardId, members) => {
+    try {
+      const memberIdList = members.map((member) => member.id);
+
+      const form = {
+        memberIds: memberIdList,
+      };
+
+      await axiosInstance.patch(`/api/kanban-cards/${cardId}/members`, form);
+
+      const updatedColumn = members.map((member) => ({
+        memberId: member.id,
+        email: member.email,
+        nickName: member.name,
+        profileUrl: member.avatar,
+      }));
+
+      const index = cards.value.findIndex((card) => card.id === cardId);
+      if (index !== -1) {
+        cards.value[index].members = updatedColumn;
       }
-    })
-  }
-  return { cards, loadAllCards, loadCardDetails, getCardsByColumnId, updateCardsForMovedColumn, updateKanbanCardTitle, updateCardsByColumnId };
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return {
+    cards,
+    loadAllCards,
+    loadCardDetails,
+    getCardsByColumnId,
+    updateCardsForMovedColumn,
+    updateCardsByColumnId,
+    updateKanbanCard,
+    updateKanbanCardMember,
+  };
 });

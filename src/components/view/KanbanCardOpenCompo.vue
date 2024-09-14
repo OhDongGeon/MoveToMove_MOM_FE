@@ -11,7 +11,7 @@
               <round-button-item :width="50" :height="28" :borderRadius="5" :fontSize="12" @click="saveTitle(card.id, 'title', modifyTitle)"
                 >저장</round-button-item
               >
-              <round-button-item :width="50" :height="28" :borderRadius="5" :fontSize="12" :backgroundColor="'cancel'" @click="cancelEdit"
+              <round-button-item :width="50" :height="28" :borderRadius="5" :fontSize="12" :backgroundColor="'cancel'" @click="cancelEditTitle"
                 >취소</round-button-item
               >
             </div>
@@ -36,9 +36,32 @@
         <div class="left-content">
           <div class="card-content">
             <div class="card-header">
-              <button class="edit-card-content">수정</button>
+              <!-- 수정 버튼 또는 저장/취소 버튼 -->
+              <template v-if="isEditingContent">
+                <round-button-item :width="50" :height="25" :borderRadius="5" :fontSize="12" @click="saveContent(card.id, 'content', modifyContent)"
+                  >저장</round-button-item
+                >
+                <round-button-item
+                  :width="50"
+                  :height="25"
+                  :borderRadius="5"
+                  :fontSize="12"
+                  :backgroundColor="'cancel'"
+                  @click="cancelEditContent"
+                  class="edit-card-cancel"
+                  >취소</round-button-item
+                >
+              </template>
+              <template v-else>
+                <button class="edit-card-content" @click="editContent">수정</button>
+              </template>
             </div>
-            <p>{{ card.content }}</p>
+            <template v-if="isEditingContent">
+              <textarea v-model="modifyContent" class="card-content-input"></textarea>
+            </template>
+            <template v-else>
+              <p>{{ card.content }}</p>
+            </template>
           </div>
 
           <!-- 코멘트 컴포넌트 -->
@@ -56,7 +79,7 @@
           <div class="card-details">
             <!-- 담당자 선택 -->
             <div class="assignee-container">
-              <div class="modal-trigger" @click="openModal('담당자 선택', users, 'assigneeModal', true)">
+              <div class="modal-trigger" @click="openAssigneeModal">
                 <div class="division-member">
                   <span class="division-name-member">담당자</span>
                   <div class="assignee-list">
@@ -80,7 +103,7 @@
             </div>
 
             <!-- 우선순위 -->
-            <div class="modal-trigger" @click="openModal('우선순위 선택', priorities, 'priorityModal', false)">
+            <div class="modal-trigger" @click="openOptionModal('우선순위 선택', priorities, 'priorityModal')">
               <div class="division">
                 <span class="division-name">우선순위</span>
                 <span class="priority" :style="priorityStyle">{{ priorityText }}</span>
@@ -98,7 +121,7 @@
             </div>
 
             <!-- 작업크기 -->
-            <div class="modal-trigger" @click="openModal('작업크기 선택', sizes, 'sizeModal', false)">
+            <div class="modal-trigger" @click="openOptionModal('작업크기 선택', sizes, 'sizeModal')">
               <div class="division">
                 <span class="division-name">작업크기</span>
                 <span class="size" :style="taskSizeStyle">{{ taskSizeText }}</span>
@@ -113,14 +136,13 @@
                 class="modal-position"
               />
             </div>
-
             <div class="division">
               <span class="division-name">시작날짜</span>
-              <input type="date" v-model="startAtFormat" class="date-input" />
+              <input type="date" v-model="startAtFormat" @change="updateStartAt(startAtFormat)" id="start-date" class="date-input" />
             </div>
             <div class="division">
               <span class="division-name">종료날짜</span>
-              <input type="date" v-model="endAtFormat" class="date-input" />
+              <input type="date" v-model="endAtFormat" @change="updateEndAt(endAtFormat)" id="end-date" class="date-input" />
             </div>
           </div>
 
@@ -129,17 +151,21 @@
           </div>
         </div>
       </div>
+      <alert-check-message :isVisible="isStartAt" :message="'종료날짜와 같거나 작아야합니다.'" @close="checkAlertClose" />
+      <alert-check-message :isVisible="isEndAt" :message="'시작날짜와 같거나 커야합니다.'" @close="checkAlertClose" />
     </div>
   </transition>
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
+import axiosInstance from '@/api/axiosInstance';
+import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import CardCommentForm from '@/components/common/CardCommentForm.vue';
 import CardComments from '@/components/common/CardComments.vue';
 import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
 import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
-import { useKanbanCardStore } from '@/stores/kanbanCardStore';
+import AlertCheckMessage from '@/components/common/AlertCheckMessage.vue';
 
 export default {
   components: {
@@ -147,6 +173,7 @@ export default {
     CardCommentForm,
     CardComments,
     ProfileImage,
+    AlertCheckMessage,
   },
   props: {
     isVisible: {
@@ -162,12 +189,30 @@ export default {
   emits: ['close', 'closeMenu'],
 
   setup(props, { emit }) {
+    // 메시지
+    const isStartAt = ref(false);
+    const isEndAt = ref(false);
+
+    // 메시지 닫기
+    const checkAlertClose = () => {
+      isStartAt.value = false;
+      isEndAt.value = false;
+    };
+
     // 닫기
     const closeSlide = () => {
       emit('close'); // 이벤트 이름 일치시켜야함!!
     };
 
     // 조회
+    const projectJoinMember = async (projectId) => {
+      try {
+        const response = await axiosInstance.get(`/api/projects/${projectId}/members`);
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
     // 카드 생성 일자
     const daysDifference = computed(() => {
@@ -183,13 +228,13 @@ export default {
     // priority
     const priorityText = computed(() => {
       switch (props.card.priority) {
-        case '3':
+        case 3:
           return '낮음';
-        case '2':
+        case 2:
           return '중간';
-        case '1':
+        case 1:
           return '높음';
-        case '0':
+        case 0:
           return '긴급';
         default:
           return '알 수 없음';
@@ -200,16 +245,16 @@ export default {
       let backgroundColor;
       let color = '#000000'; // 기본 텍스트 색상
       switch (props.card.priority) {
-        case '3': // 낮음
+        case 3: // 낮음
           backgroundColor = '#9BF09B';
           break;
-        case '2': // 중간
+        case 2: // 중간
           backgroundColor = '#9BB8F0';
           break;
-        case '1': // 높음
+        case 1: // 높음
           backgroundColor = '#E99BF0';
           break;
-        case '0': // 긴급
+        case 0: // 긴급
           backgroundColor = '#E45959';
           color = '#ffffff'; // 긴급일 때 흰색 텍스트
           break;
@@ -221,14 +266,14 @@ export default {
 
     // task_size
     const taskSizeText = computed(() => {
-      switch (props.card.task_size) {
-        case '0':
+      switch (props.card.taskSize) {
+        case 0:
           return 'Small';
-        case '1':
+        case 1:
           return 'Medium';
-        case '2':
+        case 2:
           return 'Large';
-        case '3':
+        case 3:
           return 'Extra Large';
         default:
           return 'Unknown';
@@ -237,17 +282,17 @@ export default {
 
     const taskSizeStyle = computed(() => {
       let backgroundColor;
-      switch (props.card.task_size) {
-        case '0': // Small
+      switch (props.card.taskSize) {
+        case 0: // Small
           backgroundColor = '#CEF2CE';
           break;
-        case '1': // Medium
+        case 1: // Medium
           backgroundColor = '#CEE0F2';
           break;
-        case '2': // Large
+        case 2: // Large
           backgroundColor = '#E0CEF2';
           break;
-        case '3': // Extra Large
+        case 3: // Extra Large
           backgroundColor = '#F2CECE';
           break;
         default:
@@ -257,27 +302,47 @@ export default {
     });
 
     // 시작 날짜
-    const startAtFormat = computed({
-      get() {
-        return props.card.startAt.split('T')[0]; // "T"를 기준으로 문자열을 나눠서 날짜 부분만 가져옴
-      },
-      // set(newValue) {
-      //   // 사용자가 날짜를 변경하면 기존의 "T00:00:00"을 추가하여 처리
-      //   emit('update:startAt', `${newValue}T00:00:00`);
-      // },
+    const startAtFormat = ref('');
+    watchEffect(() => {
+      if (props.card && props.card.startAt) {
+        startAtFormat.value = props.card.startAt.split('T')[0];
+      }
     });
+
+    // 시작 날짜를 업데이트 체크
+    const updateStartAt = (newValue) => {
+      if (new Date(newValue) > new Date(props.card.endAt.split('T')[0])) {
+        isStartAt.value = true;
+        startAtFormat.value = props.card.startAt.split('T')[0];
+        return;
+      }
+      kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', startAtFormat.value);
+    };
 
     // 종료 날짜
-    const endAtFormat = computed({
-      get() {
-        return props.card.startAt.split('T')[0]; // "T"를 기준으로 문자열을 나눠서 날짜 부분만 가져옴
-      },
+    const endAtFormat = ref('');
+    watchEffect(() => {
+      if (props.card && props.card.startAt) {
+        endAtFormat.value = props.card.endAt.split('T')[0];
+      }
     });
 
+    // 종료 날짜를 업데이트 체크
+    const updateEndAt = (newValue) => {
+      if (new Date(newValue) < new Date(props.card.startAt.split('T')[0])) {
+        isEndAt.value = true;
+        endAtFormat.value = props.card.endAt.split('T')[0];
+        return;
+      }
+      kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', endAtFormat.value);
+    };
+
     // 저장 및 수정
+    const kanbanCardStore = useKanbanCardStore();
     const modifyTitle = ref('');
     const isEditingTitle = ref(false);
-    const kanbanCardStore = useKanbanCardStore();
+    const modifyContent = ref('');
+    const isEditingContent = ref(false);
 
     // 제목 수정
     const editTitle = () => {
@@ -287,158 +352,165 @@ export default {
 
     // 제목 저장
     const saveTitle = (cardId, updateColumn, updateData) => {
-      kanbanCardStore.updateKanbanCardTitle(cardId, updateColumn, updateData);
+      kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
       isEditingTitle.value = false;
     };
 
     // 제목 취소
-    const cancelEdit = () => {
+    const cancelEditTitle = () => {
       modifyTitle.value = props.card.title;
       isEditingTitle.value = false;
     };
 
-    watch(
-      () => kanbanCardStore.cards, // Pinia store의 cards 배열 감시
-      (modifyCards) => {
-        if (props.card && props.card.id) {
-          const updatedCard = modifyCards.find((c) => c.id === props.card.id); // id가 일치하는 카드 찾기
-          if (updatedCard) {
-            Object.assign(props.card, updatedCard); // props.card에 업데이트된 값 할당
-          }
-        }
-      },
-      { deep: true }, // 깊은 감시 설정
-    );
+    // 내용 수정
+    const editContent = () => {
+      modifyContent.value = props.card.content;
+      isEditingContent.value = true;
+    };
 
-    // watch(
-    //   () => kanbanCardStore.cards,
-    //   (modifyCards) => {
-    //     if (props.card && props.card.id) {
-    //       // props.card와 props.card.id가 존재하는지 확인 후
-    //       const updatedCard = modifyCards.find((c) => c.id === props.card.id); // id가 일치하는 카드 찾기
-    //       if (updatedCard) {
-    //         Object.assign(props.card, updatedCard); // props.card에 업데이트된 값 할당
-    //       } else {
-    //         console.warn(`ID가 ${props.card.id}인 카드를 찾을 수 없습니다.`);
-    //       }
-    //     } else {
-    //       console.error(props.card);
-    //     }
-    //   },
-    //   { deep: true }, // 깊은 감시 설정
-    // );
+    // 내용 저장
+    const saveContent = (cardId, updateColumn, updateData) => {
+      kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+      isEditingContent.value = false;
+    };
 
-    const defaultAvatar = 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/40066ef4-ccce-424b-9ac1-d89ab31a1650.ea42ce6a.png';
+    // 내용 취소
+    const cancelEditContent = () => {
+      modifyContent.value = props.card.content;
+      isEditingContent.value = false;
+    };
+
+    // 모달 관련
+    const users = ref([]);
+    const currentModal = ref('');
     const modalTitle = ref('');
     const modalItems = ref([]);
-    const currentModal = ref('');
-    const isMultiple = ref(false); // 다중 선택 여부를 위한 변수 추가
+    const isMultiple = ref(false);
 
-    const assignee = ref({
-      selectedAssignees: [
-        {
-          name: '팬텀',
-          avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg',
-        },
-        {
-          name: '팬텀',
-          avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg',
-        },
-      ], // 여러 명의 담당자를 저장
-      priority: '중간',
-      size: 'Large',
-      startDate: '2024-08-13',
-      endDate: '2024-08-23',
-    });
+    // 담당자 모달
+    const openAssigneeModal = async () => {
+      modalTitle.value = '담당자 선택';
+      isMultiple.value = true;
 
-    const users = ref([
-      { id: 1, name: '팬텀', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg' },
-      { id: 2, name: '오동나무', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png' },
-      { id: 3, name: '백제신라고구려', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png' },
-      { id: 4, name: '은나라금나라', avatar: 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/5e56fa91-f87d-4f4b-86f0-c46d5cbaace4.png' },
-    ]);
+      const users = await projectJoinMember(props.card.projectId);
+
+      modalItems.value = users.map((user) => ({
+        id: user.memberId,
+        name: user.nickName,
+        avatar: user.profileUrl,
+        email: user.email,
+        selected: props.card.members.some((member) => member.memberId === user.memberId),
+      }));
+
+      currentModal.value = 'assigneeModal';
+    };
 
     const priorities = ref([
-      { id: 1, name: '낮음', avatar: 'https://via.placeholder.com/30' },
-      { id: 2, name: '중간', avatar: 'https://via.placeholder.com/30' },
-      { id: 3, name: '높음', avatar: 'https://via.placeholder.com/30' },
-      { id: 4, name: '긴급', avatar: 'https://via.placeholder.com/30' },
+      { id: 3, name: '낮음', color: '#9BF09B' },
+      { id: 2, name: '중간', color: '#9BB8F0' },
+      { id: 1, name: '높음', color: '#E99BF0' },
+      { id: 0, name: '긴급', color: '#E45959' },
     ]);
 
     const sizes = ref([
-      { id: 1, name: 'Small', avatar: 'https://via.placeholder.com/30' },
-      { id: 2, name: 'Medium', avatar: 'https://via.placeholder.com/30' },
-      { id: 3, name: 'Large', avatar: 'https://via.placeholder.com/30' },
-      { id: 4, name: 'Extra Large', avatar: 'https://via.placeholder.com/30' },
+      { id: 0, name: 'Small', color: '#CEF2CE' },
+      { id: 1, name: 'Medium', color: '#CEE0F2' },
+      { id: 2, name: 'Large', color: '#E0CEF2' },
+      { id: 3, name: 'Extra Large', color: '#F2CECE' },
     ]);
 
-    const openModal = (title, items, modalId, multiple) => {
+    // 우선순위, 작업크기 모달
+    const openOptionModal = (title, items, current) => {
       modalTitle.value = title;
+      isMultiple.value = false;
+
+      const selectedValue = current === 'priorityModal' ? props.card.priority : props.card.taskSize;
+
       modalItems.value = items.map((item) => ({
         ...item,
-        selected:
-          modalId === 'assigneeModal'
-            ? assignee.value.selectedAssignees.some((assignee) => assignee.id === item.id)
-            : item.name === assignee.value.priority || item.name === assignee.value.size,
+        selected: item.id === selectedValue,
       }));
-      currentModal.value = modalId;
-      isMultiple.value = multiple; // multiple 값을 설정
+
+      currentModal.value = current;
     };
 
+    // 모달 확인
+    const handleConfirm = (selectedItems) => {
+      if (modalTitle.value === '담당자 선택') {
+        kanbanCardStore.updateKanbanCardMember(props.card.id, selectedItems);
+      } else if (modalTitle.value === '우선순위 선택') {
+        kanbanCardStore.updateKanbanCard(props.card.id, 'priority', selectedItems[0].id);
+      } else if (modalTitle.value === '작업크기 선택') {
+        kanbanCardStore.updateKanbanCard(props.card.id, 'task_size', selectedItems[0].id);
+      }
+      closeModal();
+    };
+
+    // 모달 취소
     const closeModal = () => {
       currentModal.value = '';
     };
 
-    const handleConfirm = (selectedItems) => {
-      console.log('선택된 항목:', selectedItems);
-      if (modalTitle.value === '담당자 선택') {
-        // 여러 명의 담당자를 선택하도록 수정
-        assignee.value.selectedAssignees = selectedItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          avatar: item.avatar,
-        }));
-      } else if (modalTitle.value === '우선순위 선택') {
-        assignee.value.priority = selectedItems[0]?.name; // 첫 번째 선택된 항목만 저장
-      } else if (modalTitle.value === '작업크기 선택') {
-        assignee.value.size = selectedItems[0]?.name; // 첫 번째 선택된 항목만 저장
-      }
-      closeModal();
-    };
+    // store 확인
+    watch(
+      () => kanbanCardStore.cards,
+      (modifyCards) => {
+        if (props.card && props.card.id) {
+          const updatedCard = modifyCards.find((c) => c.id === props.card.id);
+          if (updatedCard) {
+            Object.assign(props.card, updatedCard);
+          }
+        }
+      },
+      { deep: true },
+    );
 
     const deleteCard = () => {
       console.log('카드가 삭제되었습니다');
     };
 
     return {
+      isStartAt,
+      isEndAt,
+      checkAlertClose,
+
+      closeSlide,
+
       daysDifference,
       priorityText,
       priorityStyle,
       taskSizeText,
       taskSizeStyle,
       startAtFormat,
+      updateStartAt,
       endAtFormat,
+      updateEndAt,
 
       modifyTitle,
-      editTitle,
       isEditingTitle,
+      editTitle,
+      saveTitle,
+      cancelEditTitle,
+      modifyContent,
+      isEditingContent,
+      editContent,
+      saveContent,
+      cancelEditContent,
 
-      defaultAvatar,
-      closeSlide,
-      assignee,
+      openAssigneeModal,
+      openOptionModal,
+      projectJoinMember,
+      users,
+      sizes,
+      priorities,
+      currentModal,
       modalTitle,
       modalItems,
-      users,
-      priorities,
-      sizes,
-      openModal,
-      closeModal,
+      isMultiple,
       handleConfirm,
+      closeModal,
+
       deleteCard,
-      currentModal,
-      isMultiple, // isMultiple을 반환하여 사용 가능하도록 설정
-      saveTitle,
-      cancelEdit,
     };
   },
 };
@@ -583,6 +655,7 @@ export default {
 
 .card-content {
   overflow: hidden;
+  height: 360px;
 }
 
 .edit-card-content {
@@ -599,6 +672,11 @@ export default {
   color: #6b9e9b;
 }
 
+.edit-card-cancel {
+  margin-left: 5px;
+  border: 1px solid #ffffff !important;
+}
+
 .card-header {
   display: flex;
   height: 35px;
@@ -610,7 +688,9 @@ export default {
   background-color: #6b9e9b;
 }
 
+.card-content-input,
 .card-content p {
+  width: 100%;
   height: 300px;
   padding: 10px;
   margin-bottom: 30px;
@@ -620,6 +700,11 @@ export default {
   border-bottom-right-radius: 5px;
   background-color: white;
   border: 1.5px solid #6b9e9b;
+}
+
+.card-content-input {
+  resize: none;
+  outline: none;
 }
 
 /* 오른쪽 내용 */
@@ -642,7 +727,7 @@ export default {
 .division-member {
   display: flex;
   align-items: center;
-  margin-left: 20px;
+  margin-left: 10px;
   margin-bottom: 15px;
 }
 
@@ -652,9 +737,9 @@ export default {
 
 .division-name,
 .division-name-member {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: bold;
-  width: 100px;
+  width: 80px;
   text-align: left;
 }
 
@@ -664,10 +749,7 @@ export default {
 
 /* 이미지 */
 .avatar {
-  width: 25px;
-  height: 25px;
-  margin-right: 15px;
-  border-radius: 50%;
+  margin-right: 10px;
   border: 1.5px solid #6b9e9b;
 }
 
@@ -685,8 +767,7 @@ export default {
 .assignee-info {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 8px;
+  padding: 4px 0px;
 }
 
 /* 우선순위 */
@@ -724,8 +805,6 @@ export default {
 
 .modal-position {
   position: absolute;
-  top: 100%;
-  left: 0;
   width: 100%;
   border: 2px solid #6b9e9b;
   border-radius: 8px;
