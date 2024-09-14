@@ -111,6 +111,7 @@
                     @card-move="onCardMove"
                     @open-card="openCard"
                     @close-card="closeCard"
+                    @delete-card="deleteCard"
                   />
                 </div>
               </template>
@@ -464,6 +465,12 @@ export default {
       isCardOpen.value = false;
     };
 
+    // 칸바 카드 삭제 (재조회 후 카드 셋팅)
+    const deleteCard = (projectId) => {
+      kanbanCardStore.loadAllCards(projectId);
+      cards.value = kanbanCardStore.cards;
+    };
+
     return {
       panel,
       folderStore, // Pinia 상태를 바로 사용
@@ -500,6 +507,7 @@ export default {
       closeCard,
       isDataLoaded,
       handleProjectDeleted, // 프로젝트 나가기
+      deleteCard,
     };
   },
 };
