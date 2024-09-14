@@ -38,16 +38,16 @@ export default {
       let backgroundColor;
       let color = '#000000'; // 기본 텍스트 색상
       switch (props.card.priority) {
-        case '3': // 낮음
+        case 3: // 낮음
           backgroundColor = '#9BF09B';
           break;
-        case '2': // 중간
+        case 2: // 중간
           backgroundColor = '#9BB8F0';
           break;
-        case '1': // 높음
+        case 1: // 높음
           backgroundColor = '#E99BF0';
           break;
-        case '0': // 긴급
+        case 0: // 긴급
           backgroundColor = '#E45959';
           color = '#ffffff'; // 긴급일 때 흰색 텍스트
           break;
@@ -59,13 +59,13 @@ export default {
 
     const priorityText = computed(() => {
       switch (props.card.priority) {
-        case '3':
+        case 3:
           return '낮음';
-        case '2':
+        case 2:
           return '중간';
-        case '1':
+        case 1:
           return '높음';
-        case '0':
+        case 0:
           return '긴급';
         default:
           return '알 수 없음';
@@ -76,16 +76,16 @@ export default {
     const taskSizeStyle = computed(() => {
       let backgroundColor;
       switch (props.card.taskSize) {
-        case '0': // Small
+        case 0: // Small
           backgroundColor = '#CEF2CE';
           break;
-        case '1': // Medium
+        case 1: // Medium
           backgroundColor = '#CEE0F2';
           break;
-        case '2': // Large
+        case 2: // Large
           backgroundColor = '#E0CEF2';
           break;
-        case '3': // Extra Large
+        case 3: // Extra Large
           backgroundColor = '#F2CECE';
           break;
         default:
@@ -96,13 +96,13 @@ export default {
 
     const taskSizeText = computed(() => {
       switch (props.card.taskSize) {
-        case '0':
+        case 0:
           return 'Small';
-        case '1':
+        case 1:
           return 'Medium';
-        case '2':
+        case 2:
           return 'Large';
-        case '3':
+        case 3:
           return 'Extra Large';
         default:
           return 'Unknown';
