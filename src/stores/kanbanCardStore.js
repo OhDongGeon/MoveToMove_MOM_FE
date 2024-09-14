@@ -120,5 +120,13 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     }
   };
 
-  return { cards, loadAllCards, loadCardDetails, getCardsByColumnId, updateCardsForMovedColumn, updateKanbanCardTitle };
+  // 컬럼 이동 시 호출하는 함수 columnId 업데이트
+  const updateCardsByColumnId = (oldColumnId, newColumnId) => {
+    cards.value.forEach(card => {
+      if(card.columnId === oldColumnId) {
+        card.columnId = newColumnId;
+      }
+    })
+  }
+  return { cards, loadAllCards, loadCardDetails, getCardsByColumnId, updateCardsForMovedColumn, updateKanbanCardTitle, updateCardsByColumnId };
 });

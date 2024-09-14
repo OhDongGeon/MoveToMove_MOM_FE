@@ -229,6 +229,8 @@ export default {
             cards.value = kanbanCardStore.cards;
 
             isDataLoaded.value = columns.value.length > 0 && cards.value.length > 0;
+
+            await nextTick();
           }
         } catch (e) {
           console.error('파일(프로젝트) 정보 로드 실패:', e);
@@ -340,10 +342,10 @@ export default {
         cards.value = kanbanCardStore.cards;
 
         // 카드 데이터 로그로 출력
-        console.log('Updated cards after column move:');
-        cards.value.forEach((card) => {
-          console.log(`Card ID: ${card.id}, Column ID: ${card.columnId}`);
-        });
+        // console.log('Updated cards after column move:');
+        // cards.value.forEach((card) => {
+        //   console.log(`Card ID: ${card.id}, Column ID: ${card.columnId}`);
+        // });
       }
     };
 

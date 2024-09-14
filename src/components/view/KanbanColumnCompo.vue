@@ -19,7 +19,7 @@
     </div>
 
     <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
-    <draggable class="kanban-card-list" :list="localCards" group="cards" @end="onCardDrop" itemKey="id">
+    <draggable class="kanban-card-list" :list="computedCards" group="cards" @end="onCardDrop" itemKey="id">
       <template #item="{ element: card }">
         <KanbanCard :card="card" @card-click="openKanbanCard" />
       </template>
@@ -73,7 +73,10 @@ export default {
 
     const localCards = [...props.cards];
     // const localCards = ref([...props.cards]);
-
+    // props.cards를 참조하는 computed 속성 사용
+    const computedCards = computed(() => {
+      return props.cards;
+    });
     const newCardTitle = ref('');
     const isCardAdd = ref(false);
     const cardInput = ref(null);
@@ -207,6 +210,7 @@ export default {
       cardInput,
       dynamicUnderlineColor,
       onCardDrop,
+      computedCards,
     };
   },
 };
