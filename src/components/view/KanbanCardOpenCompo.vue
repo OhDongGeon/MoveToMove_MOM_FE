@@ -153,6 +153,15 @@
       </div>
       <alert-check-message :isVisible="isStartAt" :message="'종료날짜와 같거나 작아야합니다.'" @close="checkAlertClose" />
       <alert-check-message :isVisible="isEndAt" :message="'시작날짜와 같거나 커야합니다.'" @close="checkAlertClose" />
+      <alert-ok-cancel
+        :isVisible="isDeleteCard"
+        @ok="agreeDeleteCard"
+        @close="checkAlertClose"
+        message="해당 칸반 카드를 삭제하시겠습니까?"
+        locationFlag="member-leader"
+      >
+      </alert-ok-cancel>
+      <alert-check-message :isVisible="successDelete" :message="'칸반 카드 삭제 완료 되었습니다.'" @close="deleteAlertClose" />
     </div>
   </transition>
 </template>
@@ -166,6 +175,7 @@ import CardComments from '@/components/common/CardComments.vue';
 import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
 import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 import AlertCheckMessage from '@/components/common/AlertCheckMessage.vue';
+import AlertOkCancel from '@/components/common/AlertOkCancel.vue';
 
 export default {
   components: {
@@ -174,6 +184,7 @@ export default {
     CardComments,
     ProfileImage,
     AlertCheckMessage,
+    AlertOkCancel,
   },
   props: {
     isVisible: {
@@ -186,22 +197,24 @@ export default {
     },
   },
 
-  emits: ['close', 'closeMenu'],
+  emits: ['close', 'delete-card'],
 
   setup(props, { emit }) {
     // 메시지
     const isStartAt = ref(false);
     const isEndAt = ref(false);
+    const successDelete = ref(false);
 
     // 메시지 닫기
     const checkAlertClose = () => {
       isStartAt.value = false;
       isEndAt.value = false;
+      isDeleteCard.value = false;
     };
 
     // 닫기
     const closeSlide = () => {
-      emit('close'); // 이벤트 이름 일치시켜야함!!
+      emit('close');
     };
 
     // 조회
@@ -451,6 +464,25 @@ export default {
       currentModal.value = '';
     };
 
+    // 카드 삭제
+    const isDeleteCard = ref(false);
+
+    const deleteCard = () => {
+      isDeleteCard.value = true;
+    };
+
+    const agreeDeleteCard = () => {
+      isDeleteCard.value = false;
+      kanbanCardStore.deleteKanbanCard(props.card.id);
+      successDelete.value = true;
+    };
+
+    const deleteAlertClose = () => {
+      successDelete.value = false;
+      emit('delete-card', props.card.projectId);
+      emit('close');
+    };
+
     // store 확인
     watch(
       () => kanbanCardStore.cards,
@@ -465,14 +497,11 @@ export default {
       { deep: true },
     );
 
-    const deleteCard = () => {
-      console.log('카드가 삭제되었습니다');
-    };
-
     return {
       isStartAt,
       isEndAt,
       checkAlertClose,
+      successDelete,
 
       closeSlide,
 
@@ -510,7 +539,10 @@ export default {
       handleConfirm,
       closeModal,
 
+      isDeleteCard,
       deleteCard,
+      agreeDeleteCard,
+      deleteAlertClose,
     };
   },
 };

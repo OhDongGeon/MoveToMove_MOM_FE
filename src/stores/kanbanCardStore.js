@@ -209,6 +209,17 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     }
   };
 
+  // 칸반 카드 삭제
+  const deleteKanbanCard = async (cardId) => {
+    try {
+      await axiosInstance.delete(`/api/kanban-cards/${cardId}`);
+
+      cards.value = cards.value.filter((card) => card.id !== cardId);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return {
     cards,
     loadAllCards,
@@ -220,5 +231,6 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     updateCardsByColumnId,
     updateKanbanCard,
     updateKanbanCardMember,
+    deleteKanbanCard,
   };
 });
