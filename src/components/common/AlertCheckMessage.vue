@@ -2,6 +2,7 @@
   <div v-if="isVisible" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-content">
+        <!-- props.message를 그대로 사용 -->
         <p>{{ message }}</p>
         <round-button-item class="home-button" type="button" :width="200" :height="40" @click="closeMessage">{{ buttonText }}</round-button-item>
       </div>
@@ -10,25 +11,27 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-
 export default {
   props: {
+    message: {
+      type: String,
+      required: false,
+      default: '동의하기를 확인해주세요.',
+    },
     isVisible: {
       type: Boolean,
       default: false,
     },
   },
   setup(props, { emit }) {
-    const message = ref('동의하기를 확인해주세요.');
-    const buttonText = ref('확인');
+    const buttonText = '확인';
 
     const closeMessage = () => {
       emit('close'); // 부모에게 닫기 이벤트 전달
     };
 
     return {
-      message,
+      ...props, // props로 받은 message 사용
       buttonText,
       closeMessage,
     };

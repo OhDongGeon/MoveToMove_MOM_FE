@@ -13,7 +13,9 @@
           </div>
           <!-- 초대 버튼 -->
           <div class="invite-button">
-            <round-button-item type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite"> 참여자 초대 + </round-button-item>
+            <round-button-item type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite">
+              참여자 초대 +
+            </round-button-item>
           </div>
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -23,8 +25,8 @@
 </template>
 
 <script>
-import { onMounted, ref, watch } from 'vue'; // Vue의 ref를 가져옵니다.
 import axios from '@/api/axiosInstance';
+import { onMounted, ref, watch } from 'vue'; // Vue의 ref를 가져옵니다.
 
 import UserItem from '../common/combine/UserListItem.vue';
 import ProjectMemberInvite from './ProjectMemberInvite.vue';
@@ -65,7 +67,7 @@ export default {
       try {
         if (props.projectId) {
           const response = await axios.get(`/api/projects/${props.projectId}/members`);
-          console.log(response.data);
+          // console.log(response.data);
 
           localUsers.value = response.data;
         }
