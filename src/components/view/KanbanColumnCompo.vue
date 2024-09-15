@@ -34,7 +34,8 @@
 
 <script>
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import {computed, nextTick, onMounted, ref, watch} from 'vue';
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
+
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
@@ -77,6 +78,7 @@ export default {
     watch(
         () => kanbanCardStore.cards, // 스토어의 cards를 감시
         () => {
+          computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
           updateCards();
         },
         { immediate: true } // 초기 마운트 시에도 호출
