@@ -42,7 +42,6 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
     } catch (e) {
       console.log(e);
     }
-
   };
   return {
     columns,

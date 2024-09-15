@@ -35,6 +35,7 @@
 <script>
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
+
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
@@ -78,19 +79,20 @@ export default {
         () => kanbanCardStore.cards, // 스토어의 cards를 감시
         () => {
           computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+          updateCards();
         },
         { immediate: true } // 초기 마운트 시에도 호출
     );
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
       updateCards();
-      const element = document.querySelector(`[data-column-id="${props.columnId}"]`);
-      element.addEventListener('update-cards', updateCards);
-
-      // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
-      onBeforeUnmount(() => {
-        element.removeEventListener('update-cards', updateCards);
-      });
+      // const element = document.querySelector(`[data-column-id="${props.columnId}"]`);
+      // element.addEventListener('update-cards', updateCards);
+      //
+      // // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
+      // onBeforeUnmount(() => {
+      //   element.removeEventListener('update-cards', updateCards);
+      // });
     });
     // const computedCards = kanbanCardStore.cards;
     const newCardTitle = ref('');
