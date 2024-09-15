@@ -1,6 +1,6 @@
 <template>
   <div class="kebab-menu" v-if="showMenu" ref="menu">
-    <div class="menu-item" v-if="isProjectLeader" @click="manage">
+    <div class="menu-item" v-if="isProjectLeaderComputed" @click="manage">
       <font-awesome-icon :icon="['fas', 'gear']" class="icon" />
       <span class="menu-text">프로젝트 관리</span>
     </div>
@@ -19,7 +19,7 @@
 <script>
 import axiosInstance from '@/api/axiosInstance';
 import { useProjectStore } from '@/stores/projectStore';
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AlertCheckMessage from './AlertCheckMessage.vue';
@@ -56,6 +56,11 @@ export default {
       // router.push({ name: '/move-to-move/manage-project', params: { projectId: props.projectId } }); // 페이지 이동
       router.replace('/move-to-move/manage-project');
     };
+
+    // isProjectLeader를 computed로 선언하여 반응형으로 동작하도록 설정
+    const isProjectLeaderComputed = computed(() => {
+      return projectStore.projectData.projectLeaderYN;
+    });
 
     // 프로젝트 나가기
     const leave = async () => {
@@ -154,6 +159,7 @@ export default {
 
     return {
       menu,
+      isProjectLeaderComputed,
       isMenuReadyToClose,
       isModalVisible, // ok/no 메시지
       isCheckMessageVisible, // 팀장 권한 이전 메시지

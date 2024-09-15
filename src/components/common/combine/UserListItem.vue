@@ -1,5 +1,5 @@
 <template>
-  <div class="user-item">
+  <div class="user-item" v-if="user">
     <!-- 사용자 이미지 -->
     <ProfileImageItem :src="userData.profileUrl" :alt="userData.nickName" :width="40" :height="40" />
 
@@ -13,11 +13,18 @@
       :icon="['fas', 'ellipsis-vertical']"
       class="dots-menu"
       ref="dotsMenuIcon"
-      v-if="userData.projectLeaderYN === 'N' && userData.memberId !== authStore.user.memberId"
-      @click="kebabMenu"
+      v-if="userData.projectLeaderYN === 'N' && userData.memberId !== authStore.user?.memberId"
+      @click="kebabMenu(userData.memberId)"
     />
 
-    <KebabMemberMenu :showMenu="showMenu" @closeMenu="closeMenu" :isProjectLeader="userData.projectLeaderYN" class="kebab-menu" />
+    <KebabMemberMenu
+      :showMenu="showMenu"
+      @transferLeader="transferLeader"
+      @projectOut="projectOut"
+      @closeMenu="closeMenu"
+      :isProjectLeader="userData.projectLeaderYN"
+      class="kebab-menu"
+    />
   </div>
 </template>
 
@@ -40,16 +47,39 @@ export default {
     ProfileImageItem,
     KebabMemberMenu,
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { user } = toRefs(props);
     const showMenu = ref(false);
+    // 클릭된 멤버 ID 저장
+    const clickedMemberId = ref(null);
 
     // Pinia 스토어 사용
     const authStore = useAuthStore(); // authStore를 가져옵니다.
 
-    // 케밥 메뉴
-    const kebabMenu = () => {
-      showMenu.value = !showMenu.value;
+    // 케밥 메뉴 클릭된 멤버
+    const kebabMenu = (memberId) => {
+      try {
+        showMenu.value = !showMenu.value;
+        clickedMemberId.value = memberId; // 클릭된 memberId
+        console.log('클릭된 멤버: ', clickedMemberId.value);
+
+        // 부모폼인 ProjectMemberCompo.vue 로 전달
+        emit('memberSelected', memberId);
+      } catch (error) {
+        console.error('Error in kebabMenu:', error); // 오류를 콘솔에 출력
+      }
+    };
+
+    // 팀장 권한 이전 전달
+    const transferLeader = () => {
+      console.log('팀장 권한 이전 전달: ', clickedMemberId.value);
+      emit('transferLeader', clickedMemberId.value);
+    };
+
+    // 프로젝트 내보내기 전달
+    const projectOut = () => {
+      console.log('프로젝트 내보내기 전달: ', clickedMemberId.value);
+      emit('projectOut', clickedMemberId.value);
     };
 
     // 케밥 메뉴 닫기
@@ -63,6 +93,8 @@ export default {
       authStore,
       showMenu,
       kebabMenu,
+      transferLeader, // 팀장 권한 이전 선택 전달
+      projectOut, // 프로젝트 내보내기 선택 전달
       closeMenu,
     };
   },
@@ -90,6 +122,7 @@ export default {
 }
 
 .dots-menu {
+  width: 10px;
   margin-left: auto;
   cursor: pointer;
 }
