@@ -1,6 +1,10 @@
 <template>
-  <div>
-    <p>로그인 처리 중입니다...</p>
+  <div class="callback-container">
+    <div class="loading-content">
+      <!-- 로딩 애니메이션을 보여주기 위해 spinner를 사용하거나 로그인 처리 중 메시지를 표시합니다 -->
+      <div class="spinner"></div>
+      <p>로그인 처리 중입니다. 잠시만 기다려 주세요...</p>
+    </div>
   </div>
 </template>
 
@@ -49,3 +53,29 @@ onMounted(() => {
   handleLogin();
 });
 </script>
+
+<style scoped>
+.callback-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* 화면 전체를 사용 */
+  background-color: #F0F8FF;
+}
+.loading-content {
+  text-align: center;
+}
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid#6b9e9b;
+  border-top: #F0F8FF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite; /* 로딩 애니메이션 */
+  margin-bottom: 20px; /* 간격 추가 */
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
