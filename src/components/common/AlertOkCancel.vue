@@ -58,7 +58,6 @@ export default {
   justify-content: center;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1500;
 }
 
 .modal-container {
