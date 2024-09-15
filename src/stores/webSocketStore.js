@@ -1,108 +1,100 @@
-import { Stomp } from '@stomp/stompjs';
+// stores/webSocketStore.js
+import { reactive } from 'vue';
 import { defineStore } from 'pinia';
+import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import axiosInstance from '@/api/axiosInstance';
 
-export const useWebSocketStore = defineStore('webSocket', {
-  state: () => ({
-    stompClient: null,
-    isConnected: false,
-    receivedMessages: [], // 수신된 메시지 배열
-    projectConnections: {}, // 각 프로젝트별 stompClient 저장
-  }),
-  actions: {
-    // 사용자가 소유하거나 참여 중인 프로젝트 목록 가져오기
-    async connectToProject(memberId) {
-      try {
-        const response = axiosInstance.get(`/api/projects/members/${memberId}`);
+export const useWebSocketStore = defineStore('webSocket', () => {
+  const projectConnections = reactive({}); // 프로젝트별 stompClient 저장
+  const connectionStatus = reactive({}); // 프로젝트별 연결 상태 저장
+  const receivedMessages = reactive({}); // 수신된 메시지 저장
 
-        const projectIds = response.data;
+  // 특정 프로젝트에 대해 WebSocket 연결 설정 및 구독 설정
+  function connect(projectId) {
+    if (projectConnections[projectId]) {
+      console.log(`Already connected to project ${projectId}`);
+      return; // 이미 연결된 경우 무시
+    }
 
-        // 각 프로젝트에 대해 WebSocket 연결 설정 및 구독 설정
-        projectIds.forEach((projectId) => {
-          this.connect(projectId);
+    const socket = new SockJS('http://localhost:8080/ws'); // 배포 시 URL 변경
+    const client = Stomp.over(socket);
+
+    client.connect(
+      {},
+      (frame) => {
+        connectionStatus[projectId] = true;
+        console.log(`Connected to project ${projectId}: ` + frame);
+
+        client.subscribe(`/topic/project/${projectId}`, (message) => {
+          handleIncomingMessage(projectId, JSON.parse(message.body));
         });
-      } catch (err) {
-        console.error(err);
+
+        projectConnections[projectId] = client;
+      },
+      (error) => {
+        connectionStatus[projectId] = false;
+        console.error('WebSocket connection error for project ' + projectId + ':', error);
+      },
+    );
+  }
+
+  // 프로젝트별 모든 WebSocket 연결 해제
+  function disconnectAll() {
+    Object.keys(projectConnections).forEach((projectId) => {
+      disconnect(projectId);
+    });
+  }
+
+  // 특정 프로젝트에 대해 WebSocket 연결 해제
+  function disconnect(projectId) {
+    const client = projectConnections[projectId];
+    if (client) {
+      client.disconnect(() => {
+        delete projectConnections[projectId];
+        connectionStatus[projectId] = false;
+        console.log(`WebSocket disconnected for project ${projectId}`);
+      });
+    }
+  }
+
+  // 수신된 메시지 처리 및 저장
+  function handleIncomingMessage(projectId, message) {
+    console.log(`Received message from project ${projectId}:`, message);
+
+    if (!receivedMessages[projectId]) {
+      receivedMessages[projectId] = [];
+    }
+
+    receivedMessages[projectId].push(message);
+  }
+
+  function sendMessageToProject(message) {
+    const client = projectConnections[message.projectId]; // 해당 프로젝트의 stompClient 가져오기
+    const isConnected = connectionStatus[message.projectId]; // 해당 프로젝트의 연결 상태 확인
+
+    if (client && isConnected) {
+      try {
+        client.send(
+          `/app/project/${message.projectId}/column-move`, // 서버의 MessageMapping 경로와 일치해야 함
+          {},
+          JSON.stringify(message),
+        );
+        console.log('Message sent successfully:', message);
+      } catch (error) {
+        console.error('Error sending message to server:', error); // 전송 중 에러를 포착
       }
-    },
-    connect(projectId) {
-      if (this.projectConnections[projectId]) {
-        console.log(`Already connected to project ${projectId}`);
-        return; // 이미 연결된 경우 무시
-      }
-      const socket = new SockJS('http://localhost:8080/ws');
-      // 배포 시 url 바꾸기
-      // const socket = new SockJS('https://move-to-move-mom-fe.vercel.app/ws');
-      this.stompClient = Stomp.over(socket);
-
-      // stompClient 연결 설정
-      this.stompClient.connect(
-        {},
-        (frame) => {
-          this.isConnected = true;
-          console.log(`Connected to project ${projectId}: ` + frame);
-
-          // 연결된 서버 정보를 명확히 출력
-          const serverInfo = frame.headers['server'] || 'undefined';
-          console.log(`connected to server ${serverInfo}`); // 서버 정보 출력
-
-          // 프로젝트별 메시지 구독 설정
-          this.stompClient.subscribe(`/topic/project/${projectId}`, (message) => {
-            this.handleIncomingMessage(projectId, JSON.parse(message.body)); // 메시지 처리
-          });
-
-          // 프로젝트별 stompClient 저장
-          this.projectConnections[projectId] = this.stompClient;
-        },
-        (error) => {
-          console.error('WebSocket connection error for project ' + projectId + ':', error); // 에러 핸들링 추가
-        },
-      );
-    },
-    disconnect() {
-      if (this.stompClient !== null) {
-        this.stompClient.disconnect();
-        this.isConnected = false;
-        console.log('WebSocket Disconnected');
-      }
-    },
-    sendMessage(message) {
-      if (this.stompClient && this.isConnected) {
-        this.stompClient.send('/app/chat.sendMessage', {}, JSON.stringify({ content: message }));
-      } else {
-        console.error('웹소켓 연결이 끊켰습니다.');
-      }
-    },
-    handleIncomingMessage(projectId, message) {
-      console.log(`Received message from project ${projectId}:`, message);
-
-      if (!this.receivedMessages[projectId]) {
-        this.receivedMessages[projectId] = []; // 프로젝트별 메시지 배열 초기화
-      }
-
-      this.receivedMessages[projectId].push(message); // 프로젝트별 수신된 메시지 저장
-    },
-
-    sendMessageToProject(message) {
-      const stompClient = this.projectConnections[message.projectId]; // 해당 프로젝트의 stompClient 가져오기
-
-      if (stompClient && this.isConnected) {
-        console.log('>>>>> Preparing to send message to server:', message);
-
-        try {
-          stompClient.send(
-            `/app/project/${message.projectId}/drag`, // 서버의 MessageMapping 경로와 일치해야 함
-            {},
-            JSON.stringify(message),
-          );
-          console.log('Message sent successfully:', message);
-        } catch (error) {
-          console.error('Error sending message to server:', error); // 전송 중 에러를 포착
-        }
-      } else {
-        console.error('WebSocket 연결이 끊켰습니다. 연결 상태:', this.isConnected, 'stompClient:', stompClient);
-      }
-    },
-  },
+    } else {
+      console.error('WebSocket 연결이 끊켰습니다. 연결 상태:', isConnected, 'stompClient:', client);
+    }
+  }
+  return {
+    projectConnections,
+    connectionStatus,
+    receivedMessages,
+    connect,
+    disconnect,
+    disconnectAll,
+    handleIncomingMessage,
+    sendMessageToProject,
+  };
 });

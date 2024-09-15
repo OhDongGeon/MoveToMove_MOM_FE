@@ -87,7 +87,6 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useWebSocketStore } from '@/stores/webSocketStore';
 
 import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
 import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
@@ -99,7 +98,6 @@ const authStore = useAuthStore();
 const navigationStore = useNavigationStore();
 
 // 웹소켓 사용 설정
-const webSocket = useWebSocketStore();
 
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
@@ -230,15 +228,6 @@ const handleSubmit = async () => {
         alert('로그인 실패: 서버와의 통신에 문제가 있습니다.');
         router.push('/login'); // 실패 시 로그인 페이지로 리다이렉트
       }
-
-      /**
-       * TODO
-       * 1. 사용자가 로그인 한 후 프로젝트 목록을 가져온다.
-       * 2. 각 프로젝트에 대해 WebSocket 연결 설정하고, 프로젝트 별 구독 설정 -> WebSocketStore 에서 처리
-       */
-      const memberId = authStore.user.memberId;
-      
-      webSocket.connect(memberId);
 
       // 응답 처리
       console.log('로그인 성공:', response.data);
