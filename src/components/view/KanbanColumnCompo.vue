@@ -21,7 +21,9 @@
     <div class="title-underline" :style="{ backgroundColor: dynamicUnderlineColor }"></div>
     <draggable class="kanban-card-list" :list="computedCards" group="cards" @end="onCardDrop" itemKey="id">
       <template #item="{ element: card }">
+        <div :data-card-id="card.id">
         <KanbanCard :card="card" @card-click="openKanbanCard" />
+        </div>
       </template>
     </draggable>
     <!-- 칸반 카드 오픈 슬라이드 -->
@@ -54,16 +56,12 @@ export default {
       type: String,
       required: true,
     },
-    cards: {
-      type: Array,
-      default: () => [],
-    },
     underlineColor: {
       type: String,
       default: '#6b9e9b',
     },
     columnId: {
-      type: String,
+      type: Number,
       default: null,
     },
   },
@@ -73,9 +71,15 @@ export default {
 
     // props.cards를 참조하는 computed 속성 사용
     const computedCards = ref([]);
+    const updateCards = () => {
+      computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+    };
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
-      computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+      updateCards();
+
+      // 상위 컴포넌트로부터 'update-cards' 이벤트를 수신
+      document.querySelector(`[data-column-id="${props.columnId}"]`).addEventListener('update-cards', updateCards);
     });
     // const computedCards = kanbanCardStore.cards;
     const newCardTitle = ref('');
@@ -134,7 +138,7 @@ export default {
       }
     };
 
-    const onCardDrop = async (event) => {
+    const onCardDrop =  (event) => {
       // async를 추가하여 비동기 함수로 선언
       const { from, to, oldIndex, newIndex, item } = event;
 
@@ -159,7 +163,6 @@ export default {
         }
 
         const cardId = item.dataset.cardId; // 이동된 카드 ID
-
         // 컬럼 간 카드 이동 이벤트를 상위 컴포넌트로 전송
         emit('card-move', { cardId, fromColumnId, toColumnId, oldIndex, newIndex });
       }
@@ -185,6 +188,7 @@ export default {
       onCardDrop,
       computedCards,
       deleteCard,
+      updateCards,
     };
   },
 };
