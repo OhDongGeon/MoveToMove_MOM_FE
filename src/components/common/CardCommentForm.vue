@@ -1,74 +1,72 @@
 <template>
   <div>
     <div class="comment-label">
-      <img :src="user.profileUrl" alt="" class="avatar" />
+      <ProfileImage :src="member.profileUrl" :alt="member.nickName + ' Avatar'" :width="50" :height="50" />
       <h3 class="comment-header">코멘트 작성</h3>
     </div>
 
     <div class="card-comment-form">
       <div class="header-container">
         <h3 class="header-title">작성</h3>
-        <!-- 커스텀 버튼 컴포넌트를 사용하여 "등록" 버튼 -->
-        <round-button-item :width="50" :height="25" :borderRadius="5" :fontSize="12" @click="submitComment">등록</round-button-item>
+        <round-button-item :width="50" :height="25" :borderRadius="5" :fontSize="12" @click="insertComment">등록</round-button-item>
       </div>
-      <textarea v-model="newComment" placeholder="댓글을 작성하세요." class="comment-input" @input="autoResize" ref="textarea"></textarea>
+      <textarea
+        v-model="newComment"
+        placeholder="코멘트를 작성하세요."
+        class="comment-input"
+        :class="{ 'error-placeholder': isInvalid }"
+        @input="autoResize"
+        ref="textarea"
+      ></textarea>
     </div>
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/memberStore'; // Pinia 스토어 가져오기
+import { useAuthStore } from '@/stores/memberStore';
 import { useCommentStore } from '@/stores/commentStore';
+import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 
 export default {
   name: 'CardCommentForm',
+  components: {
+    ProfileImage,
+  },
+  props: {
+    cardId: {
+      type: Number,
+      required: true,
+    },
+  },
 
-  setup() {
-    const newComment = ref('');
-    const textarea = ref(null); // textarea 요소 참조
-    const avatar = 'https://over-clock-s3.s3.ap-northeast-2.amazonaws.com//img/60409475-953c-4658-8fb4-7807c0c379a0.jpg';
-
-    // Pinia 스토어 사용
+  setup(props) {
     const authStore = useAuthStore();
-    // Pinia 스토어 사용
     const commentStore = useCommentStore();
+    const member = computed(() => authStore.getUser);
 
-    // 유저 정보 가져오기 (Pinia 스토어의 getter 사용)
-    const user = computed(() => authStore.getUser);
-
-    // 날짜 포맷 함수
-    function formatDate(date) {
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
-    }
-
-    // 댓글 제출 함수
-    const submitComment = () => {
-      if (newComment.value.trim()) {
-        const comment = {
-          author: user.value.nickName || '피니아 유저 오류',
-          avatar: user.value.profileUrl,
-          content: newComment.value,
-          date: formatDate(new Date()), // 포맷된 날짜 사용
-        };
-        commentStore.addComment(comment);
-        newComment.value = '';
-      }
-    };
+    const textarea = ref(null);
+    const newComment = ref('');
+    const isInvalid = ref(false);
 
     const autoResize = () => {
-      textarea.value.style.height = 'auto'; // 높이 초기화
-      textarea.value.style.height = `${textarea.value.scrollHeight}px`; // 내용에 맞게 높이 조정
+      textarea.value.style.height = 'auto';
+      textarea.value.style.height = `${textarea.value.scrollHeight}px`;
     };
 
-    // onMounted 훅에서 autoResize를 초기화
+    // 코멘트 저장
+    const insertComment = () => {
+      if (newComment.value.trim() === '') {
+        isInvalid.value = true;
+        newComment.value = '';
+        return;
+      }
+
+      commentStore.insertComment(props.cardId, newComment.value);
+      newComment.value = '';
+      isInvalid.value = false;
+    };
+
     onMounted(() => {
       if (textarea.value) {
         autoResize();
@@ -76,12 +74,12 @@ export default {
     });
 
     return {
+      member,
       newComment,
-      submitComment,
-      avatar,
-      user,
+      isInvalid,
       autoResize,
       textarea,
+      insertComment,
     };
   },
 };
@@ -137,5 +135,9 @@ export default {
   outline: none;
   resize: none;
   overflow: hidden;
+}
+
+.comment-input.error-placeholder::placeholder {
+  color: red;
 }
 </style>
