@@ -1,11 +1,9 @@
 import axiosInstance from '@/api/axiosInstance';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import {useKanbanColumnStore} from '@/stores/kanbanColumnStore';
 
 export const useKanbanCardStore = defineStore('kanbanCard', () => {
   const cards = ref([]);
-  const kanbanColumnStore = useKanbanColumnStore();
 
   const loadAllCards = async (projectId) => {
     try {
@@ -148,49 +146,22 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       }
 
       await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
-      console.log(`카드 ID ${cardId} 이동 -> new ${newCardSeq} within column ${columnId}`);
     } catch (e) {
       console.log(e);
     }
   };
-  // 컬럼 내 카드 순서를 재정렬하는 함수
-  const updateCardSequences = (columnId) => {
-    const columnCards = cards.value
-        .filter((card) => card.columnId === Number(columnId))
-        .sort((a, b) => a.cardSeq - b.cardSeq); // 기존 시퀀스로 정렬
-
-    columnCards.forEach((card, index) => {
-      card.cardSeq = index+1; // 시퀀스 재정렬
-    });
-  };
   // 다른 컬럼으로의 카드 이동
-  const moveCardToAnotherColumn = (cardId, fromColumnId, toColumnId, newIndex) => {
-    // 1. 이동할 카드 찾기
-    const card = cards.value.find((card) => String(card.id) === String(cardId));  // 피니아 내에 이동할 카드가 있는지 검사
-    if (!card) {
-      console.log(`${cardId}의 카드가 피니아 데이터 내에 없습니다.`);
-      return;
-    }
-    // 2. 카드의 컬럼 ID를 변경하는 toColumnId값으로 변경 ( 변경하려는 컬럼 아이디 검사 )
-    const targetColumnExists = kanbanColumnStore.columns.some(
-        (column) => Number(column.kanbanColumnId) === Number(toColumnId)
-    );
-    if(!targetColumnExists) {
-      console.log(`이동하고자하는 컬럼 ${toColumnId}을 찾을 수 없습니다.`);
-      return;
-    }
-    card.columnId = Number(toColumnId); // 변경되는 카드의 컬럼 ID를 이동하고자하는 컬럼의 ID로 바꿔준다.
-    // 3. 새로운 컬럼으로 카드 추가
-    const toColumnCards = cards.value.filter(
-        (card) => card.columnId === Number(toColumnId)
-    );
-    toColumnCards.splice(newIndex, 0, card); // 지정된 위치에 추가
-    console.log(`${newIndex}`);
-    // 4. 시퀀스 재정렬 (새로운 컬럼)
-    updateCardSequences(toColumnId);
+  const moveCardToAnotherColumn = async (cardId, toColumnId, newCardSeq) => {
+    try {
+      const cardLocationForm = {
+        kanbanColumnId: toColumnId,
+        cardSeq: newCardSeq,
+      }
 
-    // 5. 시퀀스 재정렬 (이전 컬럼)
-    updateCardSequences(fromColumnId);
+      await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   // 칸반 카드 담당자 수정
@@ -243,6 +214,5 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     updateKanbanCard,
     updateKanbanCardMember,
     deleteKanbanCard,
-    updateCardSequences,
   };
 });

@@ -419,24 +419,35 @@ export default {
 
     // 칸반 카드 이동 시
     const onCardMove = async (event) => {
-      const { cardId, columnId, newCardSeq, from, to, fromColumnId, toColumnId, oldIndex, newIndex } = event;
+      const { cardId, columnId, newCardSeq, from, to, toColumnId } = event; // `oldIndex`, `newIndex` 제거
       //
-      if (isMoveBetweenColumns(fromColumnId, toColumnId)) {
-        await handleMoveBetweenColumns(cardId, fromColumnId, toColumnId, newIndex);
-      } else if (isMoveWithinColumn(from, to, oldIndex, newIndex)) {
+      if (isMoveBetweenColumns(from, to)) {
+        await handleMoveBetweenColumns(cardId, toColumnId, newCardSeq);
+      } else if (isMoveWithinColumn(from, to)) {
         await handleMoveWithinColumn(cardId, columnId, newCardSeq);
       } else {
         console.warn('Unhandled card move event:', event);
       }
     };
     // 카드 이동 시 컬럼과 변경되는 컬럼이 같은지 확인하는 함수
-    const isMoveBetweenColumns = (fromColumnId, toColumnId) => {
-      return fromColumnId && toColumnId !== toColumnId;
+    const isMoveBetweenColumns = (from, to) => {
+      return from && to && from !== to;
     };
+
     // 다른 컬럼으로 카드가 이동 했을 경우 실행되는 함수
-    const handleMoveBetweenColumns = async (cardId, fromColumnId, toColumnId, newIndex) => {
-      console.log(`Card ${cardId} moved from column ${fromColumnId} to column ${toColumnId}`);
-      kanbanCardStore.moveCardToAnotherColumn(cardId, fromColumnId, toColumnId, newIndex);
+    const handleMoveBetweenColumns = async (cardId, toColumnId, newCardSeq) => {
+      try {
+        if (newCardSeq <= 0) {  // newCardSeq가 유효한지 확인
+          console.error('유효하지 않은 시퀀스 값입니다.');
+          return;
+        }
+        await kanbanCardStore.moveCardToAnotherColumn(cardId, toColumnId, newCardSeq);
+
+        // 카드 데이터를 최신화
+        await kanbanCardStore.loadAllCards(projectId.value);
+      } catch (e) {
+        console.log(e);
+      }
     };
 
     // 같은 컬럼 내 카드 이동 확인 함수
@@ -446,6 +457,10 @@ export default {
     // 같은 컬럼 내에서 카드가 이동하는 경우 실행되는 함수
     const handleMoveWithinColumn = async (cardId, columnId, newCardSeq) => {
       try {
+        if (newCardSeq <= 0) {  // newCardSeq가 유효한지 확인
+          console.error('유효하지 않은 시퀀스 값입니다.');
+          return;
+        }
         await kanbanCardStore.moveCardWithinColumn(cardId, columnId, newCardSeq);
 
         // 카드 데이터를 최신화
