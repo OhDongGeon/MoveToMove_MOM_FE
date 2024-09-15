@@ -34,7 +34,7 @@
 
 <script>
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import {computed, nextTick, onMounted, ref} from 'vue';
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
@@ -74,12 +74,23 @@ export default {
     const updateCards = () => {
       computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
     };
+    watch(
+        () => kanbanCardStore.cards, // 스토어의 cards를 감시
+        () => {
+          computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+        },
+        { immediate: true } // 초기 마운트 시에도 호출
+    );
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
       updateCards();
+      const element = document.querySelector(`[data-column-id="${props.columnId}"]`);
+      element.addEventListener('update-cards', updateCards);
 
-      // 상위 컴포넌트로부터 'update-cards' 이벤트를 수신
-      document.querySelector(`[data-column-id="${props.columnId}"]`).addEventListener('update-cards', updateCards);
+      // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
+      onBeforeUnmount(() => {
+        element.removeEventListener('update-cards', updateCards);
+      });
     });
     // const computedCards = kanbanCardStore.cards;
     const newCardTitle = ref('');
@@ -137,34 +148,39 @@ export default {
         isCardAdd.value = false;
       }
     };
-
+    // 카드 드래그 앤 드랍 시 실행될 함수
     const onCardDrop =  (event) => {
       // async를 추가하여 비동기 함수로 선언
-      const { from, to, oldIndex, newIndex, item } = event;
+      const { from, to, newIndex, item } = event;
 
-      console.log('onCardDrop event:', event); // 이벤트 로그 출력
-
+      const cardId = item.dataset.cardId; // 이동된 카드 ID
       // 같은 컬럼 내에서 카드 이동
-      if (from === to && oldIndex !== newIndex) {
-        emit('card-move', { oldIndex, newIndex, columnId: props.id });
-        computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+      if (from === to) {
+        const columnId = props.columnId; // 현재 컬럼의 ID
+        if (newIndex < 0) {  // newIndex가 유효한지 확인
+          console.error('유효하지 않은 이동 위치입니다.');
+          return;
+        }
+        const newCardSeq = newIndex + 1;
+        emit('card-move', {cardId, columnId, newCardSeq, from, to});
       }
       // 다른 컬럼으로 카드 이동
       else if (from !== to) {
-        const fromColumnId = props.columnId; // 현재 컬럼의 ID를 사용
-
         // `to` 요소의 상위 `.column` 요소에서 `data-column-id` 속성을 가져옴
         const toColumnElement = to.closest('.column'); // `.column`으로 부모 요소를 찾음
         const toColumnId = toColumnElement?.dataset?.columnId; // `data-column-id` 접근
+        const newCardSeq = Number(newIndex) + 1; // 새로운 시퀀스 (서버가 1부터 시작하도록 설정)
 
         if (!toColumnId) {
-          console.error('Cannot determine toColumnId from dataset.');
+          console.error('카드 데이터를 변경하는데, 변경되는 컬럼을 식별할 수 없습니다. ');
           return;
         }
-
-        const cardId = item.dataset.cardId; // 이동된 카드 ID
+        if (newIndex < 0) {  // newIndex가 유효한지 확인
+          console.error('유효하지 않은 이동 위치입니다.');
+          return;
+        }
         // 컬럼 간 카드 이동 이벤트를 상위 컴포넌트로 전송
-        emit('card-move', { cardId, fromColumnId, toColumnId, oldIndex, newIndex });
+        emit('card-move', { cardId, toColumnId, newCardSeq, from, to });
       }
     };
 
