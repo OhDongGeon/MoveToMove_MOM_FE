@@ -12,12 +12,10 @@
 import { onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/memberStore'; // Pinia 스토어 임포트
-import { useWebSocketStore } from '@/stores/webSocketStore'; // WebSocket 스토어 임포트
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore(); // Pinia 스토어 사용
-const webSocket = useWebSocketStore(); // WebSocket 스토어 사용
 
 const handleLogin = async () => {
   // 쿼리 파라미터에서 액세스 토큰 가져오기
@@ -32,10 +30,6 @@ const handleLogin = async () => {
       // 스토어에서 유저 정보 요청
       await authStore.fetchUser();
       console.log('유저 정보', authStore.getUser);
-
-      // 로그인 후 WebSocket 연결 설정
-      const memberId = authStore.user.memberId; // 사용자 ID 가져오기
-      webSocket.connect(memberId); // WebSocket 연결 및 프로젝트별 구독 설정
 
       router.push('/move-to-move/mypage'); // 성공 후 페이지 이동
     } catch (err) {

@@ -130,8 +130,9 @@ import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectStore } from '@/stores/projectStore';
+import { useWebSocketStore } from '@/stores/webSocketStore';
 
-import { computed, nextTick, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
+import {computed, nextTick, onMounted, onUnmounted, ref} from 'vue'; // Vue의 ref를 가져옵니다.
 
 import { useRouter } from 'vue-router';
 import { VTreeview } from 'vuetify/labs/VTreeview';
@@ -162,6 +163,7 @@ export default {
     const kanbanCardStore = useKanbanCardStore(); // 칸반 카드 Pinia store 사용
     const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
     const projectStore = useProjectStore(); // 프로젝트 Pinia 스토어 인스턴스 생성
+    const webSocketStore = useWebSocketStore();
 
     const columns = ref([]);
     const cards = ref([]);
@@ -221,29 +223,31 @@ export default {
           }
         }
 
-        // 프로젝트 구독을 위한 WebSocket 연결
-        // if (projectId.value) {
-        //   useWebSocketStore.connect(projectId.value);
-        //   useWebSocketStore.stompClient.subscribe(`/topic/project/${projectId.value}`, (message) => {
-        //     handleIncomingMessage(projectId.value, JSON.parse(message.body)); // WebSocket 메시지 수신 후 처리
-        //   });
-        // }
+        // 웹 소켓 연결
+        webSocketStore.connect(projectId.value);
+
+        // 메시지 수신 시 처리 로직 ( 컬럼 이동 시 )
+        const handleWebsocketMessage = async (message) => {
+          const data = JSON.parse(message.body);
+
+          if (data.type === 'columnMove') {
+            await kanbanColumnStore.loadColumns(projectId.value);
+          }
+        };
+        if (webSocketStore.projectConnections[projectId.value]) {
+          webSocketStore.projectConnections[projectId.value].subscribe(`/topic/project/${projectId.value}`, handleWebsocketMessage);
+        }
+
       } catch (error) {
         console.error('데이터 로드 중 오류 발생', error);
       }
     });
 
-    // const handleIncomingMessage = (projectId, message) => {
-    //   if (message.type === 'CARD_MOVE') {
-    //     const { cardId, toIndex, toColumnId } = message;
-    //     const movedCardIndex = cards.value.findIndex((card) => card.id === cardId);
-    //     if (movedCardIndex === -1) return; // 카드가 존재하지 않는 경우 리턴
-    //     const [movedCard] = cards.value.splice(movedCardIndex, 1); // 카드 제거
-    //     movedCard.columnId = toColumnId;
-    //     const newColumnCards = cards.value.filter((card) => card.columnId === toColumnId);
-    //     newColumnCards.splice(toIndex, 0, movedCard);
-    //   }
-    // };
+    // 컴포넌트가 언마운트될 때 WebSocket 구독 해제
+    onUnmounted(() => {
+      webSocketStore.disconnect(projectId.value); // 프로젝트 ID에 대한 WebSocket 연결 해제
+    });
+
     // checkMove 함수 정의
     const checkMove = (evt) => {
       console.log(evt.dragged); // 드래그 중인 요소
@@ -493,6 +497,14 @@ export default {
             if (columnComponent) {
               columnComponent.dispatchEvent(new CustomEvent('update-cards', { bubbles: true }));
             }
+          });
+
+          // WebSocket을 통해 다른 사용자에게 컬럼 이동을 알림
+          webSocketStore.sendMessageToProject({
+            projectId: projectId.value,
+            type: 'columnMove',
+            columnId: kanbanColumnId,
+            newIndex: newServerIndex,
           });
         } catch (e) {
           console.log('Error while moving column:', e);
