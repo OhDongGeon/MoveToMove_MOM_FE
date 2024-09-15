@@ -81,6 +81,7 @@
               <label>{{ projectName }}</label>
             </div>
             <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" class="ellipsis" />
+            <!-- :isProjectLeader="isProjectLeader" -->
             <KebabProjectMenu
               v-if="showMenu !== null"
               :showMenu="showMenu"
@@ -131,7 +132,7 @@ import { useKanbanColumnStore } from '@/stores/kanbanColumnStore';
 import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectStore } from '@/stores/projectStore';
 
-import { nextTick, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
+import { computed, nextTick, onMounted, ref } from 'vue'; // Vue의 ref를 가져옵니다.
 
 import { useRouter } from 'vue-router';
 import { VTreeview } from 'vuetify/labs/VTreeview';
@@ -161,7 +162,7 @@ export default {
     const kanbanColumnStore = useKanbanColumnStore(); // 칸반 컬럼 Pinia store 사용
     const kanbanCardStore = useKanbanCardStore(); // 칸반 카드 Pinia store 사용
     const folderStore = useFolderStore(); // 폴더 Pinia store 가져오기
-    const projectStore = useProjectStore(); // Pinia 스토어 인스턴스 생성
+    const projectStore = useProjectStore(); // 프로젝트 Pinia 스토어 인스턴스 생성
 
     const columns = ref([]);
     const cards = ref([]);
@@ -176,7 +177,10 @@ export default {
     const projectId = ref(0);
 
     // 프로젝트 리더 유무 변수
-    const isProjectLeader = ref(false);
+    // isProjectLeader를 computed로 선언하여 반응형으로 동작하도록 설정
+    const isProjectLeader = computed(() => {
+      return projectStore.projectData.projectLeaderYN;
+    });
 
     // 프로젝트 명
     const projectName = ref('');
@@ -276,7 +280,7 @@ export default {
 
         projectId.value = node.id;
         projectName.value = node.title;
-        isProjectLeader.value = node.projectLeaderYN;
+        // isProjectLeader.value = node.projectLeaderYN;
         folderProjectType.value = node.type;
 
         // console.log('type: ', isProjectLeader.value);

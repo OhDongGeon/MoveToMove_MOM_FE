@@ -9,8 +9,10 @@
       <span class="menu-text">내보내기</span>
     </div>
 
-    <alert-ok-cancel :isVisible="isLeader" @close="closeLeader" message="팀장 권한을 이전 하시겠습니까?" locationFlag="member-leader"> </alert-ok-cancel>
-    <alert-ok-cancel :isVisible="isLeave" @close="closeLeave" message="프로젝트에서 내보시내겠습니까?" locationFlag="member-leave"> </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isLeader" @ok="transferLeader" @close="closeLeader" message="팀장 권한을 이전 하시겠습니까?" locationFlag="member-leader">
+    </alert-ok-cancel>
+    <alert-ok-cancel :isVisible="isLeave" @ok="projectOut" @close="closeLeave" message="프로젝트에서 내보시내겠습니까?" locationFlag="member-leave">
+    </alert-ok-cancel>
   </div>
 </template>
 
@@ -35,13 +37,25 @@ export default {
     AlertOkCancel,
   },
 
-  emits: ['closeMenu'],
+  emits: ['closeMenu', 'transferLeader', 'projectOut'],
 
   setup(props, { emit }) {
     const isMenuReadyToClose = ref(false); // 외부 클릭 감지
     const menu = ref(null); // 메뉴 요소에 대한 참조
     const isLeader = ref(false); // 리더이전 모달
     const isLeave = ref(false); // 내보내기 모달
+
+    // 팀장 권한이전 확정
+    const transferLeader = () => {
+      emit('transferLeader');
+      isLeader.value = false;
+    };
+
+    // 프로젝트 내보내기
+    const projectOut = () => {
+      emit('projectOut');
+      isLeave.value = false;
+    };
 
     // 팀장 권한 이전
     const leader = () => {
@@ -100,6 +114,8 @@ export default {
     return {
       menu,
       isMenuReadyToClose,
+      transferLeader, // 팀장 권한 이전 함수
+      projectOut, // 프로젝트 내보내기 함수
       isLeader,
       isLeave,
       leader,
