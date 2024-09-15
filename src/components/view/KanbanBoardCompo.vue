@@ -449,8 +449,8 @@ export default {
     };
 
     // 같은 컬럼 내 카드 이동 확인 함수
-    const isMoveWithinColumn = (from, to, oldIndex, newIndex) => {
-      return from === to && oldIndex !== newIndex;
+    const isMoveWithinColumn = (from, to) => {
+      return from === to;
     };
     // 같은 컬럼 내에서 카드가 이동하는 경우 실행되는 함수
     const handleMoveWithinColumn = async (cardId, columnId, newCardSeq) => {
@@ -459,8 +459,14 @@ export default {
           console.error('유효하지 않은 시퀀스 값입니다.');
           return;
         }
-        await kanbanCardStore.moveCardWithinColumn(cardId, columnId, newCardSeq);
-
+        // WebSocket을 통해 다른 사용자에게 카드 이동 정보 전송
+        await webSocketStore.sendCardMoveWithinColumnMessage({
+          projectId: projectId.value,
+          type: 'cardMoveWithinColumn',  // 메시지 유형
+          cardId: cardId,
+          columnId: columnId,
+          newCardSeq: newCardSeq,
+        });
         // 카드 데이터를 최신화
         await kanbanCardStore.loadAllCards(projectId.value);
       } catch (error) {
