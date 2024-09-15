@@ -33,5 +33,9 @@ export const useProjectStore = defineStore('project', {
         deletedAt: null,
       }; // 프로젝트 데이터를 초기화
     },
+    // 프로젝트 팀장 변경
+    changeProjectLeader(projectId) {
+      this.projectData.projectLeaderYN = projectId === this.projectData.projectId ? false : true; // 팀장 ID와 현재 프로젝트 ID가 일치하면 'N'으로, 아니면 'Y'로 변경
+    },
   },
 });

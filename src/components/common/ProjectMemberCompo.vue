@@ -1,15 +1,21 @@
 <template>
   <div>
-    <v-expansion-panels v-model="members" multiple>
+    <v-expansion-panels v-model="panel" multiple>
       <v-expansion-panel class="member-contains">
         <v-expansion-panel-title>
           <div class="header">
-            <span>참여자 ({{ localUsers.length }})</span>
+            <span>참여자 ({{ joinMemberStore.joinMembers?.length }})</span>
           </div>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
-          <div class="user-list">
-            <UserItem v-for="(user, index) in localUsers" :key="index" :user="user" />
+          <div class="user-list" v-if="joinMemberStore.joinMembers?.length > 0">
+            <UserItem
+              v-for="user in joinMemberStore.joinMembers"
+              :key="user.memberId"
+              :user="user"
+              @transferLeader="handleTransferLeader"
+              @projectOut="projectOut"
+            />
           </div>
           <!-- 초대 버튼 -->
           <div class="invite-button">
@@ -25,9 +31,10 @@
 </template>
 
 <script>
-import axios from '@/api/axiosInstance';
 import { onMounted, ref, watch } from 'vue'; // Vue의 ref를 가져옵니다.
 
+import { useJoinMemberStore } from '@/stores/joinMemberStore';
+import { useProjectStore } from '@/stores/projectStore';
 import UserItem from '../common/combine/UserListItem.vue';
 import ProjectMemberInvite from './ProjectMemberInvite.vue';
 
@@ -43,13 +50,14 @@ export default {
     },
   },
   setup(props) {
-    const members = ref([0]);
-    const localUsers = ref([]);
+    const panel = ref([0]); // 첫 번째 패널을 기본적으로 열려 있게 설정
     const isInviteModalOpen = ref(false);
+    const joinMemberStore = useJoinMemberStore();
+    const projectStore = useProjectStore();
 
     onMounted(() => {
       if (props.projectId) {
-        fetchMembers(); // projectId가 존재할 때만 데이터를 조회합니다.
+        joinMemberStore.fetchMembers(props.projectId); // projectId가 존재할 때만 데이터를 조회합니다.
       }
     });
 
@@ -58,22 +66,23 @@ export default {
       () => props.projectId,
       (newProjectId) => {
         if (newProjectId) {
-          fetchMembers(newProjectId);
+          joinMemberStore.fetchMembers(newProjectId);
         }
       },
     );
 
-    const fetchMembers = async () => {
-      try {
-        if (props.projectId) {
-          const response = await axios.get(`/api/projects/${props.projectId}/members`);
-          // console.log(response.data);
+    // 팀장 권한 이전 함수 -> 스토어 전달
+    const handleTransferLeader = async (memberId) => {
+      console.log(`권한 스토어로 전달: `, memberId);
+      await joinMemberStore.transferLeader(props.projectId, memberId);
 
-          localUsers.value = response.data;
-        }
-      } catch (e) {
-        console.error('Error occurred during fetching users', e);
-      }
+      // 프로젝트 스토어 수정
+      projectStore.changeProjectLeader(props.projectId);
+    };
+
+    // 프로젝트 내보내기 한다는 전달
+    const projectOut = (memberId) => {
+      console.log(`부모컴포 전달 프로젝트에서 내보내기 할 멤버: `, memberId);
     };
 
     // 프로젝트 멤버 초대 모달 열기
@@ -88,11 +97,13 @@ export default {
     };
 
     return {
-      members,
-      localUsers, // 로컬 users 배열을 localUsers로 반환
+      panel,
       isInviteModalOpen, // 프로젝트 초대 모달 여부
       addMemberInvite, // 프로젝트 초대 함수
+      projectOut, // 프로젝트에서 내보내기 함수
       closeModal, // 프로젝트 초대 모달 닫기
+      handleTransferLeader, // 권한 이전 함수
+      joinMemberStore, // Pinia 스토어
     };
   },
 };
