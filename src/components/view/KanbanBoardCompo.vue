@@ -472,22 +472,31 @@ export default {
 
 
     // 컬럼 드래그 앤 드롭 핸들러
-    const onColumnDragEnd = ({ oldIndex, newIndex }) => {
+    const onColumnDragEnd = async ({ oldIndex, newIndex }) => {
       if (oldIndex !== newIndex) {
-        kanbanColumnStore.moveColumn(oldIndex, newIndex); // 컬럼 이동 후 상태 저장
-        cards.value = kanbanCardStore.cards;
-        // 컬럼이 이동된 후 하위 컴포넌트에 카드 업데이트 이벤트를 발생시킴
-        columns.value.forEach((column) => {
-          const columnComponent = document.querySelector(`[data-column-id="${column.kanbanColumnId}"]`);
-          if (columnComponent) {
-            columnComponent.dispatchEvent(new CustomEvent('update-cards', { bubbles: true }));
-          }
-        });
-        // 카드 데이터 로그로 출력
-        // console.log('Updated cards after column move:');
-        // cards.value.forEach((card) => {
-        //   console.log(`Card ID: ${card.id}, Column ID: ${card.columnId}`);
-        // });
+        const movedColumn = columns.value[newIndex]; // 드래그 후의 새로운 위치의 컬럼
+        const kanbanColumnId = movedColumn.kanbanColumnId; // 이동한 컬럼의 ID
+        const project = projectId.value; // 현재 프로젝트의 ID
+        const newServerIndex = newIndex+1;
+        console.log(`Moved Column ID: ${kanbanColumnId}, New Index (Server): ${newServerIndex}, Project ID: ${project}`);
+        try {
+          // 서버에 컬럼 이동 요청 전송
+          await kanbanColumnStore.moveColumn(kanbanColumnId, project, newServerIndex);
+
+          // 상태 최신화
+          await kanbanColumnStore.loadColumns(projectId.value);
+          cards.value = kanbanCardStore.cards;
+
+          // 컬럼이 이동된 후 하위 컴포넌트에 카드 업데이트 이벤트를 발생시킴
+          columns.value.forEach((column) => {
+            const columnComponent = document.querySelector(`[data-column-id="${column.kanbanColumnId}"]`);
+            if (columnComponent) {
+              columnComponent.dispatchEvent(new CustomEvent('update-cards', { bubbles: true }));
+            }
+          });
+        } catch (e) {
+          console.log('Error while moving column:', e);
+        }
       }
     };
 
