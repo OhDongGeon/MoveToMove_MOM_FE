@@ -140,28 +140,18 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
   };
 
   // 같은 컬럼 내에서의 카드 이동
-  const moveCardWithinColumn = (columnId, oldIndex, newIndex) => {
-    const columnCards = cards.value.filter((card) => card.columnId === columnId);
-    const movedCard = columnCards.splice(oldIndex, 1)[0];
-    columnCards.splice(newIndex, 0, movedCard);
-
-    // 시퀀스 업데이트
-    columnCards.forEach((card, index) => {
-      card.sequence = index + 1; // 카드 시퀀스 업데이트
-    });
-    // 전체 cards 배열에서 해당 컬럼의 카드 시퀀스 업데이트
-    cards.value = cards.value.map((card) => {
-      if (card.columnId === columnId) {
-        const updatedCard = columnCards.find((c) => c.id === card.id);
-        return updatedCard ? { ...card, sequence: updatedCard.sequence } : card;
+  const moveCardWithinColumn = async (cardId, columnId, newCardSeq) => {
+    try {
+      const cardLocationForm = {
+        kanbanColumnId: columnId,
+        cardSeq: newCardSeq,
       }
-      return card;
-    });
 
-    // cards 배열을 시퀀스에 따라 정렬
-    cards.value.sort((a, b) => a.sequence - b.sequence);
-
-    console.log(`Moved card within column ${columnId} from ${oldIndex} to ${newIndex}`);
+      await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
+      console.log(`카드 ID ${cardId} 이동 -> new ${newCardSeq} within column ${columnId}`);
+    } catch (e) {
+      console.log(e);
+    }
   };
   // 컬럼 내 카드 순서를 재정렬하는 함수
   const updateCardSequences = (columnId) => {
@@ -170,7 +160,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         .sort((a, b) => a.cardSeq - b.cardSeq); // 기존 시퀀스로 정렬
 
     columnCards.forEach((card, index) => {
-      card.cardSeq = index; // 시퀀스 재정렬
+      card.cardSeq = index+1; // 시퀀스 재정렬
     });
   };
   // 다른 컬럼으로의 카드 이동
@@ -195,7 +185,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         (card) => card.columnId === Number(toColumnId)
     );
     toColumnCards.splice(newIndex, 0, card); // 지정된 위치에 추가
-
+    console.log(`${newIndex}`);
     // 4. 시퀀스 재정렬 (새로운 컬럼)
     updateCardSequences(toColumnId);
 

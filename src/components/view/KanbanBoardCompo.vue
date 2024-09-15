@@ -418,34 +418,41 @@ export default {
     };
 
     // 칸반 카드 이동 시
-    const onCardMove = (event) => {
-      const { oldIndex, newIndex, columnId, cardId, fromColumnId, toColumnId } = event;
-
+    const onCardMove = async (event) => {
+      const { cardId, columnId, newCardSeq, from, to, fromColumnId, toColumnId, oldIndex, newIndex } = event;
+      //
       if (isMoveBetweenColumns(fromColumnId, toColumnId)) {
-        handleMoveBetweenColumns(cardId, fromColumnId, toColumnId, newIndex);
-      } else if (isMoveWithinColumn(columnId, oldIndex, newIndex)) {
-        handleMoveWithinColumn(columnId, oldIndex, newIndex);
+        await handleMoveBetweenColumns(cardId, fromColumnId, toColumnId, newIndex);
+      } else if (isMoveWithinColumn(from, to, oldIndex, newIndex)) {
+        await handleMoveWithinColumn(cardId, columnId, newCardSeq);
       } else {
         console.warn('Unhandled card move event:', event);
       }
     };
-    // 카드 이동 시 컬럼과 카드 ID 같은지 확인하는 함수
+    // 카드 이동 시 컬럼과 변경되는 컬럼이 같은지 확인하는 함수
     const isMoveBetweenColumns = (fromColumnId, toColumnId) => {
-      return fromColumnId && toColumnId && fromColumnId !== toColumnId;
-    };
-    // 카드 이동 시 다른 컬럼으로 이동했는지 검사하는 함수
-    const isMoveWithinColumn = (columnId, oldIndex, newIndex) => {
-      return columnId && oldIndex !== newIndex;
+      return fromColumnId && toColumnId !== toColumnId;
     };
     // 다른 컬럼으로 카드가 이동 했을 경우 실행되는 함수
-    const handleMoveBetweenColumns = (cardId, fromColumnId, toColumnId, newIndex) => {
+    const handleMoveBetweenColumns = async (cardId, fromColumnId, toColumnId, newIndex) => {
       console.log(`Card ${cardId} moved from column ${fromColumnId} to column ${toColumnId}`);
       kanbanCardStore.moveCardToAnotherColumn(cardId, fromColumnId, toColumnId, newIndex);
     };
+
+    // 같은 컬럼 내 카드 이동 확인 함수
+    const isMoveWithinColumn = (from, to, oldIndex, newIndex) => {
+      return from === to && oldIndex !== newIndex;
+    };
     // 같은 컬럼 내에서 카드가 이동하는 경우 실행되는 함수
-    const handleMoveWithinColumn = (columnId, oldIndex, newIndex) => {
-      console.log(`Card moved in column ${columnId} from ${oldIndex} to ${newIndex}`);
-      kanbanCardStore.moveCardWithinColumn(columnId, oldIndex, newIndex);
+    const handleMoveWithinColumn = async (cardId, columnId, newCardSeq) => {
+      try {
+        await kanbanCardStore.moveCardWithinColumn(cardId, columnId, newCardSeq);
+
+        // 카드 데이터를 최신화
+        await kanbanCardStore.loadAllCards(projectId.value);
+      } catch (error) {
+        console.error('Error moving card:', error);
+      }
     };
 
 
@@ -467,16 +474,6 @@ export default {
         //   console.log(`Card ID: ${card.id}, Column ID: ${card.columnId}`);
         // });
       }
-    };
-
-    // 컬럼별로 필터링된 카드 반환 함수
-    const filteredCardsByColumn = (columnId) => {
-      if (!cards.value || cards.value.length === 0) return [];
-      const filteredCards = cards.value.filter((card) => card.columnId === columnId);
-
-      // 필터링된 카드 확인
-      console.log(`Filtered cards for column ${columnId}:`, filteredCards);
-      return filteredCards;
     };
 
     // 카드 열림 확인
@@ -527,7 +524,6 @@ export default {
       addNewFolder,
       onColumnDragEnd, // 드래그 앤 드랍
       cards,
-      filteredCardsByColumn,
       onCardMove,
       isCardOpen,
       openCard,
