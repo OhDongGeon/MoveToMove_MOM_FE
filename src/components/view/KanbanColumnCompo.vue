@@ -161,7 +161,6 @@ export default {
         const columnId = props.columnId; // 현재 컬럼의 ID
         const newCardSeq = newIndex + 1;
         emit('card-move', {cardId, columnId, newCardSeq, oldIndex, newIndex, from, to});
-        updateCards();
       }
       // 다른 컬럼으로 카드 이동
       else if (from !== to) {
