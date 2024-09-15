@@ -105,7 +105,6 @@
                   <kanban-column
                     :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
-                    :cards="filteredCardsByColumn(col.kanbanColumnId)"
                     :columnId="col.kanbanColumnId"
                     :isCardOpen="isCardOpen"
                     @card-move="onCardMove"
@@ -433,7 +432,13 @@ export default {
       if (oldIndex !== newIndex) {
         kanbanColumnStore.moveColumn(oldIndex, newIndex); // 컬럼 이동 후 상태 저장
         cards.value = kanbanCardStore.cards;
-
+        // 컬럼이 이동된 후 하위 컴포넌트에 카드 업데이트 이벤트를 발생시킴
+        columns.value.forEach((column) => {
+          const columnComponent = document.querySelector(`[data-column-id="${column.kanbanColumnId}"]`);
+          if (columnComponent) {
+            columnComponent.dispatchEvent(new CustomEvent('update-cards', { bubbles: true }));
+          }
+        });
         // 카드 데이터 로그로 출력
         // console.log('Updated cards after column move:');
         // cards.value.forEach((card) => {

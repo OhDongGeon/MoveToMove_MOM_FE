@@ -56,10 +56,6 @@ export default {
       type: String,
       required: true,
     },
-    cards: {
-      type: Array,
-      default: () => [],
-    },
     underlineColor: {
       type: String,
       default: '#6b9e9b',
@@ -75,9 +71,15 @@ export default {
 
     // props.cards를 참조하는 computed 속성 사용
     const computedCards = ref([]);
+    const updateCards = () => {
+      computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+    };
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
-      computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
+      updateCards();
+
+      // 상위 컴포넌트로부터 'update-cards' 이벤트를 수신
+      document.querySelector(`[data-column-id="${props.columnId}"]`).addEventListener('update-cards', updateCards);
     });
     // const computedCards = kanbanCardStore.cards;
     const newCardTitle = ref('');
@@ -186,6 +188,7 @@ export default {
       onCardDrop,
       computedCards,
       deleteCard,
+      updateCards,
     };
   },
 };
