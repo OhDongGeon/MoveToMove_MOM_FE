@@ -3,7 +3,6 @@
     <div v-if="isVisible" class="slide-container">
       <div class="header-contains">
         <font-awesome-icon :icon="['fas', 'xmark']" class="close-icon" @click="closeSlide" />
-
         <div class="title-section">
           <template v-if="isEditingTitle">
             <input v-model="modifyTitle" class="card-title card-title-input" />
@@ -64,11 +63,11 @@
             </template>
           </div>
 
-          <!-- 코멘트 컴포넌트 -->
-          <CardComments :commentList="card.comments" />
+          <!-- 코멘트 -->
+          <CardComments :commentList="comment" @delete-comment="handleDeleteComment" />
 
-          <!-- 코멘트 작성 컴포넌트 -->
-          <CardCommentForm />
+          <!-- 코멘트 작성 -->
+          <CardCommentForm :cardId="card.id" />
         </div>
 
         <!-- 세로선 -->
@@ -170,6 +169,7 @@
 import { computed, ref, watch, watchEffect } from 'vue';
 import axiosInstance from '@/api/axiosInstance';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
+import { useCommentStore } from '@/stores/commentStore';
 import CardCommentForm from '@/components/common/CardCommentForm.vue';
 import CardComments from '@/components/common/CardComments.vue';
 import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
@@ -316,11 +316,6 @@ export default {
 
     // 시작 날짜
     const startAtFormat = ref('');
-    watchEffect(() => {
-      if (props.card && props.card.startAt) {
-        startAtFormat.value = props.card.startAt.split('T')[0];
-      }
-    });
 
     // 시작 날짜를 업데이트 체크
     const updateStartAt = (newValue) => {
@@ -334,11 +329,6 @@ export default {
 
     // 종료 날짜
     const endAtFormat = ref('');
-    watchEffect(() => {
-      if (props.card && props.card.startAt) {
-        endAtFormat.value = props.card.endAt.split('T')[0];
-      }
-    });
 
     // 종료 날짜를 업데이트 체크
     const updateEndAt = (newValue) => {
@@ -352,6 +342,7 @@ export default {
 
     // 저장 및 수정
     const kanbanCardStore = useKanbanCardStore();
+    const commentStore = useCommentStore();
     const modifyTitle = ref('');
     const isEditingTitle = ref(false);
     const modifyContent = ref('');
@@ -483,6 +474,13 @@ export default {
       emit('close');
     };
 
+    // 코멘트
+    const comment = ref([]);
+
+    const handleDeleteComment = () => {
+      comment.value = commentStore.comments;
+    };
+
     // store 확인
     watch(
       () => kanbanCardStore.cards,
@@ -495,6 +493,32 @@ export default {
         }
       },
       { deep: true },
+    );
+
+    // 시작날짜 변경 확인
+    watchEffect(() => {
+      if (props.card && props.card.startAt) {
+        startAtFormat.value = props.card.startAt.split('T')[0];
+      }
+    });
+
+    // 종료날짜 변경 확인
+    watchEffect(() => {
+      if (props.card && props.card.startAt) {
+        endAtFormat.value = props.card.endAt.split('T')[0];
+      }
+    });
+
+    // 카드 확인 후 코멘트
+    watch(
+      () => props.card?.id,
+      (newCardId) => {
+        if (newCardId) {
+          commentStore.selectComment(newCardId).then(() => {
+            comment.value = commentStore.comments;
+          });
+        }
+      },
     );
 
     return {
@@ -543,6 +567,9 @@ export default {
       deleteCard,
       agreeDeleteCard,
       deleteAlertClose,
+
+      comment,
+      handleDeleteComment,
     };
   },
 };
@@ -580,7 +607,6 @@ export default {
   width: 60%;
   height: 88.1%;
   z-index: 1000;
-  overflow-y: auto;
 }
 
 /* 타이틀 */
@@ -683,6 +709,9 @@ export default {
 .left-content {
   width: 70%;
   padding: 15px;
+  height: calc(100vh - 240px); /* 고정된 헤더 아래로 남은 공간을 채우도록 높이 설정 */
+  overflow-y: auto; /* 스크롤 가능하게 설정 */
+  padding: 15px;
 }
 
 .card-content {
@@ -732,6 +761,9 @@ export default {
   border-bottom-right-radius: 5px;
   background-color: white;
   border: 1.5px solid #6b9e9b;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 .card-content-input {

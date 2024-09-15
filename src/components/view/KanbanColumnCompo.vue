@@ -22,7 +22,7 @@
     <draggable class="kanban-card-list" :list="computedCards" group="cards" @end="onCardDrop" itemKey="id">
       <template #item="{ element: card }">
         <div :data-card-id="card.id">
-        <KanbanCard :card="card" @card-click="openKanbanCard" />
+          <KanbanCard :card="card" @card-click="openKanbanCard" />
         </div>
       </template>
     </draggable>
@@ -34,8 +34,7 @@
 
 <script>
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
-
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
@@ -76,12 +75,11 @@ export default {
       computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
     };
     watch(
-        () => kanbanCardStore.cards, // 스토어의 cards를 감시
-        () => {
-          computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
-          updateCards();
-        },
-        { immediate: true } // 초기 마운트 시에도 호출
+      () => kanbanCardStore.cards, // 스토어의 cards를 감시
+      () => {
+        updateCards();
+      },
+      { immediate: true }, // 초기 마운트 시에도 호출
     );
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
@@ -150,8 +148,9 @@ export default {
         isCardAdd.value = false;
       }
     };
+
     // 카드 드래그 앤 드랍 시 실행될 함수
-    const onCardDrop =  (event) => {
+    const onCardDrop = (event) => {
       // async를 추가하여 비동기 함수로 선언
       const { from, to, newIndex, item } = event;
 
@@ -159,12 +158,13 @@ export default {
       // 같은 컬럼 내에서 카드 이동
       if (from === to) {
         const columnId = props.columnId; // 현재 컬럼의 ID
-        if (newIndex < 0) {  // newIndex가 유효한지 확인
+        if (newIndex < 0) {
+          // newIndex가 유효한지 확인
           console.error('유효하지 않은 이동 위치입니다.');
           return;
         }
         const newCardSeq = newIndex + 1;
-        emit('card-move', {cardId, columnId, newCardSeq, from, to});
+        emit('card-move', { cardId, columnId, newCardSeq, from, to });
       }
       // 다른 컬럼으로 카드 이동
       else if (from !== to) {
@@ -177,7 +177,8 @@ export default {
           console.error('카드 데이터를 변경하는데, 변경되는 컬럼을 식별할 수 없습니다. ');
           return;
         }
-        if (newIndex < 0) {  // newIndex가 유효한지 확인
+        if (newIndex < 0) {
+          // newIndex가 유효한지 확인
           console.error('유효하지 않은 이동 위치입니다.');
           return;
         }
@@ -219,7 +220,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0); /* 투명 오버레이 */
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 999; /* 슬라이드보다 낮고, 부모 상호작용 차단 */
   pointer-events: all; /* 상호작용 차단 */
 }
