@@ -138,7 +138,7 @@ export default {
       }
     };
 
-    const onCardDrop = async (event) => {
+    const onCardDrop =  (event) => {
       // async를 추가하여 비동기 함수로 선언
       const { from, to, oldIndex, newIndex, item } = event;
 
