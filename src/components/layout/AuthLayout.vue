@@ -90,10 +90,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axiosInstance from '@/api/axiosInstance.js';
-import { useRouter } from 'vue-router';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { useAuthStore } from '@/stores/memberStore'; //pinia 스토어 임포트
 import { useNavigationStore } from '@/stores/navigationStore';
 
@@ -239,7 +235,7 @@ const handleSubmit = async () => {
         password: password.value,
       };
 
-      const response = await axiosInstance.post(`/api/members/login`, loginData, {
+      const response = await axios.post(`${API_BASE_URL}/api/members/login`, loginData, {
         withCredentials: true,
       });
 
@@ -286,7 +282,7 @@ const handleSubmit = async () => {
         console.log('파일이 선택되지 않았으므로 기본 이미지 업로드');
         formData.append('file', defaultProfileImageBlob); // 기본 이미지 Blob 추가
       }
-      
+
       await axios.post(`${API_BASE_URL}/api/members/sign-up`, formData);
       openErrorAlert(`회원가입이 완료되었습니다. 로그인 해주세요`);
       isLoginMode.value = true;
