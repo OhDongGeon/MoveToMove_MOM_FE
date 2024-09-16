@@ -26,11 +26,19 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
     };
     columns.value.push(newColumn);
   };
-
-  const removeColumn = (columnId) => {
+  // 컬럼 삭제 요청
+  const removeColumn = async (columnId) => {
     columns.value = columns.value.filter((col) => col.id !== columnId);
-  };
 
+    try {
+
+      await axiosInstance.delete(`/api/kanban-columns/${columnId}`);
+    } catch (error) {
+
+      console.error(`Failed to load columns: `, error);
+    }
+
+  };
   const moveColumn = async (kanbanColumnId, projectId, newIndex) => {
     try {
       const kanbanColumnMoveRequestForm = {

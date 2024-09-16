@@ -47,9 +47,9 @@
           <div class="vertical-line-area"></div>
           <!-- 동적으로 추가된 칸반 컬럼 리스트 -->
           <div class="kanban-list">
-            <div v-for="(column, index) in kanbanColumns" :key="index" class="kanban-item">
-              <input v-model="column.name" readonly />
-              <button @click="removeColumn(index)" class="remove-btn">
+            <div v-for="(column, index) in kanbanColumns" :key="column.kanbanColumnId" class="kanban-item">
+              <input v-model="column.kanbanColumnName" readonly />
+              <button @click="removeColumn(column.kanbanColumnId)" class="remove-btn">
                 <font-awesome-icon :icon="['far', 'square-minus']" />
               </button>
             </div>
@@ -71,9 +71,9 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-// import { useKanbanCardStore } from "@/stores/kanbanCardStore";
+import {useKanbanColumnStore} from "@/stores/kanbanColumnStore";
 
 export default {
   name: 'ManageProjectCompo',
@@ -83,19 +83,14 @@ export default {
       required: false,
     }
   },
-  setup() {
+  setup(props) {
     const router = useRouter();
     const route = useRoute();
-    // const kanbanCardStore = useKanbanCardStore();
+    const kanbanColumnStore = useKanbanColumnStore();
     const projectName = route.query.projectName;
 
     const newColumn = ref(''); // 새로운 컬럼 이름
-    const kanbanColumns = ref([
-      // 초기 컬럼 목록
-      { name: 'Task' },
-      { name: '진행중' },
-      { name: '완료' },
-    ]);
+    const kanbanColumns = computed(() => kanbanColumnStore.columns);
     // 새로운 컬럼 추가
     const addColumn = () => {
       if (newColumn.value) {
@@ -106,14 +101,18 @@ export default {
       }
     };
     // 컬럼 삭제
-    const removeColumn = (index) => {
-      kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
+    const removeColumn = (KanbanColumnId) => {
+      // kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
+      kanbanColumnStore.removeColumn(KanbanColumnId);
     };
 
     const onCancelButton = () => {
       router.replace('/move-to-move/kanban');
     };
 
+    onMounted(() => {
+      kanbanColumnStore.loadColumns(props.projectId);
+    });
     return {
       onCancelButton,
       newColumn,
