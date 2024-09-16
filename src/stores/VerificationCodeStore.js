@@ -65,11 +65,11 @@ export const useVerificationCodeStore = defineStore('verificationCode', {
     },
 
     // 비밀번호 변경 함수 추가
-    async changePassword({ email, authCode, newPassword, confirmPassword }) {
+    async changePassword({ email, code, newPassword, confirmPassword }) {
       try {
         const requestData = {
           email,
-          authCode,
+          code,
           newPassword,
           confirmPassword,
         };
@@ -109,7 +109,8 @@ export const useVerificationCodeStore = defineStore('verificationCode', {
 
     // 인증 정보 초기화
     clearAuthentication() {
-      this.authentication = { email: '', code: '', expiresIn: '' };
+      this.authentication.code = '';
+      this.authentication.expiresIn = '';
       this.isSent = false;
       this.alertVisible = false;
       if (this.intervalId) {
