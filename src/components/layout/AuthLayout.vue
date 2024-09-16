@@ -20,27 +20,35 @@
           <div class="form-group">
             <label for="email">이메일</label>
             <input type="email" id="email" placeholder="이메일을 입력하세요" v-model="email" @blur="validateEmail" />
-            <span v-if="emailError" class="error-message">{{ emailError }}</span>
+            <div class="error-div">
+              <span v-if="emailError" class="error-message">{{ emailError }}</span>
+            </div>
           </div>
 
           <!-- 회원가입일 경우 닉네임 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="nickname">닉네임</label>
             <input type="text" id="nickname" placeholder="닉네임을 입력하세요" v-model="nickname" @blur="validateNickname" />
-            <span v-if="nicknameError" class="error-message">{{ nicknameError }}</span>
+            <div class="error-div">
+              <span v-if="nicknameError" class="error-message">{{ nicknameError }}</span>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="password">비밀번호</label>
             <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" @blur="validatePassword" />
-            <span v-if="passwordError" class="error-message">{{ passwordError }}</span>
+            <div class="error-div">
+              <span v-if="passwordError" class="error-message">{{ passwordError }}</span>
+            </div>
           </div>
 
           <!-- 회원가입일 경우 비밀번호 확인 입력 필드 추가 -->
           <div v-if="!isLoginMode" class="form-group">
             <label for="confirm-password">비밀번호 확인</label>
             <input type="password" id="confirm-password" placeholder="다시 비밀번호를 입력하세요" v-model="confirmPassword" @blur="validateConfirmPassword" />
-            <span v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</span>
+            <div class="error-div">
+              <span v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</span>
+            </div>
           </div>
 
           <!-- 버튼 텍스트도 상태에 따라 변경 -->
@@ -51,9 +59,9 @@
 
         <!-- 로그인/회원가입 모드 전환 링크 -->
         <div class="toggle-mode">
-          <a href="#" @click.prevent="isPasswordModalOpen = true">비밀번호 찾기</a>
+          <a href="#" @click.prevent="isPasswordModalOpen = true" v-if="isLoginMode">비밀번호 찾기</a>
           <a href="#" @click.prevent="toggleMode">
-            {{ isLoginMode ? '회원가입' : '로그인' }}
+            {{ isLoginMode ? '회원가입' : '로그인으로 가기' }}
           </a>
         </div>
 
@@ -136,6 +144,17 @@ onMounted(async () => {
 
 const toggleMode = () => {
   isLoginMode.value = !isLoginMode.value; // Toggle mode
+
+  // 초기화
+  email.value = '';
+  nickname.value = '';
+  password.value = '';
+  confirmPassword.value = '';
+  profileImage.value = defaultProfileImageSrc; // 기본 프로필 이미지로 초기화
+  emailError.value = '';
+  nicknameError.value = '';
+  passwordError.value = '';
+  confirmPasswordError.value = '';
 };
 
 const onFileChange = (event) => {
@@ -269,7 +288,13 @@ const handleSubmit = async () => {
       isLoginMode.value = true;
     } catch (error) {
       console.error('회원가입 실패:', error.response?.data || error.message);
-      openErrorAlert('회원가입에 실패했습니다. 다시 시도해주세요.');
+
+      // 존재하는 이메일, 닉네임
+      if (error.response.data.status === 409) {
+        openErrorAlert(error.response.data.message);
+      } else {
+        openErrorAlert('회원가입에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   }
 };
@@ -321,8 +346,8 @@ const handleKakaoLogin = () => {
 }
 
 .form-group {
-  margin-top: 30px;
-  margin-bottom: 15px;
+  margin-top: 20px;
+  margin-bottom: 5px;
   text-align: left;
 }
 .form-profile {
@@ -356,6 +381,7 @@ const handleKakaoLogin = () => {
 .submit-button {
   width: 100%;
   padding: 10px;
+  margin-top: 20px;
   background-color: #6b9e9b;
   color: white;
   border: none;
@@ -416,7 +442,12 @@ const handleKakaoLogin = () => {
   margin-top: 10px;
   aspect-ratio: 1 / 1; /* 가로세로 비율을 1:1로 고정 */
 }
+
+.error-div {
+  height: 12px;
+}
 .error-message {
+  font-size: 10px;
   color: #b81414;
 }
 </style>
