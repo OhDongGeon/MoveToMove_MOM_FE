@@ -173,7 +173,6 @@ export default {
 
     // watch를 사용하여 Pinia 상태가 변경될 때 반영
     watch(storeColumns, (newColumns) => {
-      console.log("Columns have been updated:", newColumns);
       columns.value = newColumns;  // 컴포넌트의 columns 상태에 최신 값 할당
     }, { immediate: true });  // 초기 로딩 시에도 반영
 
@@ -418,11 +417,11 @@ export default {
 
     // 칸반 카드 이동 시
     const onCardMove = async (event) => {
-      const { cardId, newCardSeq, from, to, toColumnId } = event; // `oldIndex`, `newIndex` 제거
+      const { cardId, newCardSeq, from, to, toColumnId, columnId } = event; // `oldIndex`, `newIndex` 제거
       if (isMoveBetweenColumns(from, to)) {
         await handleMoveBetweenColumns(cardId, toColumnId, newCardSeq);
       } else if (isMoveWithinColumn(from, to)) {
-        await handleMoveWithinColumn(cardId, toColumnId, newCardSeq);
+        await handleMoveWithinColumn(cardId, columnId, newCardSeq);
       } else {
         console.warn('Unhandled card move event:', event);
       }
@@ -486,9 +485,9 @@ export default {
       if (oldIndex !== newIndex) {
         const movedColumn = columns.value[newIndex]; // 드래그 후의 새로운 위치의 컬럼
         const kanbanColumnId = movedColumn.kanbanColumnId; // 이동한 컬럼의 ID
-        const project = projectId.value; // 현재 프로젝트의 ID
+        // const project = projectId.value; // 현재 프로젝트의 ID
         const newServerIndex = newIndex+1;
-        console.log(`Moved Column ID: ${kanbanColumnId}, New Index (Server): ${newServerIndex}, Project ID: ${project}`);
+        // console.log(`Moved Column ID: ${kanbanColumnId}, New Index (Server): ${newServerIndex}, Project ID: ${project}`);
         try {
           // 서버에 컬럼 이동 요청 전송
           // await kanbanColumnStore.moveColumn(kanbanColumnId, project, newServerIndex);

@@ -152,8 +152,6 @@ export default {
         const response = await axios.post('/api/members/logout', {}, { withCredentials: true }); // 로그아웃 API 호출
 
         if (response.status === 200) {
-          console.log('로그아웃 성공');
-          console.log(response.data);
           authStore.logout(); // Pinia 스토어의 로그아웃 함수 호출
           // 로그아웃 후 리디렉션 ,
           router.push('/');
