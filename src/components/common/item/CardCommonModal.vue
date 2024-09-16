@@ -15,7 +15,7 @@
           <div v-for="item in filteredItems" :key="item.id" @click="toggleSelectItem(item)" class="item" :class="{ 'selected-item': isItemSelected(item) }">
             <input type="checkbox" :checked="isItemSelected(item)" />
             <template v-if="multiple">
-              <ProfileImage :src="item.avatar" :alt="item.name + ' Avatar'" :width="25" :height="25" />
+              <ProfileImage :src="item.avatar || require('@/assets/basic-profile.png')" :alt="item.name + ' Avatar'" :width="25" :height="25" />
             </template>
             <template v-else>
               <font-awesome-icon :icon="['fas', 'circle-dot']" :style="{ color: item.color }" />
@@ -34,8 +34,8 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from 'vue';
 import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
+import { computed, defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
   components: {
