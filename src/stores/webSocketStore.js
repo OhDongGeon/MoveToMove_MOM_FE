@@ -62,7 +62,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     }
   }
 
-  // 메시지 핸들러 정의
+  // 메시지 핸들러 정의 ( 이 후 웹소켓 기능 추가 시  여기에 함수 추가하면됩니다. 함수 이름이 메시지 타입과 동일해야합니다. )
   const messageHandlers = {
     async columnMove(projectId, message) {
       try {
@@ -79,6 +79,14 @@ export const useWebSocketStore = defineStore('webSocket', () => {
         console.log(`Cards reloaded successfully after moving within column. type: ${message.type}`);
       } catch (error) {
         console.error("Failed to reload cards:", error);
+      }
+    },
+    async cardMoveBetweenColumn(projectId, message) {
+      try {
+        await kanbanCardsStore.loadAllCards(projectId);
+        console.log(`Cards reloaded successfully after moving within column. type: ${message.type}`);
+      } catch (e) {
+        console.error(`Failed to reloadCards:`,e);
       }
     },
     // 새로운 메시지 유형 핸들러 추가 가능
@@ -108,8 +116,10 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       console.warn(`No handler defined for message type: ${message.type}`);
     }
   }
-
-  // 컬럼 이동 시 웹소켓 함수
+  /*
+  *   프론트에서 웹소켓에 알리는 함수 시작
+  * */
+  // 컬럼 이동 시 웹소켓에 알리는 함수
   async function sendMessageToProject(message)  {
     const client = projectConnections[message.projectId]; // 해당 프로젝트의 stompClient 가져오기
     const isConnected = connectionStatus[message.projectId]; // 해당 프로젝트의 연결 상태 확인
@@ -141,10 +151,12 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     const isConnected = connectionStatus[message.projectId];
 
     try {
+      // DB에 이동 내역 저장하기
       await kanbanCardsStore.moveCardWithinColumn(message.cardId, message.columnId, message.newCardSeq);
     } catch (e) {
-      console.log('Error while updating database before sending WebSocket message:', e);
+      console.error('Error while updating database before sending WebSocket message:', e);
     }
+    // 웹소켓 메시지 보내기
     if (client && isConnected) {
       try {
         client.send(
@@ -160,15 +172,42 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       console.error('WebSocket 연결이 끊켰습니다. 연결 상태:', isConnected, 'stompClient:', client);
     }
   }
+  // 카드 이동 - TO Outher Column
+  async function sendCardBetweenColumnMessage(message) {
+    const client = projectConnections[message.projectId];
+    const isConnected = connectionStatus[message.projectId];
+    try {
+      // DB에 이동 내역 저장하기
+      await kanbanCardsStore.moveCardToAnotherColumn(message.cardId, message.columnId, message.newCardSeq);
+    }catch (e) {
+      console.error(`Error while updating database before sending WebSocket message: `, e)
+    }
+    if (client && isConnected) {
+      try {
+        client.send(
+            `/app/project/${message.projectId}/card-move-between-column`,
+            {},
+            JSON.stringify(message),
+        );
+        console.log('Card move message sent successfully:', message);
+      } catch (e) {
+        console.error(`Error sending card move Between Column to server" `, e);
+      }
+      console.log('Card move message sent successfully:', message);
+    } else {
+      console.error(`WebSocket 연결이 끊겼습니다. 연결 상태: `, isConnected, `stompClient:`, client);
+    }
+  }
   return {
     projectConnections,
     connectionStatus,
     receivedMessages,
-    connect,
-    disconnect,
     disconnectAll,
     handleIncomingMessage,
+    connect,
+    disconnect,
     sendMessageToProject,
-    sendCardMoveWithinColumnMessage
+    sendCardMoveWithinColumnMessage,
+    sendCardBetweenColumnMessage,
   };
 });

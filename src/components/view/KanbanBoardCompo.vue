@@ -92,30 +92,31 @@
           </div>
           <div class="project-content">
             <draggable
-              v-model="columns"
-              group="columns"
-              @end="onColumnDragEnd"
-              class="columns-container"
-              ghost-class="dragging"
-              drag-class="drag-active"
-              itemKey="id"
-              :disabled="isCardOpen"
+                v-model="columns"
+                group="columns"
+                @end="onColumnDragEnd"
+                class="columns-container"
+                ghost-class="dragging"
+                drag-class="drag-active"
+                itemKey="id"
+                :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
                 <div class="column kanban-column" :key="col.kanbanColumnId" :data-column-id="col.kanbanColumnId">
                   <kanban-column
-                    :id="col.kanbanColumnId"
-                    :title="col.kanbanColumnName"
-                    :columnId="col.kanbanColumnId"
-                    :isCardOpen="isCardOpen"
-                    @card-move="onCardMove"
-                    @open-card="openCard"
-                    @close-card="closeCard"
-                    @delete-card="deleteCard"
+                      :id="col.kanbanColumnId"
+                      :title="col.kanbanColumnName"
+                      :columnId="col.kanbanColumnId"
+                      :isCardOpen="isCardOpen"
+                      @card-move="onCardMove"
+                      @open-card="openCard"
+                      @close-card="closeCard"
+                      @delete-card="deleteCard"
                   />
                 </div>
               </template>
             </draggable>
+
           </div>
         </div>
         <div v-else></div>
@@ -417,12 +418,11 @@ export default {
 
     // 칸반 카드 이동 시
     const onCardMove = async (event) => {
-      const { cardId, columnId, newCardSeq, from, to, toColumnId } = event; // `oldIndex`, `newIndex` 제거
-      //
+      const { cardId, newCardSeq, from, to, toColumnId } = event; // `oldIndex`, `newIndex` 제거
       if (isMoveBetweenColumns(from, to)) {
         await handleMoveBetweenColumns(cardId, toColumnId, newCardSeq);
       } else if (isMoveWithinColumn(from, to)) {
-        await handleMoveWithinColumn(cardId, columnId, newCardSeq);
+        await handleMoveWithinColumn(cardId, toColumnId, newCardSeq);
       } else {
         console.warn('Unhandled card move event:', event);
       }
@@ -439,12 +439,18 @@ export default {
           console.error('유효하지 않은 시퀀스 값입니다.');
           return;
         }
-        await kanbanCardStore.moveCardToAnotherColumn(cardId, toColumnId, newCardSeq);
-
+        // WebSocket을 통해 다른 사용자에게 카드 이동 정보 전송
+        await webSocketStore.sendCardBetweenColumnMessage({
+          projectId: projectId.value,
+          type: `cardMoveBetweenColumn`,
+          cardId: cardId,
+          columnId: toColumnId,
+          newCardSeq: newCardSeq,
+        });
         // 카드 데이터를 최신화
-        await kanbanCardStore.loadAllCards(projectId.value);
+        // await kanbanCardStore.loadAllCards(projectId.value);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     };
 
@@ -468,7 +474,7 @@ export default {
           newCardSeq: newCardSeq,
         });
         // 카드 데이터를 최신화
-        await kanbanCardStore.loadAllCards(projectId.value);
+        // await kanbanCardStore.loadAllCards(projectId.value);
       } catch (error) {
         console.error('Error moving card:', error);
       }
@@ -497,7 +503,7 @@ export default {
           await kanbanColumnStore.loadColumns(projectId.value);
           await kanbanCardStore.loadAllCards(projectId.value);
         } catch (e) {
-          console.log('Error while moving column:', e);
+          console.error('Error while moving column:', e);
         }
       }
     };
