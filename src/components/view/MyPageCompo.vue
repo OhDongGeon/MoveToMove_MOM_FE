@@ -41,7 +41,7 @@ export default {
   components: { Bar },
   setup() {
     const chartData = ref({
-      labels: [], // 프로젝트 이름이 들어감
+      labels: [], // 프로젝트 이름
       datasets: [],
     });
 
@@ -51,14 +51,22 @@ export default {
         x: {
           ticks: {
             font: {
-              size: 16, // 글자 크기
-              weight: 'bold', // 글자 두께
+              size: 16,
+              weight: 'bold',
             },
-            color: '#333', // 글자 색상
+            color: '#333',
           },
         },
         y: {
           beginAtZero: true,
+          ticks: {
+            // 정수만 표시하도록 설정
+            callback: function (value) {
+              if (Number.isInteger(value)) {
+                return value;
+              }
+            },
+          },
         },
       },
     };
@@ -71,9 +79,12 @@ export default {
     const selectAllTask = async () => {
       try {
         const response = await axiosInstance.get('/api/members/all-tasks');
+        console.log(response.data.totalTask);
+        console.log(response.data.endTask);
+        console.log(response.data.remainTask);
         totalTasks.value = response.data.totalTask;
-        endTasks.value = response.data.endTask;
-        remainTasks.value = response.data.remainTask;
+        endTasks.value = response.data.endTask !== null ? response.data.endTask : 0;
+        remainTasks.value = response.data.remainTask !== null ? response.data.remainTask : 0;
       } catch (error) {
         console.error(error);
       }

@@ -40,7 +40,7 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
 
        await axiosInstance.patch(`/api/kanban-columns/${kanbanColumnId}`, kanbanColumnMoveRequestForm);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
   return {
