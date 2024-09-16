@@ -169,10 +169,8 @@ export default {
       // 다른 컬럼으로 카드 이동
       else if (from !== to) {
         // `to` 요소의 상위 `.column` 요소에서 `data-column-id` 속성을 가져옴
-        const toColumnElement = to.closest('.column'); // `.column`으로 부모 요소를 찾음
-        const toColumnId = toColumnElement?.dataset?.columnId; // `data-column-id` 접근
+        const toColumnId = to.closest('.kanban-column')?.dataset?.columnId;
         const newCardSeq = Number(newIndex) + 1; // 새로운 시퀀스 (서버가 1부터 시작하도록 설정)
-
         if (!toColumnId) {
           console.error('카드 데이터를 변경하는데, 변경되는 컬럼을 식별할 수 없습니다. ');
           return;
