@@ -2,7 +2,7 @@
   <div class="auth-layout">
     <div class="left-side">
       <!-- 배경 이미지 또는 기타 콘텐츠 -->
-      <img src="path/to/background-image.png" alt="Background" class="background-image" />
+      <img src="../../assets/login-background-image.png" alt="Background" class="background-image" />
     </div>
     <div class="right-side">
       <div class="form-container">
@@ -82,16 +82,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { useNavigationStore } from '@/stores/navigationStore';
 import { useAuthStore } from '@/stores/memberStore'; //pinia 스토어 임포트
+import { useNavigationStore } from '@/stores/navigationStore';
 
-import PasswordModal from '@/components/common/PasswordModal.vue';
-import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
+import axios from 'axios';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 import defaultProfileImageSrc from '@/assets/basic-profile.png'; // 기본 이미지 경로
 import CommonAlert from '@/components/common/item/ErrorAlertItem.vue';
+import PasswordModal from '@/components/common/PasswordModal.vue';
+import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.vue';
 
 // Pinia store 사용 설정
 const authStore = useAuthStore();
@@ -100,9 +101,12 @@ const navigationStore = useNavigationStore();
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
+
+// 비밀번호 변경 다이얼로그
 const openRecoveryDialog = () => {
   isRecoveryDialogOpen.value = true;
 };
+
 const alertComponent = ref(null); // Alert 컴포넌트를 위한 ref 추가
 const isLoginMode = ref(true);
 const email = ref('');
@@ -227,11 +231,8 @@ const handleSubmit = async () => {
         router.push('/login'); // 실패 시 로그인 페이지로 리다이렉트
       }
 
-      // TODO : 알림을 위해서 웹 소켓 연결 구현해야함
-
       // 응답 처리
       console.log('로그인 성공:', response.data);
-      alert('로그인에 성공했습니다.');
       router.push('/move-to-move/mypage'); // 로그인 성공 후 페이지 이동
       navigationStore.setActiveItem('mypage');
     } catch (error) {
@@ -293,7 +294,7 @@ const handleKakaoLogin = () => {
 }
 
 .left-side {
-  flex: 1;
+  flex: 0.9;
   background-color: #f5f5f5;
   display: flex;
   align-items: center;
@@ -301,7 +302,7 @@ const handleKakaoLogin = () => {
 }
 
 .right-side {
-  flex: 1;
+  flex: 1.1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,8 +310,7 @@ const handleKakaoLogin = () => {
 
 .background-image {
   width: 100%;
-  height: auto;
-  max-width: 90%;
+  height: 1075px;
 }
 
 .form-container {

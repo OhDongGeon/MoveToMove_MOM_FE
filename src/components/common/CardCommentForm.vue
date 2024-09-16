@@ -1,76 +1,143 @@
 <template>
   <div>
-    <h3>코멘트 작성</h3>
+    <div class="comment-label">
+      <ProfileImage :src="member.profileUrl" :alt="member.nickName + ' Avatar'" :width="50" :height="50" />
+      <h3 class="comment-header">코멘트 작성</h3>
+    </div>
+
     <div class="card-comment-form">
       <div class="header-container">
         <h3 class="header-title">작성</h3>
-        <!-- 커스텀 버튼 컴포넌트를 사용하여 "등록" 버튼 -->
-        <CustomButton :default-text="'등록'" :width="50" :height="20" :font-size="12" style="border: 1px solid white" @click="submitComment"></CustomButton>
+        <round-button-item :width="50" :height="25" :borderRadius="5" :fontSize="12" @click="insertComment">등록</round-button-item>
       </div>
-      <textarea v-model="newComment" placeholder="댓글을 작성하세요." class="comment-input" cols="30" rows="10"></textarea>
+      <textarea
+        v-model="newComment"
+        placeholder="코멘트를 작성하세요."
+        class="comment-input"
+        :class="{ 'error-placeholder': isInvalid }"
+        @input="autoResize"
+        ref="textarea"
+      ></textarea>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import CustomButton from '@/components/common/item/RoundButtonItem.vue';
+import { ref, computed, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/memberStore';
+import { useCommentStore } from '@/stores/commentStore';
+import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
 
 export default {
   name: 'CardCommentForm',
   components: {
-    CustomButton,
+    ProfileImage,
   },
-  setup() {
-    const newComment = ref('');
+  props: {
+    cardId: {
+      type: Number,
+      required: true,
+    },
+  },
 
-    // 댓글 제출 함수
-    const submitComment = () => {
-      console.log('댓글 내용: ', newComment.value);
-      newComment.value = '';
+  setup(props) {
+    const authStore = useAuthStore();
+    const commentStore = useCommentStore();
+    const member = computed(() => authStore.getUser);
+
+    const textarea = ref(null);
+    const newComment = ref('');
+    const isInvalid = ref(false);
+
+    const autoResize = () => {
+      textarea.value.style.height = 'auto';
+      textarea.value.style.height = `${textarea.value.scrollHeight}px`;
     };
+
+    // 코멘트 저장
+    const insertComment = () => {
+      if (newComment.value.trim() === '') {
+        isInvalid.value = true;
+        newComment.value = '';
+        return;
+      }
+
+      commentStore.insertComment(props.cardId, newComment.value);
+      newComment.value = '';
+      isInvalid.value = false;
+    };
+
+    onMounted(() => {
+      if (textarea.value) {
+        autoResize();
+      }
+    });
+
     return {
+      member,
       newComment,
-      submitComment,
+      isInvalid,
+      autoResize,
+      textarea,
+      insertComment,
     };
   },
 };
 </script>
 
 <style scoped>
-.card-comment-form {
-  background-color: white;
-  padding: 0;
+.comment-label {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 0px 20px 5px 0px;
   border: 1px solid #6b9e9b;
-  border-radius: 8px;
+}
+
+.comment-header {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.card-comment-form {
+  text-align: left;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid #6b9e9b;
   overflow: hidden;
 }
-.comment-input {
-  width: 100%;
-  height: 80px;
-  margin: 0; /* 마진 제거하여 딱 붙도록 설정 */
-  padding: 10px;
-  border-radius: 4px;
-  border: none; /* 테두리 제거 */
-  border-top: 1px solid #6b9e9b; /* 상단 테두리 설정 */
-  border-bottom-left-radius: 8px; /* 왼쪽 하단 모서리 둥글게 */
-  border-bottom-right-radius: 8px; /* 오른쪽 하단 모서리 둥글게 */
-  resize: none; /* 크기 조절 비활성화 */
-  box-sizing: border-box; /* 패딩과 너비를 포함하여 계산 */
-  outline: none;
-}
-/* 헤더 */
+
 .header-container {
   display: flex;
+  height: 35px;
+  padding: 0 10px;
   justify-content: space-between;
   align-items: center;
   background-color: #6b9e9b;
-  padding: 5px 10px;
 }
+
 .header-title {
   color: white;
-  font-size: 18px; /* 제목 글자 크기 */
+  font-size: 17px;
   font-weight: bold;
-  margin: 0;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  background-color: white;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+}
+
+.comment-input.error-placeholder::placeholder {
+  color: red;
 }
 </style>
