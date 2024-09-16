@@ -27,9 +27,10 @@ export const useWebSocketStore = defineStore('webSocket', () => {
 
     client.connect(
       {},
-      (frame) => {
+      () => {
         connectionStatus[projectId] = true;
-        console.log(`Connected to project ${projectId}: ` + frame);
+        // 콘솔에 웹소켓 연결 확인하려면 connect 매개변수에 frame 추가해서 로그 찍으세요.
+        // console.log(`Connected to project ${projectId}: ` + frame);
 
         client.subscribe(`/topic/project/${projectId}`, (message) => {
           handleIncomingMessage(projectId, JSON.parse(message.body));
@@ -58,45 +59,41 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       client.disconnect(() => {
         delete projectConnections[projectId];
         connectionStatus[projectId] = false;
-        console.log(`WebSocket disconnected for project ${projectId}`);
+        // console.log(`WebSocket disconnected for project ${projectId}`);
       });
     }
   }
 
   // 메시지 핸들러 정의 ( 이 후 웹소켓 기능 추가 시  여기에 함수 추가하면됩니다. 함수 이름이 메시지 타입과 동일해야합니다. )
   const messageHandlers = {
-    async columnMove(projectId, message) {
+    async columnMove(projectId) {
       try {
         await kanbanColumnStore.loadColumns(projectId);
         await kanbanCardsStore.loadAllCards(projectId);
-        console.log(`Columns reloaded successfully. type : ${message.type}`);
+        // console.log(`Columns reloaded successfully. type : ${message.type}`);
       } catch (error) {
         console.error("Failed to reload columns:", error);
       }
     },
-    async cardMoveWithinColumn(projectId, message) {
+    async cardMoveWithinColumn(projectId) {
       try {
         await kanbanCardsStore.loadAllCards(projectId);
-        console.log(`Cards reloaded successfully after moving within column. type: ${message.type}`);
+        // console.log(`Cards reloaded successfully after moving within column. type: ${message.type}`);
       } catch (error) {
         console.error("Failed to reload cards:", error);
       }
     },
-    async cardMoveBetweenColumn(projectId, message) {
+    async cardMoveBetweenColumn(projectId) {
       try {
         await kanbanCardsStore.loadAllCards(projectId);
-        console.log(`Cards reloaded successfully after moving within column. type: ${message.type}`);
+        // console.log(`Cards reloaded successfully after moving within column. type: ${message.type}`);
       } catch (e) {
         console.error(`Failed to reloadCards:`,e);
       }
     },
     // 새로운 메시지 유형 핸들러 추가 가능
-    async anotherMessageTypeHandler(projectId, message) {
-      try {
-        console.log(`Processing another message type. type: ${message.type}`);
-      } catch (error) {
-        console.error("Error handling another message type:", error);
-      }
+    async anotherMessageTypeHandler(projectId) {
+        console.error(`프로젝트${projectId}에서 Processing another message type. type: 등록되지 않은 요청입니다.`);
     },
   };
 
@@ -112,7 +109,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     // 메시지 핸들러 호출
     const handler = messageHandlers[message.type];
     if (handler) {
-      await handler(projectId, message); // 핸들러 함수 호출
+      await handler(projectId); // 핸들러 함수 호출
     } else {
       console.warn(`No handler defined for message type: ${message.type}`);
     }
@@ -129,7 +126,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     try {
       await kanbanColumnStore.moveColumn( message.columnId , message.projectId, message.newIndex);
     } catch (e) {
-      console.log('Error while updating database before sending WebSocket message:', e);
+      console.error('Error while updating database before sending WebSocket message:', e);
     }
     if (client && isConnected) {
       try {
@@ -138,7 +135,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
           {},
           JSON.stringify(message),
         );
-        console.log('Message sent successfully:', message);
+        // console.log('Message sent successfully:', message);
       } catch (error) {
         console.error('Error sending message to server:', error); // 전송 중 에러를 포착
       }
@@ -165,7 +162,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
             {},
             JSON.stringify(message),
         );
-        console.log('Card move message sent successfully:', message);
+        // console.log('Card move message sent successfully:', message);
       } catch (error) {
         console.error('Error sending card move message to server:', error);
       }
@@ -194,7 +191,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       } catch (e) {
         console.error(`Error sending card move Between Column to server" `, e);
       }
-      console.log('Card move message sent successfully:', message);
+      // console.log('Card move message sent successfully:', message);
     } else {
       console.error(`WebSocket 연결이 끊겼습니다. 연결 상태: `, isConnected, `stompClient:`, client);
     }

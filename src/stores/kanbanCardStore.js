@@ -84,7 +84,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       const response = await axiosInstance.post(`/api/kanban-columns/${columnId}/kanban-cards`, newCard);
       const cardData = response.data.data;
 
-      console.log('저장데이터:', cardData);
+      // console.log('저장데이터:', cardData);
 
       cards.value.push({
         id: cardData.kanbanCardId,
@@ -116,7 +116,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         if (card.columnId === column.id) {
           // 카드의 columnId를 업데이트된 컬럼의 인덱스로 설정
           card.columnId = column.id;
-          console.log(`Updated Card ID: ${card.id} to Column ID: ${card.columnId}`);
+          // console.log(`Updated Card ID: ${card.id} to Column ID: ${card.columnId}`);
         }
       });
     });
@@ -171,7 +171,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
 
       await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
     } catch (e) {
-      console.log(e);
+      console.error(`유효하지 않은 요청입니다.`,e);
     }
   };
   // 다른 컬럼으로의 카드 이동
@@ -184,7 +184,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
 
       await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
     } catch (e) {
-      console.log(e);
+      console.error(`유효하지 않은 요청입니다.`,e);
     }
   };
 

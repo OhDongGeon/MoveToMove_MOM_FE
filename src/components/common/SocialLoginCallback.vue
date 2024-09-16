@@ -29,15 +29,14 @@ const handleLogin = async () => {
     try {
       // 스토어에서 유저 정보 요청
       await authStore.fetchUser();
-      console.log('유저 정보', authStore.getUser);
 
       router.push('/move-to-move/mypage'); // 성공 후 페이지 이동
     } catch (err) {
-      console.log('API 요청 실패:', err);
+      console.error('API 요청 실패:', err);
       router.push('/login'); // 실패 시 로그인 페이지로 리다이렉트
     }
   } else {
-    console.log('로그인 실패: 액세스 토큰이 없습니다.');
+    console.error('로그인 실패: 액세스 토큰이 없습니다.');
     router.push('/login'); // 실패 시 로그인 페이지로 리다이렉트
   }
 };
