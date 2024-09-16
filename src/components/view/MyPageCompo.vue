@@ -59,6 +59,14 @@ export default {
         },
         y: {
           beginAtZero: true,
+          ticks: {
+            // 정수만 표시하도록 설정
+            callback: function (value) {
+              if (Number.isInteger(value)) {
+                return value; // 정수만 반환
+              }
+            },
+          },
         },
       },
     };
