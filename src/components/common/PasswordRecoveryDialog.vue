@@ -128,7 +128,7 @@ export default {
     const changePassword = async () => {
       console.log('비밀번호 변경 요청:', {
         email: email.value,
-        authCode: authCode.value,
+        code: authCode.value,
         newPassword: newPassword.value,
         confirmPassword: confirmPassword.value,
       });
@@ -137,7 +137,7 @@ export default {
       try {
         await verificationCodeStore.changePassword({
           email: email.value,
-          authCode: authCode.value,
+          code: authCode.value,
           newPassword: newPassword.value,
           confirmPassword: confirmPassword.value,
         });
