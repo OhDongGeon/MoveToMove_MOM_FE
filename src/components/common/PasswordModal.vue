@@ -18,6 +18,7 @@
               class="custom-text-field"
             ></v-text-field>
           </div>
+
           <!-- 인증번호 발송 버튼 -->
           <round-button-item type="submit" :width="200" :height="40">인증번호 발송</round-button-item>
         </v-form>
@@ -27,9 +28,12 @@
       </v-card-actions>
     </v-card>
 
+    <!-- LoadingOverlay 컴포넌트 추가 -->
+    <LoadingOverlay :isLoading="verificationCodeStore?.isLoading" />
+
     <!-- SweetAlert 알림 컴포넌트 -->
     <AlertDialog
-      :show="alertVisible"
+      :show="verificationCodeStore?.alertVisible"
       title="인증번호 발송!"
       text="이메일로 인증번호가 발송되었습니다."
       icon="success"
@@ -37,20 +41,25 @@
     />
 
     <!-- 확인 모달창 -->
-    <CheckMessage :isVisible="isModalVisible" @close="closeModal" />
+    <CheckMessage :isVisible="isModalVisible" :message="errorMessage" @close="closeModal" />
   </v-dialog>
 </template>
 
 <script>
 import { ref, watch } from 'vue';
+
+import { useVerificationCodeStore } from '@/stores/VerificationCodeStore';
+
 import CheckMessage from './AlertCheckMessage.vue';
 import AlertDialog from './AlertDialog.vue'; // SweetAlert 컴포넌트 임포트
+import LoadingOverlay from './LoadingOverlay.vue';
 
 export default {
   name: 'PasswordModal',
   components: {
     AlertDialog,
     CheckMessage,
+    LoadingOverlay,
   },
   props: {
     modelValue: {
@@ -63,8 +72,10 @@ export default {
   setup(props, { emit }) {
     const email = ref('');
     const isSent = ref(false);
-    const alertVisible = ref(false); // 알림창 표시 상태
     const isModalVisible = ref(false); // 확인 모달창 설정
+    const authentication = ref({}); // 인증정보
+    const verificationCodeStore = useVerificationCodeStore(); // 인증 스토어 사용
+    const errorMessage = ref(''); // 오류 메시지
 
     const rules = {
       required: (value) => !!value || '이메일은 필수입니다.',
@@ -82,12 +93,26 @@ export default {
     };
 
     // 인증번호 발송
-    const sendVerificationCode = () => {
+    const sendVerificationCode = async () => {
       if (email.value) {
-        console.log(`인증번호가 ${email.value}로 발송되었습니다.`);
-        isSent.value = true; // 성공 상태로 변경
-        alertVisible.value = true; // 알림창 표시
+        try {
+          verificationCodeStore.startLoading(); // 로딩 시작
+          await verificationCodeStore.sendVerificationCode(email.value);
+
+          errorMessage.value = '';
+          isModalVisible.value = false;
+        } catch (error) {
+          if (error.response) {
+            if (error.response.data.status === 404) {
+              errorMessage.value = error.response.data.message;
+              isModalVisible.value = true;
+            }
+          }
+        } finally {
+          verificationCodeStore.stopLoading(); // 로딩 종료
+        }
       } else {
+        errorMessage.value = '이메일을 입력해주세요.';
         isModalVisible.value = true;
       }
     };
@@ -98,8 +123,9 @@ export default {
     };
 
     const handleAlertClose = () => {
-      email.value = '';
-      alertVisible.value = false;
+      // email.value = '';
+      // alertVisible.value = false;
+      verificationCodeStore.clearAlert(); // 알림 닫기
       closeDialog();
       emit('open-recovery-dialog'); // 두 번째 모달을 열기 위한 이벤트 발송
     };
@@ -115,10 +141,13 @@ export default {
       isDialogOpen,
       email,
       isSent,
-      alertVisible,
       rules,
       closeDialog,
-      sendVerificationCode,
+      sendVerificationCode, // 인증받는 함수
+      isModalVisible, // 반환해서 템플릿에서 사용 가능하게 설정
+      verificationCodeStore, // 인증 스토어 사용
+      errorMessage, //  인증 오류
+      authentication,
       handleAlertClose,
       closeModal,
     };

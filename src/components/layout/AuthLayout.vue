@@ -84,6 +84,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/memberStore'; //pinia 스토어 임포트
 import { useNavigationStore } from '@/stores/navigationStore';
+
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -102,9 +103,12 @@ const navigationStore = useNavigationStore();
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
+
+// 비밀번호 변경 다이얼로그
 const openRecoveryDialog = () => {
   isRecoveryDialogOpen.value = true;
 };
+
 const alertComponent = ref(null); // Alert 컴포넌트를 위한 ref 추가
 const isLoginMode = ref(true);
 const email = ref('');
