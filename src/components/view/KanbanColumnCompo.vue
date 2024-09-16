@@ -1,7 +1,7 @@
 <template>
   <div class="contains">
     <div class="kanban-column">
-      <font-awesome-icon :icon="['far', 'square-plus']" class="square-icon" @click="startEditing" />
+      <font-awesome-icon :icon="['far', 'square-plus']" class="square-icon" ref="addCardColumnId" @click="startEditing" />
       <div class="title">
         <input
           v-if="isCardAdd"
@@ -13,6 +13,7 @@
           ref="cardInput"
           placeholder="칸반 카드 제목 입력"
           class="title-input"
+          :data-column-id="id"
         />
         <span v-else class="column-title">{{ title }}</span>
       </div>
@@ -66,14 +67,17 @@ export default {
     },
   },
   emits: ['open-card', 'close-card', 'card-move', 'delete-card'],
+
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
 
     // props.cards를 참조하는 computed 속성 사용
     const computedCards = ref([]);
+    // 컬럼 아이디 기준 다시 조회
     const updateCards = () => {
       computedCards.value = kanbanCardStore.getCardsByColumnId(props.columnId);
     };
+
     watch(
       () => kanbanCardStore.cards, // 스토어의 cards를 감시
       () => {
@@ -81,6 +85,7 @@ export default {
       },
       { immediate: true }, // 초기 마운트 시에도 호출
     );
+
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
       updateCards();
@@ -133,17 +138,22 @@ export default {
       isCardAdd.value = false;
     };
 
-    const submitAddCardTitle = () => {
+    // 카드 생성 input 에서 엔터 시 카드 생성 함수
+    const submitAddCardTitle = async () => {
+      const columnId = cardInput.value.getAttribute('data-column-id'); // 컬럼 ID 참조
+      console.log('Column ID:', columnId);
+
       if (newCardTitle.value.trim()) {
         const newCard = {
-          id: Date.now(),
-          columnId: props.id,
+          kanbanCardId: '',
           title: newCardTitle.value,
-          priority: '중간',
-          task_size: 'Medium',
-          members: [],
         };
-        kanbanCardStore.addCard(props.id, newCard.title); // 수정된 부분
+
+        await kanbanCardStore.addCard(columnId, newCard); // 수정된 부분
+
+        // 새로 추가된 카드를 반영하기 위해 computedCards 업데이트
+        updateCards(); // 스토어의 최신 데이터를 다시 로드하여 computedCards 갱신
+
         newCardTitle.value = '';
         isCardAdd.value = false;
       }

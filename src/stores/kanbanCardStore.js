@@ -22,8 +22,6 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
         const members = item.cardMemberList; // 멤버 리스트
 
         return {
-          projectId: projectCard.projectId,
-          projectName: projectCard.projectName,
           columnId: projectCard.kanbanColumnId,
           columnName: projectCard.kanbanColumnName,
           columnSeq: projectCard.columnSeq,
@@ -80,6 +78,32 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     }
   };
 
+  // 카드 생성 함수
+  const addCard = async (columnId, newCard) => {
+    try {
+      const response = await axiosInstance.post(`/api/kanban-columns/${columnId}/kanban-cards`, newCard);
+      const cardData = response.data.data;
+
+      console.log('저장데이터:', cardData);
+
+      cards.value.push({
+        id: cardData.kanbanCardId,
+        columnId: cardData.kanbanColumnId,
+        columnName: cardData.kanbanColumnName,
+        title: cardData.title,
+        content: cardData.content,
+        priority: cardData.priority,
+        taskSize: cardData.taskSize,
+        startAt: cardData.startAt,
+        endAt: cardData.endAt,
+        createdAt: cardData.createdAt,
+      });
+    } catch (error) {
+      console.error('Failed to add new card:', error);
+    }
+  };
+
+  // 컬럼 아이디 기준 카드 정보
   const getCardsByColumnId = (columnId) => {
     return cards.value.filter((card) => card.columnId === columnId);
   };
@@ -143,7 +167,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       const cardLocationForm = {
         kanbanColumnId: columnId,
         cardSeq: newCardSeq,
-      }
+      };
 
       await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
     } catch (e) {
@@ -156,7 +180,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
       const cardLocationForm = {
         kanbanColumnId: toColumnId,
         cardSeq: newCardSeq,
-      }
+      };
 
       await axiosInstance.put(`/api/kanban-cards/${cardId}/locations`, cardLocationForm);
     } catch (e) {
@@ -206,6 +230,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
     cards,
     loadAllCards,
     loadCardDetails,
+    addCard,
     getCardsByColumnId,
     moveCardWithinColumn,
     moveCardToAnotherColumn,
