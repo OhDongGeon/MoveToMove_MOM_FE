@@ -12,6 +12,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
   const receivedMessages = reactive({}); // 수신된 메시지 저장
   const kanbanColumnStore  = useKanbanColumnStore();
   const kanbanCardsStore = useKanbanCardStore();
+  const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
   // 특정 프로젝트에 대해 WebSocket 연결 설정 및 구독 설정
   function connect(projectId) {
@@ -20,7 +21,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       return; // 이미 연결된 경우 무시
     }
 
-    const socket = new SockJS('http://localhost:8080/ws'); // 배포 시 URL 변경
+    const socket = new SockJS(`${API_BASE_URL}/ws`); // 배포 시 URL 변경
     const client = Stomp.over(socket);
 
 

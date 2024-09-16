@@ -98,8 +98,6 @@ import PasswordRecoveryDialog from '@/components/common/PasswordRecoveryDialog.v
 const authStore = useAuthStore();
 const navigationStore = useNavigationStore();
 
-// 웹소켓 사용 설정
-
 const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 const isPasswordModalOpen = ref(false);
 const isRecoveryDialogOpen = ref(false);
