@@ -286,12 +286,21 @@ const handleSubmit = async () => {
       await axios.post(`${API_BASE_URL}/api/members/sign-up`, formData);
       openErrorAlert(`회원가입이 완료되었습니다. 로그인 해주세요`);
       isLoginMode.value = true;
+      password.value = '';
     } catch (error) {
       console.error('회원가입 실패:', error.response?.data || error.message);
 
       // 존재하는 이메일, 닉네임
       if (error.response.data.status === 409) {
-        openErrorAlert(error.response.data.message);
+        if (error.response.data.message.includes('이메일')) {
+          // '이메일'이 포함되어 있으면 emailError에 메시지 설정
+          emailError.value = error.response.data.message;
+        }
+
+        // '닉네임'이 포함되어 있으면 nicknameError에 메시지 설정
+        if (error.response.data.message.includes('닉네임')) {
+          nicknameError.value = error.response.data.message;
+        }
       } else {
         openErrorAlert('회원가입에 실패했습니다. 다시 시도해주세요.');
       }
