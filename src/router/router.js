@@ -8,6 +8,8 @@ import Withdraw from '../components/view/WithdrawCompo.vue';
 import SocialLoginCallback from '@/components/common/SocialLoginCallback.vue';
 import KanbanCard from '@/components/layout/KanbanCardLayout.vue';
 import NewProject from '@/components/view/NewProjectCompo.vue';
+import ManageProject from '@/components/view/ManageProjectCompo.vue';
+import KanbanCardOpen from '@/components/view/KanbanCardOpenCompo.vue';
 
 const routes = [
   {
@@ -49,11 +51,22 @@ const routes = [
         path: 'kanbanCard',
         name: 'KanbanCardCompo',
         component: KanbanCard,
+        props: (route) => ({ id: route.query.id, title: route.query.title }), // query 파라미터로 카드 ID와 제목 전달
+      },
+      {
+        path: 'kanban-card',
+        name: 'KanbanCardOpenCompo',
+        component: KanbanCardOpen,
       },
       {
         path: 'new-project',
         name: 'NewProjectCompo',
         component: NewProject,
+      },
+      {
+        path: 'manage-project',
+        name: 'ManageProjectCompo',
+        component: ManageProject,
       },
     ],
   },

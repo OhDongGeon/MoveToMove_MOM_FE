@@ -30,11 +30,10 @@ export default {
 .content-wrapper {
   display: flex; /* Flexbox 사용 */
   justify-content: space-between; /* 좌우 요소 간 간격을 고르게 배치 */
-  gap: 20px; /* 좌우 간격 */
 }
 .content-left {
   flex: 3;
-  padding: 20px;
+  padding: 10px;
 }
 .content-right {
   flex: 1;

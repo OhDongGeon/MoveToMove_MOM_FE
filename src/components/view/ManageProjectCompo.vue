@@ -1,0 +1,285 @@
+<template>
+  <div>
+    <h1>프로젝트 관리</h1>
+
+    <div class="new-project-contains">
+      <div class="project-content">
+        <div class="content-group">
+          <label>프로젝트명</label>
+          <div class="vertical-line"></div>
+          <div class="input-container">
+            <input type="text" id="nickName" placeholder="프로젝트명" />
+            <div class="error-message"></div>
+          </div>
+        </div>
+        <div class="content-group-area">
+          <label>프로젝트 설명</label>
+          <div class="vertical-line-area"></div>
+          <div class="input-container">
+            <textarea id="projectDescription" placeholder="프로젝트 설명"></textarea>
+            <div class="error-message"></div>
+          </div>
+        </div>
+        <div class="content-group">
+          <label><font-awesome-icon :icon="['far', 'calendar-check']" class="icon" /> 시작일시</label>
+          <div class="vertical-line"></div>
+          <div class="input-container">
+            <input type="date" id="nickName" placeholder="시작일시" />
+            <div class="error-message"></div>
+          </div>
+        </div>
+        <div class="content-group">
+          <label><font-awesome-icon :icon="['far', 'calendar-check']" class="icon" /> 종료일시</label>
+          <div class="vertical-line"></div>
+          <div class="input-container">
+            <input type="date" id="nickName" placeholder="종료일시" />
+            <div class="error-message"></div>
+          </div>
+        </div>
+        <div class="content-button">
+          <round-button-item type="button" class="save-btn" :width="120" :height="30" :fontSize="14">저장</round-button-item>
+        </div>
+
+        <div class="underline"></div>
+
+        <div class="content-group-area">
+          <label><font-awesome-icon :icon="['fas', 'table-columns']" class="icon" /> 칸반 칼럼</label>
+          <div class="vertical-line-area"></div>
+          <!-- 동적으로 추가된 칸반 컬럼 리스트 -->
+          <div class="kanban-list">
+            <div v-for="(column, index) in kanbanColumns" :key="index" class="kanban-item">
+              <input v-model="column.name" readonly />
+              <button @click="removeColumn(index)" class="remove-btn">
+                <font-awesome-icon :icon="['far', 'square-minus']" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="content-button">
+          <input v-model="newColumn" placeholder="칸반 컬럼 이름" />
+          <round-button-item type="button" class="save-btn" :width="120" :height="30" :fontSize="14" @click="addColumn">추가</round-button-item>
+        </div>
+      </div>
+      <div class="button-group">
+        <round-button-item type="button" class="cancel-btn" :width="200" :height="40" :backgroundColor="'cancel'" @click="onCancelButton">취소</round-button-item>
+      </div>
+    </div>
+
+    <CheckMessage :isVisible="isModalVisible" @close="closeModal" />
+    <ConfirmAlert :isVisible="isWithdrawVisible" @close="closeWithdraw" message="탈퇴 되었습니다." />
+  </div>
+</template>
+
+<script>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+export default {
+  setup() {
+    const router = useRouter();
+
+    const newColumn = ref(''); // 새로운 컬럼 이름
+    const kanbanColumns = ref([
+      // 초기 컬럼 목록
+      { name: 'Task' },
+      { name: '진행중' },
+      { name: '완료' },
+    ]);
+    // 새로운 컬럼 추가
+    const addColumn = () => {
+      if (newColumn.value) {
+        kanbanColumns.value.push({ name: newColumn.value }); // 새로운 컬럼을 목록에 추가
+        newColumn.value = ''; // 입력 필드 초기화
+      }
+    };
+    // 컬럼 삭제
+    const removeColumn = (index) => {
+      kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
+    };
+
+    const onCancelButton = () => {
+      router.replace('/move-to-move/kanban');
+    };
+
+    return {
+      onCancelButton,
+      newColumn,
+      kanbanColumns,
+      addColumn,
+      removeColumn,
+    };
+  },
+};
+</script>
+
+<style scoped>
+h1 {
+  text-align: left;
+}
+
+.new-project-contains {
+  margin-top: 20px;
+  height: 850px;
+  border: 1.5px solid #6b9e9b;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.project-content {
+  display: flex;
+  margin-top: 20px;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tabs {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: background-color 0.3s;
+}
+
+.tabs button.active {
+  background-color: #6b9e9b;
+  color: white;
+}
+
+.vertical-line,
+.vertical-line-area {
+  margin-right: 20px;
+  border-radius: 20px;
+  border-left: 2px solid #6b9e9b;
+}
+
+.vertical-line {
+  height: 20px;
+}
+
+.vertical-line-area {
+  margin-top: 2%;
+  height: 90%;
+}
+
+.content-group,
+.content-group-area {
+  text-align: left;
+  width: 500px;
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.content-group {
+  align-items: center;
+}
+
+.content-group label,
+.content-group-area label {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  width: 30%;
+}
+
+.content-group-area label {
+  margin-top: 2%;
+}
+
+.content-group input,
+.content-group-area textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.content-group-area textarea {
+  height: 200px;
+}
+
+.content-button {
+  display: flex;
+  justify-content: flex-end;
+  width: 500px;
+}
+
+.content-button input {
+  width: 220px;
+  padding: 10px;
+  height: 30px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.underline {
+  width: 450px;
+  margin: 30px;
+  border-bottom: 2px solid #6b9e9b;
+}
+
+.input-container {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.error-message {
+  position: absolute;
+  color: #d63f3f;
+  font-size: 10px;
+  top: 100%;
+  left: 10px;
+}
+
+/* 칸반 리스트 */
+.kanban-list {
+  width: 70%;
+  height: 230px;
+  overflow-y: auto;
+}
+
+.kanban-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.kanban-item input {
+  flex-grow: 1;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.remove-btn {
+  color: #d63f3f;
+  font-size: 20px;
+  padding: 5px;
+}
+
+/* 버튼 */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.content-group-area {
+  margin-bottom: 20px;
+}
+</style>

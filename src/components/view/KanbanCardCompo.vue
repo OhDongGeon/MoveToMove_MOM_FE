@@ -1,21 +1,13 @@
 <template>
-
   <div class="contains" @click="cardClick">
     <div class="card-member">
-      <ProfileImage 
-        v-for="(member, index) in card.members" 
-        :key="index" 
-        :src="member.avatar" 
-        alt="Member Avatar" 
-        :width="25" 
-        :height="25" 
-      />
+      <ProfileImage v-for="(member, index) in card.members" :key="index" :src="member.profileUrl" :alt="member.nickName + ' Avatar'" :width="25" :height="25" />
     </div>
     <div class="card-info">
       <div class="card-title">{{ card.title }}</div>
       <div class="card-labels">
-        <span class="label" :style="priorityStyle">{{ card.priority }}</span>
-        <span class="label" :style="taskSizeStyle">{{ card.task_size }}</span>
+        <span class="label" :style="priorityStyle">{{ priorityText }}</span>
+        <span class="label" :style="taskSizeStyle">{{ taskSizeText }}</span>
       </div>
     </div>
   </div>
@@ -38,25 +30,26 @@ export default {
   setup(props, { emit }) {
     // 카드 클릭 시 이벤트 핸들러
     const cardClick = () => {
-      emit('card-click', props.card.id);
-    }
-    // priority에 따른 배경색 결정
+      emit('card-click', props.card);
+    };
+
+    // priority에 따른 배경색 및 텍스트 결정
     const priorityStyle = computed(() => {
       let backgroundColor;
-      let color;
+      let color = '#000000'; // 기본 텍스트 색상
       switch (props.card.priority) {
-        case '낮음':
+        case 3: // 낮음
           backgroundColor = '#9BF09B';
           break;
-        case '중간':
+        case 2: // 중간
           backgroundColor = '#9BB8F0';
           break;
-        case '높음':
+        case 1: // 높음
           backgroundColor = '#E99BF0';
           break;
-        case '긴급':
+        case 0: // 긴급
           backgroundColor = '#E45959';
-          color = '#ffffff';
+          color = '#ffffff'; // 긴급일 때 흰색 텍스트
           break;
         default:
           backgroundColor = '#e0e0e0'; // 기본 색상
@@ -64,20 +57,35 @@ export default {
       return { backgroundColor, color };
     });
 
-    // task_size에 따른 배경색 결정
+    const priorityText = computed(() => {
+      switch (props.card.priority) {
+        case 3:
+          return '낮음';
+        case 2:
+          return '중간';
+        case 1:
+          return '높음';
+        case 0:
+          return '긴급';
+        default:
+          return '알 수 없음';
+      }
+    });
+
+    // task_size에 따른 배경색 및 텍스트 결정
     const taskSizeStyle = computed(() => {
       let backgroundColor;
-      switch (props.card.task_size) {
-        case 'Small':
+      switch (props.card.taskSize) {
+        case 0: // Small
           backgroundColor = '#CEF2CE';
           break;
-        case 'Medium':
+        case 1: // Medium
           backgroundColor = '#CEE0F2';
           break;
-        case 'Large':
+        case 2: // Large
           backgroundColor = '#E0CEF2';
           break;
-        case 'Extra Large':
+        case 3: // Extra Large
           backgroundColor = '#F2CECE';
           break;
         default:
@@ -86,9 +94,26 @@ export default {
       return { backgroundColor };
     });
 
+    const taskSizeText = computed(() => {
+      switch (props.card.taskSize) {
+        case 0:
+          return 'Small';
+        case 1:
+          return 'Medium';
+        case 2:
+          return 'Large';
+        case 3:
+          return 'Extra Large';
+        default:
+          return 'Unknown';
+      }
+    });
+
     return {
       priorityStyle,
+      priorityText,
       taskSizeStyle,
+      taskSizeText,
       cardClick,
     };
   },

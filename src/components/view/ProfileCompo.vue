@@ -27,22 +27,23 @@
               <div v-if="errorMessage.nickName" class="error-message">{{ errorMessage.nickName }}</div>
             </div>
           </div>
-
-          <div class="form-group">
-            <label>비밀번호</label>
-            <div class="vertical-line"></div>
-            <div class="input-container">
-              <input type="password" id="password" placeholder="비밀번호" v-model="memberInfo.password" @blur="onPasswordBlur" />
-              <div v-if="errorMessage.password" class="error-message">{{ errorMessage.password }}</div>
+          <div v-if="isRegularLogin">
+            <div class="form-group">
+              <label>비밀번호</label>
+              <div class="vertical-line"></div>
+              <div class="input-container">
+                <input type="password" id="password" placeholder="비밀번호" v-model="memberInfo.password" @blur="onPasswordBlur" />
+                <div v-if="errorMessage.password" class="error-message">{{ errorMessage.password }}</div>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>비밀번호 확인</label>
-            <div class="vertical-line"></div>
-            <div class="input-container">
-              <input type="password" id="password-check" placeholder="비밀번호 확인" v-model="memberInfo.passwordCheck" @blur="onPasswordCheckBlur" />
-              <div v-if="errorMessage.passwordCheck" class="error-message">{{ errorMessage.passwordCheck }}</div>
+            <div class="form-group">
+              <label>비밀번호 확인</label>
+              <div class="vertical-line"></div>
+              <div class="input-container">
+                <input type="password" id="password-check" placeholder="비밀번호 확인" v-model="memberInfo.passwordCheck" @blur="onPasswordCheckBlur" />
+                <div v-if="errorMessage.passwordCheck" class="error-message">{{ errorMessage.passwordCheck }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -59,6 +60,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axiosInstance from '@/api/axiosInstance.js';
+import { useAuthStore } from '@/stores/memberStore';
 import basicProfile from '@/assets/basic-profile.png';
 import RoundButtonItem from '../common/item/RoundButtonItem.vue';
 
@@ -68,6 +70,7 @@ export default {
     RoundButtonItem,
   },
   setup() {
+    const authStore = useAuthStore();
     const router = useRouter();
     const previewImage = ref(null);
     const selectedImage = ref(null);
@@ -83,7 +86,8 @@ export default {
       password: '',
       passwordCheck: '',
     });
-
+    // 로그인 유저가 소셜 로그인 시 비밀번호 변경이 안보이도록 함
+    const isRegularLogin = ref(false); // 기본값은 false로 설정
     // 기본 이미지 세팅
     const setBasicProfile = async () => {
       const response = await fetch(basicProfile);
@@ -122,7 +126,9 @@ export default {
         // 사용자 정보 할당
         memberInfo.email = res.data.email;
         memberInfo.nickName = res.data.nickName;
+        isRegularLogin.value = res.data.social === null
 
+        console.log(res.data.social);
         if (res.data.profileUrl) {
           memberInfo.profileUrl = res.data.profileUrl;
           previewImage.value = `${res.data.profileUrl}?t=${new Date().getTime()}`;
@@ -171,6 +177,8 @@ export default {
         errorMessage.nickName = null;
         errorMessage.password = null;
         errorMessage.passwordCheck = null;
+
+        await authStore.fetchUser();
 
         pageChange();
       } catch (error) {
@@ -238,6 +246,7 @@ export default {
       onPasswordBlur,
       onPasswordCheckBlur,
       pageChange,
+      isRegularLogin,
     };
   },
 };

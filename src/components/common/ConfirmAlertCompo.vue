@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { watch, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, watch } from 'vue';
 
 export default {
   props: {
@@ -40,7 +40,7 @@ export default {
       }
       timer = setTimeout(() => {
         closeAlert();
-      }, 1000);
+      }, 800); // 0.8 초
     };
 
     // isVisible 값이 변경될 때마다 타이머를 다시 설정
