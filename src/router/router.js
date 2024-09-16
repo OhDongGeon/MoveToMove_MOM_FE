@@ -64,9 +64,10 @@ const routes = [
         component: NewProject,
       },
       {
-        path: 'manage-project',
+        path: 'manage-project/:projectId',  // 동적 매개변수 :projectId 추가
         name: 'ManageProjectCompo',
         component: ManageProject,
+        props: true,
       },
     ],
   },

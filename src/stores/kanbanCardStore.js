@@ -79,6 +79,7 @@ export const useKanbanCardStore = defineStore('kanbanCard', () => {
   };
 
   // 카드 생성 함수
+  // TODO API 서버에 요청할 때 columnId가 널이여도 됨
   const addCard = async (columnId, newCard) => {
     try {
       const response = await axiosInstance.post(`/api/kanban-columns/${columnId}/kanban-cards`, newCard);

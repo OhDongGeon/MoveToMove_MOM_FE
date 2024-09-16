@@ -43,6 +43,9 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
       console.error(e);
     }
   };
+
+  // 컬럼 조회
+
   return {
     columns,
     loadColumns,

@@ -88,6 +88,8 @@
               @closeMenu="closeMenu"
               @projectDeleted="handleProjectDeleted"
               :isProjectLeader="isProjectLeader"
+              :projectId="projectId"
+              :projectName="projectName"
             />
           </div>
           <div class="project-content">

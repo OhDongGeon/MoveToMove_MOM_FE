@@ -72,11 +72,22 @@
 
 <script>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+// import { useKanbanCardStore } from "@/stores/kanbanCardStore";
 
 export default {
+  name: 'ManageProjectCompo',
+  props: {
+    projectId: {
+      type: Number,
+      required: false,
+    }
+  },
   setup() {
     const router = useRouter();
+    const route = useRoute();
+    // const kanbanCardStore = useKanbanCardStore();
+    const projectName = route.query.projectName;
 
     const newColumn = ref(''); // 새로운 컬럼 이름
     const kanbanColumns = ref([
@@ -88,6 +99,8 @@ export default {
     // 새로운 컬럼 추가
     const addColumn = () => {
       if (newColumn.value) {
+        // DB에 저장
+        // kanbanCardStore.addCard();
         kanbanColumns.value.push({ name: newColumn.value }); // 새로운 컬럼을 목록에 추가
         newColumn.value = ''; // 입력 필드 초기화
       }
@@ -107,6 +120,7 @@ export default {
       kanbanColumns,
       addColumn,
       removeColumn,
+      projectName
     };
   },
 };
