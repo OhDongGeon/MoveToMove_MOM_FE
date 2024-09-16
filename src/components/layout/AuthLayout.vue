@@ -21,7 +21,7 @@
             <label for="email">이메일</label>
             <input type="email" id="email" placeholder="이메일을 입력하세요" v-model="email" @blur="validateEmail" />
             <div class="error-div">
-              <span v-if="emailError" class="error-message">{{ emailError }}</span>
+              <span v-if="emailError && !isLoginMode" class="error-message">{{ emailError }}</span>
             </div>
           </div>
 
@@ -38,7 +38,7 @@
             <label for="password">비밀번호</label>
             <input type="password" id="password" placeholder="비밀번호를 입력하세요" v-model="password" @blur="validatePassword" />
             <div class="error-div">
-              <span v-if="passwordError" class="error-message">{{ passwordError }}</span>
+              <span v-if="passwordError && !isLoginMode" class="error-message">{{ passwordError }}</span>
             </div>
           </div>
 
