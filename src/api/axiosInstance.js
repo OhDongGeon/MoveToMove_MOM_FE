@@ -1,11 +1,12 @@
 import axios from 'axios';
 import router from '@/router';
 import { useAuthStore } from '@/stores/memberStore';
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
 // 인스턴스 생성
 const axiosInstance = axios.create({
   // baseURL: 'https://move-to-move.online', // 나중 API URL
-  baseURL: 'http://localhost:8080',
+  baseURL: `${API_BASE_URL}`, //.env 파일에 API URL 바꾸면됩니다.
   headers: {
     'Content-Type': 'application/json',
   },
