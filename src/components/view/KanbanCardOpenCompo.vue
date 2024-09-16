@@ -166,16 +166,17 @@
 </template>
 
 <script>
-import { computed, ref, watch, watchEffect } from 'vue';
 import axiosInstance from '@/api/axiosInstance';
-import { useKanbanCardStore } from '@/stores/kanbanCardStore';
-import { useCommentStore } from '@/stores/commentStore';
+import AlertCheckMessage from '@/components/common/AlertCheckMessage.vue';
+import AlertOkCancel from '@/components/common/AlertOkCancel.vue';
 import CardCommentForm from '@/components/common/CardCommentForm.vue';
 import CardComments from '@/components/common/CardComments.vue';
 import CardCommonModal from '@/components/common/item/CardCommonModal.vue';
 import ProfileImage from '@/components/common/item/ProfileImageItem.vue';
-import AlertCheckMessage from '@/components/common/AlertCheckMessage.vue';
-import AlertOkCancel from '@/components/common/AlertOkCancel.vue';
+import { useCommentStore } from '@/stores/commentStore';
+import { useKanbanCardStore } from '@/stores/kanbanCardStore';
+import { useProjectStore } from '@/stores/projectStore'; // 프로젝트 스토어
+import { computed, ref, watch, watchEffect } from 'vue';
 
 export default {
   components: {
@@ -319,12 +320,21 @@ export default {
 
     // 시작 날짜를 업데이트 체크
     const updateStartAt = (newValue) => {
-      if (new Date(newValue) > new Date(props.card.endAt.split('T')[0])) {
-        isStartAt.value = true;
-        startAtFormat.value = props.card.startAt.split('T')[0];
+      if (!props.card.endAt) {
+        // endAt이 null이므로 비교 없이 바로 업데이트
+        kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', newValue);
         return;
       }
-      kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', startAtFormat.value);
+
+      // endAt이 존재할 때만 비교
+      if (new Date(newValue) > new Date(props.card.endAt.split('T')[0])) {
+        isStartAt.value = true;
+        startAtFormat.value = props.card.startAt ? props.card.startAt.split('T')[0] : ''; // 안전하게 split 호출
+        return;
+      }
+
+      // 비교를 통과했을 때 업데이트
+      kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', newValue);
     };
 
     // 종료 날짜
@@ -332,17 +342,27 @@ export default {
 
     // 종료 날짜를 업데이트 체크
     const updateEndAt = (newValue) => {
-      if (new Date(newValue) < new Date(props.card.startAt.split('T')[0])) {
-        isEndAt.value = true;
-        endAtFormat.value = props.card.endAt.split('T')[0];
+      if (!props.card.startAt) {
+        // startAt이 null이므로 비교 없이 바로 업데이트
+        kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', newValue);
         return;
       }
-      kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', endAtFormat.value);
+
+      // startAt이 존재할 때만 비교
+      if (new Date(newValue) < new Date(props.card.startAt.split('T')[0])) {
+        isEndAt.value = true;
+        endAtFormat.value = props.card.endAt ? props.card.endAt.split('T')[0] : ''; // 안전하게 split 호출
+        return;
+      }
+
+      // 비교를 통과했을 때 업데이트
+      kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', newValue);
     };
 
     // 저장 및 수정
     const kanbanCardStore = useKanbanCardStore();
     const commentStore = useCommentStore();
+    const projectStore = useProjectStore();
     const modifyTitle = ref('');
     const isEditingTitle = ref(false);
     const modifyContent = ref('');
@@ -396,14 +416,17 @@ export default {
       modalTitle.value = '담당자 선택';
       isMultiple.value = true;
 
-      const users = await projectJoinMember(props.card.projectId);
+      const users = await projectJoinMember(projectStore.projectData.id);
+
+      // card.members가 undefined인 경우 빈 배열로 처리
+      const cardMembers = props.card.members || [];
 
       modalItems.value = users.map((user) => ({
         id: user.memberId,
         name: user.nickName,
         avatar: user.profileUrl,
         email: user.email,
-        selected: props.card.members.some((member) => member.memberId === user.memberId),
+        selected: cardMembers.some((member) => member.memberId === user.memberId),
       }));
 
       currentModal.value = 'assigneeModal';
@@ -470,7 +493,7 @@ export default {
 
     const deleteAlertClose = () => {
       successDelete.value = false;
-      emit('delete-card', props.card.projectId);
+      emit('delete-card', projectStore.projectData.id);
       emit('close');
     };
 
@@ -480,6 +503,23 @@ export default {
     const handleDeleteComment = () => {
       comment.value = commentStore.comments;
     };
+
+    // 프로젝트 스토어 변경 감지
+    watch(
+      () => projectStore.projectData.id, // 감시할 값: projectStore의 프로젝트 ID
+      async (newProjectId, oldProjectId) => {
+        if (newProjectId !== oldProjectId) {
+          // 프로젝트 ID가 변경되었을 때 새로운 프로젝트 멤버를 다시 로드하고 users에 저장
+          try {
+            const response = await projectJoinMember(newProjectId); // 멤버 데이터를 불러옴
+            users.value = response; // users 변수에 불러온 멤버 데이터를 저장
+          } catch (error) {
+            console.error('Failed to load project members:', error);
+          }
+        }
+      },
+      { immediate: true }, // 컴포넌트 로드시에도 watch가 즉시 실행되도록 설정
+    );
 
     // store 확인
     watch(
@@ -499,13 +539,19 @@ export default {
     watchEffect(() => {
       if (props.card && props.card.startAt) {
         startAtFormat.value = props.card.startAt.split('T')[0];
+      } else {
+        // startAt이 null이거나 없는 경우 처리
+        startAtFormat.value = ''; // 기본값을 빈 문자열로 설정
       }
     });
 
     // 종료날짜 변경 확인
     watchEffect(() => {
-      if (props.card && props.card.startAt) {
+      if (props.card && props.card.endAt) {
         endAtFormat.value = props.card.endAt.split('T')[0];
+      } else {
+        // endAt이 null이거나 없는 경우 처리
+        endAtFormat.value = ''; // 기본값을 빈 문자열로 설정
       }
     });
 
