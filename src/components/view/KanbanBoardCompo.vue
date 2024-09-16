@@ -92,31 +92,30 @@
           </div>
           <div class="project-content">
             <draggable
-                v-model="columns"
-                group="columns"
-                @end="onColumnDragEnd"
-                class="columns-container"
-                ghost-class="dragging"
-                drag-class="drag-active"
-                itemKey="id"
-                :disabled="isCardOpen"
+              v-model="columns"
+              group="columns"
+              @end="onColumnDragEnd"
+              class="columns-container"
+              ghost-class="dragging"
+              drag-class="drag-active"
+              itemKey="id"
+              :disabled="isCardOpen"
             >
               <template #item="{ element: col }">
                 <div class="column kanban-column" :key="col.kanbanColumnId" :data-column-id="col.kanbanColumnId">
                   <kanban-column
-                      :id="col.kanbanColumnId"
-                      :title="col.kanbanColumnName"
-                      :columnId="col.kanbanColumnId"
-                      :isCardOpen="isCardOpen"
-                      @card-move="onCardMove"
-                      @open-card="openCard"
-                      @close-card="closeCard"
-                      @delete-card="deleteCard"
+                    :id="col.kanbanColumnId"
+                    :title="col.kanbanColumnName"
+                    :columnId="col.kanbanColumnId"
+                    :isCardOpen="isCardOpen"
+                    @card-move="onCardMove"
+                    @open-card="openCard"
+                    @close-card="closeCard"
+                    @delete-card="deleteCard"
                   />
                 </div>
               </template>
             </draggable>
-
           </div>
         </div>
         <div v-else></div>
@@ -133,7 +132,7 @@ import { useNavigationStore } from '@/stores/navigationStore';
 import { useProjectStore } from '@/stores/projectStore';
 import { useWebSocketStore } from '@/stores/webSocketStore';
 
-import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue'; // Vue의 ref를 가져옵니다.
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'; // Vue의 ref를 가져옵니다.
 
 import { useRouter } from 'vue-router';
 import { VTreeview } from 'vuetify/labs/VTreeview';
@@ -172,9 +171,13 @@ export default {
     const storeColumns = computed(() => kanbanColumnStore.columns);
 
     // watch를 사용하여 Pinia 상태가 변경될 때 반영
-    watch(storeColumns, (newColumns) => {
-      columns.value = newColumns;  // 컴포넌트의 columns 상태에 최신 값 할당
-    }, { immediate: true });  // 초기 로딩 시에도 반영
+    watch(
+      storeColumns,
+      (newColumns) => {
+        columns.value = newColumns; // 컴포넌트의 columns 상태에 최신 값 할당
+      },
+      { immediate: true },
+    ); // 초기 로딩 시에도 반영
 
     const open = ref([]);
     const active = ref([]);
@@ -434,7 +437,8 @@ export default {
     // 다른 컬럼으로 카드가 이동 했을 경우 실행되는 함수
     const handleMoveBetweenColumns = async (cardId, toColumnId, newCardSeq) => {
       try {
-        if (newCardSeq <= 0) {  // newCardSeq가 유효한지 확인
+        if (newCardSeq <= 0) {
+          // newCardSeq가 유효한지 확인
           console.error('유효하지 않은 시퀀스 값입니다.');
           return;
         }
@@ -460,14 +464,15 @@ export default {
     // 같은 컬럼 내에서 카드가 이동하는 경우 실행되는 함수
     const handleMoveWithinColumn = async (cardId, columnId, newCardSeq) => {
       try {
-        if (newCardSeq <= 0) {  // newCardSeq가 유효한지 확인
+        if (newCardSeq <= 0) {
+          // newCardSeq가 유효한지 확인
           console.error('유효하지 않은 시퀀스 값입니다.');
           return;
         }
         // WebSocket을 통해 다른 사용자에게 카드 이동 정보 전송
         await webSocketStore.sendCardMoveWithinColumnMessage({
           projectId: projectId.value,
-          type: 'cardMoveWithinColumn',  // 메시지 유형
+          type: 'cardMoveWithinColumn', // 메시지 유형
           cardId: cardId,
           columnId: columnId,
           newCardSeq: newCardSeq,
@@ -479,14 +484,13 @@ export default {
       }
     };
 
-
     // 컬럼 드래그 앤 드롭 핸들러
     const onColumnDragEnd = async ({ oldIndex, newIndex }) => {
       if (oldIndex !== newIndex) {
         const movedColumn = columns.value[newIndex]; // 드래그 후의 새로운 위치의 컬럼
         const kanbanColumnId = movedColumn.kanbanColumnId; // 이동한 컬럼의 ID
         // const project = projectId.value; // 현재 프로젝트의 ID
-        const newServerIndex = newIndex+1;
+        const newServerIndex = newIndex + 1;
         // console.log(`Moved Column ID: ${kanbanColumnId}, New Index (Server): ${newServerIndex}, Project ID: ${project}`);
         try {
           // 서버에 컬럼 이동 요청 전송
@@ -633,7 +637,7 @@ h1 {
 }
 
 /* 트리뷰의 인덴트를 줄이기 위한 스타일 */
-::v-deep .v-treeview-node__content {
+:deep(.v-treeview-node__content) {
   padding-left: 3px !important; /* 기본 인덴트를 줄임 */
 }
 
@@ -728,7 +732,7 @@ h1 {
 }
 
 /* Deep Selector를 사용하여 Vue3Tree의 내부 스타일을 덮어씁니다. */
-::v-deep .custom-node-class {
+:deep(.custom-node-class) {
   margin: 0px;
   padding: 0px;
   font-weight: bold;
