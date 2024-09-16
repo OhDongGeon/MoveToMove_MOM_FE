@@ -101,9 +101,9 @@ export default {
       }
     };
     // 컬럼 삭제
-    const removeColumn = (KanbanColumnId) => {
+    const removeColumn = async (KanbanColumnId) => {
       // kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
-      kanbanColumnStore.removeColumn(KanbanColumnId);
+      await kanbanColumnStore.removeColumn(KanbanColumnId);
     };
 
     const onCancelButton = () => {
