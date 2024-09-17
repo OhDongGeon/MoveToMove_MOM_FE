@@ -49,7 +49,7 @@
           <div class="kanban-list">
             <div v-for="(column, index) in kanbanColumns" :key="column.kanbanColumnId" class="kanban-item">
               <input v-model="column.kanbanColumnName" readonly />
-              <button @click="removeColumn(column.kanbanColumnId)" class="remove-btn">
+              <button @click="removeColumn(column.kanbanColumnId, index)" class="remove-btn">
                 <font-awesome-icon :icon="['far', 'square-minus']" />
               </button>
             </div>
@@ -59,6 +59,7 @@
           <input v-model="newColumn" placeholder="칸반 컬럼 이름" />
           <round-button-item type="button" class="save-btn" :width="120" :height="30" :fontSize="14" @click="addColumn">추가</round-button-item>
         </div>
+        <!-- TODO 모든 컬럼 정보를 서버로 전송 버튼 -->
       </div>
       <div class="button-group">
         <round-button-item type="button" class="cancel-btn" :width="200" :height="40" :backgroundColor="'cancel'" @click="onCancelButton">취소</round-button-item>
@@ -94,9 +95,16 @@ export default {
     // 새로운 컬럼 추가
     const addColumn = () => {
       if (newColumn.value) {
-        // DB에 저장
-        // kanbanCardStore.addCard();
-        kanbanColumns.value.push({ name: newColumn.value }); // 새로운 컬럼을 목록에 추가
+        // 시퀀스 가져와서 +1 해서 마지막에 더해주기
+        const currentMaxSeq = kanbanColumns.value.length > 0 ? Math.max(...kanbanColumns.value.map(col => col.columnSeq)) : 0;
+        const newSeq = currentMaxSeq + 1;
+        const columnData = {
+          projectId: props.projectId,
+          kanbanColumnId: null,
+          kanbanColumnName: newColumn.value,
+          columnSeq: newSeq,
+        };
+        kanbanColumnStore.addColumn(columnData);
         newColumn.value = ''; // 입력 필드 초기화
       }
     };
