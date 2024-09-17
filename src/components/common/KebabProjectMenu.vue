@@ -44,7 +44,7 @@ export default {
     projectName: {
       type: String,
       required: false,
-    }
+    },
   },
   components: {
     AlertOkCancel,
@@ -64,8 +64,8 @@ export default {
     const manage = () => {
       router.push({
         name: 'ManageProjectCompo',
-        params: { projectId: props.projectId },  // 동적 경로 매개변수로 projectId 전달
-        query: { projectName: props.projectName }  // 쿼리 파라미터로 projectName 전달
+        params: { projectId: props.projectId }, // 동적 경로 매개변수로 projectId 전달
+        query: { projectName: props.projectName }, // 쿼리 파라미터로 projectName 전달
       });
       // router.replace('/move-to-move/manage-project');
     };
