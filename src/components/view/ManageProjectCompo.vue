@@ -95,7 +95,7 @@ export default {
     const newColumn = ref(''); // 새로운 컬럼 이름
     const kanbanColumns = computed(() => kanbanColumnStore.columns);
     // 새로운 컬럼 추가
-    const addColumn = () => {
+    const addColumn = async () => {
       if (newColumn.value) {
         // 시퀀스 가져와서 +1 해서 마지막에 더해주기
         const currentMaxSeq = kanbanColumns.value.length > 0 ? Math.max(...kanbanColumns.value.map(col => col.columnSeq)) : 0;
@@ -106,14 +106,20 @@ export default {
           kanbanColumnName: newColumn.value,
           columnSeq: newSeq,
         };
-        kanbanColumnStore.addColumn(columnData);
+        // kanbanColumnStore.addColumn(columnData);
+        // TODO 웹소켓으려 변경해야함.
+        await webSocketStore.sendAddColumnMessage({
+          projectId: props.projectId,
+          type: 'addColumn',
+          columnData: columnData,
+        });
         newColumn.value = ''; // 입력 필드 초기화
       }
     };
     // 컬럼 삭제
     const removeColumn = async (KanbanColumnId) => {
-      // kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
       await kanbanColumnStore.removeColumn(KanbanColumnId);
+      // TODO 웹소켓으로 변경해야함.
     };
 
     const onCancelButton = () => {
