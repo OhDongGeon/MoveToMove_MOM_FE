@@ -47,9 +47,9 @@
           <div class="vertical-line-area"></div>
           <!-- 동적으로 추가된 칸반 컬럼 리스트 -->
           <div class="kanban-list">
-            <div v-for="(column, index) in kanbanColumns" :key="index" class="kanban-item">
-              <input v-model="column.name" readonly />
-              <button @click="removeColumn(index)" class="remove-btn">
+            <div v-for="(column, index) in kanbanColumns" :key="column.kanbanColumnId" class="kanban-item">
+              <input v-model="column.kanbanColumnName" readonly />
+              <button @click="removeColumn(column.kanbanColumnId, index)" class="remove-btn">
                 <font-awesome-icon :icon="['far', 'square-minus']" />
               </button>
             </div>
@@ -59,6 +59,7 @@
           <input v-model="newColumn" placeholder="칸반 컬럼 이름" />
           <round-button-item type="button" class="save-btn" :width="120" :height="30" :fontSize="14" @click="addColumn">추가</round-button-item>
         </div>
+        <!-- TODO 모든 컬럼 정보를 서버로 전송 버튼 -->
       </div>
       <div class="button-group">
         <round-button-item type="button" class="cancel-btn" :width="200" :height="40" :backgroundColor="'cancel'" @click="onCancelButton">취소</round-button-item>
@@ -71,42 +72,69 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import {useKanbanColumnStore} from "@/stores/kanbanColumnStore";
+import {useWebSocketStore} from "@/stores/webSocketStore";
 
 export default {
-  setup() {
+  name: 'ManageProjectCompo',
+  props: {
+    projectId: {
+      type: Number,
+      required: false,
+    }
+  },
+  setup(props) {
     const router = useRouter();
+    const route = useRoute();
+    const webSocketStore = useWebSocketStore();
+    const kanbanColumnStore = useKanbanColumnStore();
+    const projectName = route.query.projectName;
 
     const newColumn = ref(''); // 새로운 컬럼 이름
-    const kanbanColumns = ref([
-      // 초기 컬럼 목록
-      { name: 'Task' },
-      { name: '진행중' },
-      { name: '완료' },
-    ]);
+    const kanbanColumns = computed(() => kanbanColumnStore.columns);
     // 새로운 컬럼 추가
     const addColumn = () => {
       if (newColumn.value) {
-        kanbanColumns.value.push({ name: newColumn.value }); // 새로운 컬럼을 목록에 추가
+        // 시퀀스 가져와서 +1 해서 마지막에 더해주기
+        const currentMaxSeq = kanbanColumns.value.length > 0 ? Math.max(...kanbanColumns.value.map(col => col.columnSeq)) : 0;
+        const newSeq = currentMaxSeq + 1;
+        const columnData = {
+          projectId: props.projectId,
+          kanbanColumnId: null,
+          kanbanColumnName: newColumn.value,
+          columnSeq: newSeq,
+        };
+        kanbanColumnStore.addColumn(columnData);
         newColumn.value = ''; // 입력 필드 초기화
       }
     };
     // 컬럼 삭제
-    const removeColumn = (index) => {
-      kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
+    const removeColumn = async (KanbanColumnId) => {
+      // kanbanColumns.value.splice(index, 1); // 선택한 컬럼을 삭제
+      await kanbanColumnStore.removeColumn(KanbanColumnId);
     };
 
     const onCancelButton = () => {
       router.replace('/move-to-move/kanban');
     };
 
+    onMounted(() => {
+      kanbanColumnStore.loadColumns(props.projectId);
+      webSocketStore.connect(props.projectId);
+    });
+    // 컴포넌트가 언마운트될 때 WebSocket 구독 해제
+    onUnmounted(() => {
+      webSocketStore.disconnect(props.projectId); // 프로젝트 ID에 대한 WebSocket 연결 해제
+    });
     return {
       onCancelButton,
       newColumn,
       kanbanColumns,
       addColumn,
       removeColumn,
+      projectName
     };
   },
 };

@@ -26,6 +26,7 @@ import AlertCheckMessage from './AlertCheckMessage.vue';
 import AlertOkCancel from './AlertOkCancel.vue';
 
 export default {
+  name: 'kebabProjectMenu',
   props: {
     showMenu: Boolean,
     isProjectLeader: {
@@ -36,6 +37,14 @@ export default {
       type: String,
       required: false,
     },
+    projectId: {
+      type: Number,
+      required: false,
+    },
+    projectName: {
+      type: String,
+      required: false,
+    }
   },
   components: {
     AlertOkCancel,
@@ -53,8 +62,12 @@ export default {
 
     // 프로젝트 관리
     const manage = () => {
-      // router.push({ name: '/move-to-move/manage-project', params: { projectId: props.projectId } }); // 페이지 이동
-      router.replace('/move-to-move/manage-project');
+      router.push({
+        name: 'ManageProjectCompo',
+        params: { projectId: props.projectId },  // 동적 경로 매개변수로 projectId 전달
+        query: { projectName: props.projectName }  // 쿼리 파라미터로 projectName 전달
+      });
+      // router.replace('/move-to-move/manage-project');
     };
 
     // isProjectLeader를 computed로 선언하여 반응형으로 동작하도록 설정
