@@ -106,8 +106,6 @@ export default {
           kanbanColumnName: newColumn.value,
           columnSeq: newSeq,
         };
-        // kanbanColumnStore.addColumn(columnData);
-        // TODO 웹소켓으려 변경해야함.
         await webSocketStore.sendAddColumnMessage({
           projectId: props.projectId,
           type: 'addColumn',
@@ -118,8 +116,11 @@ export default {
     };
     // 컬럼 삭제
     const removeColumn = async (KanbanColumnId) => {
-      await kanbanColumnStore.removeColumn(KanbanColumnId);
-      // TODO 웹소켓으로 변경해야함.
+      await webSocketStore.sendDeleteColumnMessage({
+        projectId: props.projectId,
+        KanbanColumnId: KanbanColumnId,
+        type: 'deleteColumn',
+      });
     };
 
     const onCancelButton = () => {

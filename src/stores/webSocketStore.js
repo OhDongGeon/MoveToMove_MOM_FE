@@ -98,6 +98,13 @@ export const useWebSocketStore = defineStore('webSocket', () => {
         console.error("Failed to reload columns:", e);
       }
     },
+    async deleteColumn(projectId) {
+      try{
+        await kanbanColumnStore.loadColumns(projectId);
+      } catch (e) {
+        console.error("Failed to reload columns: ", e)
+      }
+    },
     // 새로운 메시지 유형 핸들러 추가 가능
     async anotherMessageTypeHandler(projectId) {
         console.error(`프로젝트${projectId}에서 Processing another message type. type: 등록되지 않은 요청입니다.`);
@@ -226,6 +233,29 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       }
     }
   }
+  // 컬럼 삭제 - projectManage .컴포넌트 요청
+  async function sendDeleteColumnMessage(message) {
+    const client = projectConnections[message.projectId];
+    const isConnected = connectionStatus[message.projectId];
+
+    try {
+      await kanbanColumnStore.removeColumn(message.KanbanColumnId);
+    } catch (e) {
+      console.error(`Error while updating database before sending WebSocket message: `, e)
+    }
+    if (client && isConnected) {
+      try {
+        client.send(
+            `/app/project/${message.projectId}/deleteColumn`,
+            {},
+            JSON.stringify(message),
+        );
+        console.log('Card delete message sent successfully:', message);
+      } catch (e) {
+        console.error('Error sending card delete to Server', e);
+      }
+    }
+  }
   return {
     projectConnections,
     connectionStatus,
@@ -238,5 +268,6 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     sendCardMoveWithinColumnMessage,
     sendCardBetweenColumnMessage,
     sendAddColumnMessage,
+    sendDeleteColumnMessage,
   };
 });
