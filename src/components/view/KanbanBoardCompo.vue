@@ -78,7 +78,7 @@
         <div v-if="isDataLoaded && columns.length > 0">
           <div class="project-title">
             <div class="project-name">
-              <label>{{ projectName }}</label>
+              <label>{{ testProjectName }}</label>
             </div>
             <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" class="ellipsis" />
             <!-- :isProjectLeader="isProjectLeader" -->
@@ -198,7 +198,7 @@ export default {
 
     // 프로젝트 명
     const projectName = ref('');
-
+    const testProjectName = computed(() => projectStore.projectData.title);
     // 폴더인지 프로젝트인지 구분자
     const folderProjectType = ref('');
 
@@ -568,6 +568,7 @@ export default {
       isDataLoaded,
       handleProjectDeleted, // 프로젝트 나가기
       deleteCard,
+      testProjectName,
     };
   },
 };
