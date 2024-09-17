@@ -18,19 +18,28 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
       console.error('Failed to load columns:', error);
     }
   };
-
-  const addColumn = (title) => {
-    const newColumn = {
-      id: Date.now(),
-      title,
-    };
-    columns.value.push(newColumn);
+  // 컬럼 추가 요청
+  const addColumn = async (kanbanColumnForms) => {
+    columns.value.push(kanbanColumnForms);
+    try {
+      await axiosInstance.patch(`/api/kanban-columns`,columns.value);
+      await loadColumns(kanbanColumnForms.projectId);
+    } catch (e) {
+      console.log('Failed to add column',e);
+    }
   };
+  // 컬럼 삭제 요청
+  const removeColumn = async (columnId) => {
 
-  const removeColumn = (columnId) => {
-    columns.value = columns.value.filter((col) => col.id !== columnId);
+      try {
+        // 디비 먼저 삭제
+        await axiosInstance.delete(`/api/kanban-columns/${columnId}`);
+        // 서버 요청이 성공하였을 때에만 피니아 배열에서 데이터 삭제합니다.
+        columns.value = columns.value.filter((col) => col.kanbanColumnId !== columnId);
+      } catch (error) {
+        console.error(`Failed to load columns: `, error);
+      }
   };
-
   const moveColumn = async (kanbanColumnId, projectId, newIndex) => {
     try {
       const kanbanColumnMoveRequestForm = {
@@ -43,6 +52,9 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
       console.error(e);
     }
   };
+
+  // 컬럼 조회
+
   return {
     columns,
     loadColumns,
