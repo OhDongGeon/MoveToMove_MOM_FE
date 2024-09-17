@@ -576,6 +576,7 @@ export default {
 <style scoped>
 /* MyPageCompo 스타일 */
 .mypage {
+  width: 100%;
   background-color: #f0f8ff;
   border-radius: 8px;
   height: 100%; /* 부모 컨테이너의 고정된 높이를 픽셀 값으로 설정 */
@@ -658,12 +659,14 @@ h1 {
 
 /* 메인 컨텐츠 스타일 */
 .main-content {
+  width: 800px;
   flex-grow: 1; /* 메인 컨텐츠가 나머지 공간을 채우도록 설정 */
   background-color: #ffffff; /* 흰색 배경색 */
   border-radius: 10px;
   border: 1.5px solid #6b9e9b;
   height: 98%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
+  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
 }
 
 .project-title {
@@ -697,14 +700,14 @@ h1 {
 
 .project-content {
   display: flex;
-  overflow-y: auto; /* 넘치는 경우 가로 스크롤 생성 */
+  /* overflow-y: auto; 넘치는 경우 가로 스크롤 생성 */
   margin-top: 10px;
   height: 100%;
 }
 
 .column {
-  flex: 0 0 32.7%; /* 고정된 크기로 각 컬럼을 배치 */
-  height: 815px;
+  flex: 0 0 32.5%; /* 고정된 크기로 각 컬럼을 배치 */
+  height: 100%;
   margin-bottom: 3px;
   background: #ffffff;
   border-radius: 10px;
@@ -727,9 +730,8 @@ h1 {
 .columns-container {
   display: flex;
   gap: 10px; /* 컬럼 간 간격 유지 */
-  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
   width: 100%;
-  height: 835px;
+  height: 100%;
   padding: 0;
 }
 
