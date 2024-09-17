@@ -21,6 +21,7 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
   // 컬럼 추가 요청
   const addColumn = async (kanbanColumnForms) => {
     columns.value.push(kanbanColumnForms);
+    console.log(kanbanColumnForms);
     try {
       await axiosInstance.patch(`/api/kanban-columns`,columns.value);
       await loadColumns(kanbanColumnForms.projectId);

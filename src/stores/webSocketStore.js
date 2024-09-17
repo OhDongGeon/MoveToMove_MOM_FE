@@ -61,7 +61,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       client.disconnect(() => {
         delete projectConnections[projectId];
         connectionStatus[projectId] = false;
-        // console.log(`WebSocket disconnected for project ${projectId}`);
+        console.log(`WebSocket disconnected for project ${projectId}`);
       });
     }
   }
@@ -128,7 +128,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     if (!receivedMessages[projectId]) {
       receivedMessages[projectId] = [];
     }
-
+    console.log(`>>>>>>>>>>>>>>>>>webSocket receive message : ${message}, projectId: ${projectId}`);
     receivedMessages[projectId].push(message);
 
     // 메시지 핸들러 호출
@@ -273,7 +273,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     const isConnected = connectionStatus[message.projectId];
     try {
       await projectStore.updateProject(message.projectForm);
-      message.projectForm.type = message.type;
+      // message.projectForm.type = message.type;
     } catch(e) {
       console.error('Error While updating database before sending WebSocket message:', e);
     }
