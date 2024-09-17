@@ -48,5 +48,13 @@ export const useProjectStore = defineStore('project', {
         console.error('Failed to load project data:', error);
       }
     },
+    // 프로젝트 수정
+    async updateProject(projectForm){
+      try {
+        await axiosInstance.put(`/api/projects/${projectForm.projectId}`, projectForm);
+      } catch (e) {
+        console.error('Failed to update project data: ', e);
+      }
+    }
   },
 });

@@ -128,9 +128,26 @@ export default {
       });
     };
     // 프로젝트 저장 클릭
-    const saveProject = () => {
+    const saveProject = async () => {
+      const memberDtoMap = {};
+      // 멤버 추가 기능 필요시 구현
+      const projectForm = {
+        projectId: props.projectId,
+        projectName: projectData.value.title,
+        projectDescription: projectData.value.projectDescription,
+        startAt: projectData.value.startAt,
+        endAt: projectData.value.endAt,
+        MemberDtoMap: memberDtoMap,
+      };
+      if (projectForm) {
+        await webSocketStore.sendUpdateProjectMessage({
+          projectId: props.projectId,
+          projectForm: projectForm,
+          type: 'updateProject',
+        });
+      }
+    };
 
-    }
     const onCancelButton = () => {
       router.replace('/move-to-move/kanban');
     };
