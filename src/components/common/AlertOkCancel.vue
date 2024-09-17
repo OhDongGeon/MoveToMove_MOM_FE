@@ -69,6 +69,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   max-width: 400px;
   width: 100%;
+  z-index: 2000;
 }
 .modal-content {
   display: flex;
