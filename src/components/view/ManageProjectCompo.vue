@@ -8,7 +8,7 @@
           <label>프로젝트명</label>
           <div class="vertical-line"></div>
           <div class="input-container">
-            <input type="text" id="nickName" placeholder="프로젝트명" />
+            <input type="text" id="nickName" placeholder="프로젝트명" v-model="projectData.title" />
             <div class="error-message"></div>
           </div>
         </div>
@@ -16,7 +16,7 @@
           <label>프로젝트 설명</label>
           <div class="vertical-line-area"></div>
           <div class="input-container">
-            <textarea id="projectDescription" placeholder="프로젝트 설명"></textarea>
+            <textarea id="projectDescription" placeholder="프로젝트 설명" v-model="projectData.projectDescription" ></textarea>
             <div class="error-message"></div>
           </div>
         </div>
@@ -24,7 +24,7 @@
           <label><font-awesome-icon :icon="['far', 'calendar-check']" class="icon" /> 시작일시</label>
           <div class="vertical-line"></div>
           <div class="input-container">
-            <input type="date" id="nickName" placeholder="시작일시" />
+            <input type="date" id="nickName" v-model="projectData.startAt" placeholder="시작일시" />
             <div class="error-message"></div>
           </div>
         </div>
@@ -32,12 +32,12 @@
           <label><font-awesome-icon :icon="['far', 'calendar-check']" class="icon" /> 종료일시</label>
           <div class="vertical-line"></div>
           <div class="input-container">
-            <input type="date" id="nickName" placeholder="종료일시" />
+            <input type="date" id="nickName" v-model="projectData.endAt" placeholder="종료일시" />
             <div class="error-message"></div>
           </div>
         </div>
         <div class="content-button">
-          <round-button-item type="button" class="save-btn" :width="120" :height="30" :fontSize="14">저장</round-button-item>
+          <round-button-item type="button" class="save-btn" :width="120" :height="30" :fontSize="14" @click="saveProject">저장</round-button-item>
         </div>
 
         <div class="underline"></div>
@@ -73,9 +73,10 @@
 
 <script>
 import {computed, onMounted, onUnmounted, ref} from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import {useKanbanColumnStore} from "@/stores/kanbanColumnStore";
 import {useWebSocketStore} from "@/stores/webSocketStore";
+import {useProjectStore} from "@/stores/projectStore";
 
 export default {
   name: 'ManageProjectCompo',
@@ -87,13 +88,17 @@ export default {
   },
   setup(props) {
     const router = useRouter();
-    const route = useRoute();
     const webSocketStore = useWebSocketStore();
     const kanbanColumnStore = useKanbanColumnStore();
-    const projectName = route.query.projectName;
+    const projectStore = useProjectStore();
+
+    // const projectName = route.query.projectName;
+
+    // 프로젝트ID에 해당하는 데이터
+    const projectData =  computed(() => projectStore.projectData);
+    const kanbanColumns = computed(() => kanbanColumnStore.columns);
 
     const newColumn = ref(''); // 새로운 컬럼 이름
-    const kanbanColumns = computed(() => kanbanColumnStore.columns);
     // 새로운 컬럼 추가
     const addColumn = async () => {
       if (newColumn.value) {
@@ -106,8 +111,6 @@ export default {
           kanbanColumnName: newColumn.value,
           columnSeq: newSeq,
         };
-        // kanbanColumnStore.addColumn(columnData);
-        // TODO 웹소켓으려 변경해야함.
         await webSocketStore.sendAddColumnMessage({
           projectId: props.projectId,
           type: 'addColumn',
@@ -118,17 +121,44 @@ export default {
     };
     // 컬럼 삭제
     const removeColumn = async (KanbanColumnId) => {
-      await kanbanColumnStore.removeColumn(KanbanColumnId);
-      // TODO 웹소켓으로 변경해야함.
+      await webSocketStore.sendDeleteColumnMessage({
+        projectId: props.projectId,
+        KanbanColumnId: KanbanColumnId,
+        type: 'deleteColumn',
+      });
+    };
+    // 프로젝트 저장 클릭
+    const saveProject = async () => {
+      const memberDtoMap = {};
+      // 멤버 추가 기능 필요시 구현
+      const projectForm = {
+        projectId: props.projectId,
+        projectName: projectData.value.title,
+        projectDescription: projectData.value.projectDescription,
+        startAt: projectData.value.startAt,
+        endAt: projectData.value.endAt,
+        MemberDtoMap: memberDtoMap,
+      };
+      if (projectForm) {
+        await webSocketStore.sendUpdateProjectMessage({
+          projectId: props.projectId,
+          projectForm: projectForm,
+          type: 'updateProject',
+        });
+      }
     };
 
     const onCancelButton = () => {
       router.replace('/move-to-move/kanban');
     };
 
+    // 컴포넌트 마운트 시 프로젝트 , 컬럼 데이터 서버에서 조회, 웹소켓 연결
     onMounted(() => {
       kanbanColumnStore.loadColumns(props.projectId);
       webSocketStore.connect(props.projectId);
+      if (!projectData.value.projectDescription) {
+        projectStore.loadProject(props.projectId);
+      }
     });
     // 컴포넌트가 언마운트될 때 WebSocket 구독 해제
     onUnmounted(() => {
@@ -140,7 +170,8 @@ export default {
       kanbanColumns,
       addColumn,
       removeColumn,
-      projectName
+      saveProject,
+      projectData,
     };
   },
 };

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import axiosInstance from "@/api/axiosInstance";
 
 export const useProjectStore = defineStore('project', {
   state: () => ({
@@ -37,5 +38,23 @@ export const useProjectStore = defineStore('project', {
     changeProjectLeader(projectId) {
       this.projectData.projectLeaderYN = projectId === this.projectData.projectId ? false : true; // 팀장 ID와 현재 프로젝트 ID가 일치하면 'N'으로, 아니면 'Y'로 변경
     },
+    // 프로젝트 데이터를 새로 서버에서 로드
+    // 프로젝트 데이터를 로드하는 함수
+    async loadProject(projectId) {
+      try {
+        const response = await axiosInstance.get(`/api/projects/${projectId}`); // 서버에서 프로젝트 데이터를 가져옴
+        this.setProjectData(response.data); // 프로젝트 데이터를 상태에 저장
+      } catch (error) {
+        console.error('Failed to load project data:', error);
+      }
+    },
+    // 프로젝트 수정
+    async updateProject(projectForm){
+      try {
+        await axiosInstance.put(`/api/projects/${projectForm.projectId}`, projectForm);
+      } catch (e) {
+        console.error('Failed to update project data: ', e);
+      }
+    }
   },
 });

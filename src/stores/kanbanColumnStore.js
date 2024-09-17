@@ -35,7 +35,7 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
         // 디비 먼저 삭제
         await axiosInstance.delete(`/api/kanban-columns/${columnId}`);
         // 서버 요청이 성공하였을 때에만 피니아 배열에서 데이터 삭제합니다.
-        columns.value = columns.value.filter((col) => col.kanbanColumnId !== columnId);
+        // columns.value = columns.value.filter((col) => col.kanbanColumnId !== columnId);
       } catch (error) {
         console.error(`Failed to load columns: `, error);
       }
@@ -52,9 +52,6 @@ export const useKanbanColumnStore = defineStore('kanbanColumn', () => {
       console.error(e);
     }
   };
-
-  // 컬럼 조회
-
   return {
     columns,
     loadColumns,

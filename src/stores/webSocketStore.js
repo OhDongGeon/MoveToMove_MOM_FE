@@ -5,6 +5,7 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {useKanbanColumnStore} from "@/stores/kanbanColumnStore";
 import { useKanbanCardStore} from "@/stores/kanbanCardStore";
+import {useProjectStore} from "@/stores/projectStore";
 
 export const useWebSocketStore = defineStore('webSocket', () => {
   const projectConnections = reactive({}); // 프로젝트별 stompClient 저장
@@ -12,6 +13,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
   const receivedMessages = reactive({}); // 수신된 메시지 저장
   const kanbanColumnStore  = useKanbanColumnStore();
   const kanbanCardsStore = useKanbanCardStore();
+  const projectStore = useProjectStore();
   const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
 
   // 특정 프로젝트에 대해 WebSocket 연결 설정 및 구독 설정
@@ -96,6 +98,22 @@ export const useWebSocketStore = defineStore('webSocket', () => {
         await kanbanColumnStore.loadColumns(projectId);
       } catch (e) {
         console.error("Failed to reload columns:", e);
+      }
+    },
+    // 프로젝트 관리 - 컬럼 삭제
+    async deleteColumn(projectId) {
+      try{
+        await kanbanColumnStore.loadColumns(projectId);
+      } catch (e) {
+        console.error("Failed to reload columns: ", e)
+      }
+    },
+    // 프로젝트 관리 - 프로젝트 업데이트
+    async updateProject(projectId) {
+      try {
+        await projectStore.loadProject(projectId);
+      } catch (e) {
+        console.error('Failed to reload project:', e);
       }
     },
     // 새로운 메시지 유형 핸들러 추가 가능
@@ -226,6 +244,56 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       }
     }
   }
+  // 컬럼 삭제 - projectManage .컴포넌트 요청
+  async function sendDeleteColumnMessage(message) {
+    const client = projectConnections[message.projectId];
+    const isConnected = connectionStatus[message.projectId];
+
+    try {
+      await kanbanColumnStore.removeColumn(message.KanbanColumnId);
+    } catch (e) {
+      console.error(`Error while updating database before sending WebSocket message: `, e)
+    }
+    if (client && isConnected) {
+      try {
+        client.send(
+            `/app/project/${message.projectId}/deleteColumn`,
+            {},
+            JSON.stringify(message),
+        );
+        console.log('Card delete message sent successfully:', message);
+      } catch (e) {
+        console.error('Error sending card delete to Server', e);
+      }
+    }
+  }
+  // 프로젝트 update
+  async function sendUpdateProjectMessage(message) {
+    const client = projectConnections[message.projectId];
+    const isConnected = connectionStatus[message.projectId];
+    try {
+      await projectStore.updateProject(message.projectForm);
+      message.projectForm.type = message.type;
+    } catch(e) {
+      console.error('Error While updating database before sending WebSocket message:', e);
+    }
+    // 웹소켓
+    if (client && isConnected) {
+      try {
+        client.send(
+            `/app/project/${message.projectId}/update-project`,
+            {},
+            JSON.stringify(message),
+        );
+        console.log('Card delete message sent successfully:', message);
+      } catch (e) {
+        // 재연결 시도
+        console.error('Error sending card update Project to Server', e);
+        connect(message.projectId);
+        console.log(`웹소켓 재연결`);
+      }
+    }
+  }
   return {
     projectConnections,
     connectionStatus,
@@ -238,5 +306,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     sendCardMoveWithinColumnMessage,
     sendCardBetweenColumnMessage,
     sendAddColumnMessage,
+    sendDeleteColumnMessage,
+    sendUpdateProjectMessage,
   };
 });
