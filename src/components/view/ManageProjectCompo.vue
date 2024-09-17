@@ -72,9 +72,10 @@
 </template>
 
 <script>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {useKanbanColumnStore} from "@/stores/kanbanColumnStore";
+import {useWebSocketStore} from "@/stores/webSocketStore";
 
 export default {
   name: 'ManageProjectCompo',
@@ -87,6 +88,7 @@ export default {
   setup(props) {
     const router = useRouter();
     const route = useRoute();
+    const webSocketStore = useWebSocketStore();
     const kanbanColumnStore = useKanbanColumnStore();
     const projectName = route.query.projectName;
 
@@ -120,6 +122,11 @@ export default {
 
     onMounted(() => {
       kanbanColumnStore.loadColumns(props.projectId);
+      webSocketStore.connect(props.projectId);
+    });
+    // 컴포넌트가 언마운트될 때 WebSocket 구독 해제
+    onUnmounted(() => {
+      webSocketStore.disconnect(props.projectId); // 프로젝트 ID에 대한 WebSocket 연결 해제
     });
     return {
       onCancelButton,
