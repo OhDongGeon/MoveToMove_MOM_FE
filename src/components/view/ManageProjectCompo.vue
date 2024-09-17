@@ -101,31 +101,39 @@ export default {
     const newColumn = ref(''); // 새로운 컬럼 이름
     // 새로운 컬럼 추가
     const addColumn = async () => {
-      if (newColumn.value) {
-        // 시퀀스 가져와서 +1 해서 마지막에 더해주기
-        const currentMaxSeq = kanbanColumns.value.length > 0 ? Math.max(...kanbanColumns.value.map(col => col.columnSeq)) : 0;
-        const newSeq = currentMaxSeq + 1;
-        const columnData = {
-          projectId: props.projectId,
-          kanbanColumnId: null,
-          kanbanColumnName: newColumn.value,
-          columnSeq: newSeq,
-        };
-        await webSocketStore.sendAddColumnMessage({
-          projectId: props.projectId,
-          type: 'addColumn',
-          columnData: columnData,
-        });
-        newColumn.value = ''; // 입력 필드 초기화
+      try {
+        if (newColumn.value) {
+          // 시퀀스 가져와서 +1 해서 마지막에 더해주기
+          const currentMaxSeq = kanbanColumns.value.length > 0 ? Math.max(...kanbanColumns.value.map(col => col.columnSeq)) : 0;
+          const newSeq = currentMaxSeq + 1;
+          const columnData = {
+            projectId: props.projectId,
+            kanbanColumnId: null,
+            kanbanColumnName: newColumn.value,
+            columnSeq: newSeq,
+          };
+          await webSocketStore.sendAddColumnMessage({
+            projectId: props.projectId,
+            type: 'addColumn',
+            columnData: columnData,
+          });
+          newColumn.value = ''; // 입력 필드 초기화
+        }
+      } catch (e) {
+        console.error('Error call webSocket call :', e);
       }
     };
     // 컬럼 삭제
     const removeColumn = async (KanbanColumnId) => {
-      await webSocketStore.sendDeleteColumnMessage({
-        projectId: props.projectId,
-        KanbanColumnId: KanbanColumnId,
-        type: 'deleteColumn',
-      });
+      try {
+        await webSocketStore.sendDeleteColumnMessage({
+          projectId: props.projectId,
+          KanbanColumnId: KanbanColumnId,
+          type: 'deleteColumn',
+        });
+      } catch (e) {
+        console.error('Error call webSocket call :', e);
+      }
     };
     // 프로젝트 저장 클릭
     const saveProject = async () => {
@@ -138,13 +146,18 @@ export default {
         startAt: projectData.value.startAt,
         endAt: projectData.value.endAt,
         MemberDtoMap: memberDtoMap,
+        type: 'updateProject',
       };
-      if (projectForm) {
-        await webSocketStore.sendUpdateProjectMessage({
-          projectId: props.projectId,
-          projectForm: projectForm,
-          type: 'updateProject',
-        });
+      try {
+        if (projectForm) {
+          await webSocketStore.sendUpdateProjectMessage({
+            projectId: props.projectId,
+            projectForm: projectForm,
+            type: 'updateProject',
+          });
+        }
+      } catch (e) {
+        console.error('Error call webSocket call :', e);
       }
     };
 
@@ -154,10 +167,14 @@ export default {
 
     // 컴포넌트 마운트 시 프로젝트 , 컬럼 데이터 서버에서 조회, 웹소켓 연결
     onMounted(() => {
-      kanbanColumnStore.loadColumns(props.projectId);
-      webSocketStore.connect(props.projectId);
-      if (!projectData.value.projectDescription) {
-        projectStore.loadProject(props.projectId);
+      try {
+        kanbanColumnStore.loadColumns(props.projectId);
+        webSocketStore.connect(props.projectId);
+        if (!projectData.value.projectDescription) {
+          projectStore.loadProject(props.projectId);
+        }
+      } catch (e) {
+        console.log('Error Database load: ', e);
       }
     });
     // 컴포넌트가 언마운트될 때 WebSocket 구독 해제

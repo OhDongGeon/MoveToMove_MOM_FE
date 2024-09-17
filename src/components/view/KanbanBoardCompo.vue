@@ -242,7 +242,7 @@ export default {
 
     // 컴포넌트가 언마운트될 때 WebSocket 구독 해제
     onUnmounted(() => {
-      webSocketStore.disconnect(projectId.value); // 프로젝트 ID에 대한 WebSocket 연결 해제
+      webSocketStore.disconnect(projectId); // 프로젝트 ID에 대한 WebSocket 연결 해제
     });
 
     // checkMove 함수 정의
