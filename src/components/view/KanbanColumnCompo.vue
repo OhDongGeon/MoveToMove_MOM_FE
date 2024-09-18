@@ -65,6 +65,10 @@ export default {
       type: Number,
       default: null,
     },
+    projectId: {
+      type: Number,
+      default: null,
+    }
   },
   emits: ['open-card', 'close-card', 'card-move', 'delete-card'],
 
@@ -142,8 +146,6 @@ export default {
     // 카드 생성 input 에서 엔터 시 카드 생성 함수
     const submitAddCardTitle = async () => {
       const columnId = cardInput.value.getAttribute('data-column-id'); // 컬럼 ID 참조
-      console.log('Column ID:', columnId);
-
       if (newCardTitle.value.trim()) {
         const newCard = {
           kanbanCardId: '',
@@ -151,7 +153,10 @@ export default {
         };
 
         await kanbanCardStore.addCard(columnId, newCard); // 수정된 부분
-        // await webSo
+        await webSocketStore.sendAddKanbanCardMessage({
+          projectId: props.projectId,
+          type: 'addCard',
+        });
         // 새로 추가된 카드를 반영하기 위해 computedCards 업데이트
         updateCards(); // 스토어의 최신 데이터를 다시 로드하여 computedCards 갱신
 

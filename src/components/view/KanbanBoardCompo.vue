@@ -106,10 +106,11 @@
               <template #item="{ element: col }">
                 <div class="column kanban-column" :key="col.kanbanColumnId" :data-column-id="col.kanbanColumnId">
                   <kanban-column
-                    :id="projectId"
+                    :id="col.kanbanColumnId"
                     :title="col.kanbanColumnName"
                     :columnId="col.kanbanColumnId"
                     :isCardOpen="isCardOpen"
+                    :projectId="projectId"
                     @card-move="onCardMove"
                     @open-card="openCard"
                     @close-card="closeCard"

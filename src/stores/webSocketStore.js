@@ -310,7 +310,7 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     if (client && isConnected) {
       try {
         client.send(
-            `/app/project/${message.projectId}/add-project`,
+            `/app/project/${message.projectId}/add-card`,
             {},
             JSON.stringify(message),
         );
