@@ -26,7 +26,7 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <project-member-invite :isInviteModalOpen="isInviteModalOpen" :projectId="sendProjectId" @closeModal="closeModal" />
+    <project-member-invite :isInviteModalOpen="isInviteModalOpen" @closeModal="closeModal" />
   </div>
 </template>
 
