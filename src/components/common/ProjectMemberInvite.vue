@@ -75,9 +75,6 @@ export default {
     const projectStore = useProjectStore();
     const projectId = ref(null);
 
-    // 프로젝트 ID 사용
-    // const projectId = projectStore.projectId;
-
     let typingTimeout = null;
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -178,17 +175,10 @@ export default {
     };
 
     // 초대 메일 전송
-    const sendEmails = async (emailData) => {
+    const sendEmails = async () => {
       if (projectId.value) {
-        // projectId가 있는지 확인
-        console.log('projectId:', projectId.value);
-
-        console.log('이메일 정보: ', emailData.value);
-
-        const emailDataValue = emailData.value;
-
         // emailData를 서버에서 기대하는 형식으로 변환 (MemberDto 형식에 맞추기)
-        const memberDtoList = emailDataValue.map((member) => ({
+        const memberDtoList = emailList.value.map((member) => ({
           memberId: member.memberId,
           email: member.email,
           nickname: member.nickName,
