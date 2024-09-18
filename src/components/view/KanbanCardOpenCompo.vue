@@ -494,7 +494,7 @@ export default {
       isDeleteCard.value = false;
       await kanbanCardStore.deleteKanbanCard(props.card.id);
       // 웹소켓
-      await webSocketStore.connect(props.card.id);
+      await webSocketStore.connect(props.projectId);
       await webSocketStore.sendDeleteKanbanCardMessage({
         projectId: props.projectId,
         type: 'deleteCard',
