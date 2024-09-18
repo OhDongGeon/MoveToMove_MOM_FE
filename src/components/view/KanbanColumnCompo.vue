@@ -68,7 +68,7 @@ export default {
     projectId: {
       type: Number,
       default: null,
-    }
+    },
   },
   emits: ['open-card', 'close-card', 'card-move', 'delete-card'],
 
@@ -93,7 +93,7 @@ export default {
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
       updateCards();
-      webSocketStore.connect(props.id);
+      webSocketStore.connect(props.projectId);
       // const element = document.querySelector(`[data-column-id="${props.columnId}"]`);
       // element.addEventListener('update-cards', updateCards);
       //
