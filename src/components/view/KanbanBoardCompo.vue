@@ -78,7 +78,7 @@
         <div v-if="isDataLoaded && columns.length > 0">
           <div class="project-title">
             <div class="project-name">
-              <label>{{ projectName }}</label>
+              <label>{{ testProjectName }}</label>
             </div>
             <font-awesome-icon :icon="['fas', 'ellipsis']" ref="menuToggle" @click="toggleMenu" class="ellipsis" />
             <!-- :isProjectLeader="isProjectLeader" -->
@@ -110,6 +110,7 @@
                     :title="col.kanbanColumnName"
                     :columnId="col.kanbanColumnId"
                     :isCardOpen="isCardOpen"
+                    :projectId="projectId"
                     @card-move="onCardMove"
                     @open-card="openCard"
                     @close-card="closeCard"
@@ -198,7 +199,7 @@ export default {
 
     // 프로젝트 명
     const projectName = ref('');
-
+    const testProjectName = computed(() => projectStore.projectData.title);
     // 폴더인지 프로젝트인지 구분자
     const folderProjectType = ref('');
 
@@ -242,7 +243,7 @@ export default {
 
     // 컴포넌트가 언마운트될 때 WebSocket 구독 해제
     onUnmounted(() => {
-      webSocketStore.disconnect(projectId.value); // 프로젝트 ID에 대한 WebSocket 연결 해제
+      webSocketStore.disconnect(projectId); // 프로젝트 ID에 대한 WebSocket 연결 해제
     });
 
     // checkMove 함수 정의
@@ -568,6 +569,7 @@ export default {
       isDataLoaded,
       handleProjectDeleted, // 프로젝트 나가기
       deleteCard,
+      testProjectName,
     };
   },
 };
@@ -576,6 +578,7 @@ export default {
 <style scoped>
 /* MyPageCompo 스타일 */
 .mypage {
+  width: 100%;
   background-color: #f0f8ff;
   border-radius: 8px;
   height: 100%; /* 부모 컨테이너의 고정된 높이를 픽셀 값으로 설정 */
@@ -658,6 +661,7 @@ h1 {
 
 /* 메인 컨텐츠 스타일 */
 .main-content {
+  width: 800px;
   flex-grow: 1; /* 메인 컨텐츠가 나머지 공간을 채우도록 설정 */
   background-color: #ffffff; /* 흰색 배경색 */
   border-radius: 10px;
@@ -697,14 +701,14 @@ h1 {
 
 .project-content {
   display: flex;
-  overflow-y: auto; /* 넘치는 경우 가로 스크롤 생성 */
+  /* overflow-y: auto; 넘치는 경우 가로 스크롤 생성 */
   margin-top: 10px;
   height: 100%;
 }
 
 .column {
-  flex: 0 0 32.7%; /* 고정된 크기로 각 컬럼을 배치 */
-  height: 815px;
+  flex: 0 0 32.5%; /* 고정된 크기로 각 컬럼을 배치 */
+  height: 100%;
   margin-bottom: 3px;
   background: #ffffff;
   border-radius: 10px;
@@ -727,10 +731,10 @@ h1 {
 .columns-container {
   display: flex;
   gap: 10px; /* 컬럼 간 간격 유지 */
-  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
   width: 100%;
-  height: 835px;
+  height: 100%;
   padding: 0;
+  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
 }
 
 /* Deep Selector를 사용하여 Vue3Tree의 내부 스타일을 덮어씁니다. */

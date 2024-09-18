@@ -19,7 +19,7 @@
           </div>
           <!-- 초대 버튼 -->
           <div class="invite-button">
-            <round-button-item type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite">
+            <round-button-item v-if="isLeader" type="button" :width="180" :height="30" :borderRadius="5" :fontSize="13" @click.stop="addMemberInvite">
               참여자 초대 +
             </round-button-item>
           </div>
@@ -34,6 +34,7 @@
 import { onMounted, ref, watch } from 'vue'; // Vue의 ref를 가져옵니다.
 
 import { useJoinMemberStore } from '@/stores/joinMemberStore';
+import { useAuthStore } from '@/stores/memberStore'; // 로그인 정보 가져오기
 import { useProjectStore } from '@/stores/projectStore';
 import UserItem from '../common/combine/UserListItem.vue';
 import ProjectMemberInvite from './ProjectMemberInvite.vue';
@@ -43,6 +44,7 @@ export default {
     UserItem,
     ProjectMemberInvite,
   },
+  emits: ['projectOut'],
   props: {
     projectId: {
       type: Number,
@@ -54,12 +56,35 @@ export default {
     const isInviteModalOpen = ref(false);
     const joinMemberStore = useJoinMemberStore();
     const projectStore = useProjectStore();
+    const authStore = useAuthStore(); // 로그인 정보 가져오기
+    const isLeader = ref(false);
+    const sendProjectId = ref(null);
 
     onMounted(() => {
       if (props.projectId) {
         joinMemberStore.fetchMembers(props.projectId); // projectId가 존재할 때만 데이터를 조회합니다.
+
+        // projectStore에서 projectData를 가져와서 팀장 여부 확인
+        const projectData = projectStore.projectData;
+        if (projectData && projectData.projectLeaderYN) {
+          isLeader.value = projectData.projectLeaderYN;
+          sendProjectId.value = projectData.projectId;
+        }
       }
     });
+
+    // 로그인된 유저와 joinMemberStore의 멤버 비교 후 팀장 여부 설정
+    const checkLeaderStatus = () => {
+      if (joinMemberStore.joinMembers?.length > 0 && authStore.user) {
+        const currentUser = joinMemberStore.joinMembers.find((member) => member.memberId === authStore.user.memberId);
+
+        if (currentUser && currentUser.projectLeaderYN === 'Y') {
+          isLeader.value = true;
+        } else {
+          isLeader.value = false;
+        }
+      }
+    };
 
     // projectId가 변경될 때마다 멤버 조회를 다시 수행
     watch(
@@ -67,13 +92,26 @@ export default {
       (newProjectId) => {
         if (newProjectId) {
           joinMemberStore.fetchMembers(newProjectId);
+
+          checkLeaderStatus(); // 멤버 정보 가져온 후 팀장 여부 확인
         }
       },
+      { immediate: true }, // 처음 컴포넌트가 마운트될 때도 실행
+    );
+
+    // 프로젝트 리더 여부를 감지하는 watch
+    watch(
+      () => joinMemberStore.joinMembers,
+      (newMembers) => {
+        if (newMembers) {
+          checkLeaderStatus(); // 멤버 정보 변경 시 팀장 여부 확인
+        }
+      },
+      { immediate: true }, // 처음에도 실행
     );
 
     // 팀장 권한 이전 함수 -> 스토어 전달
     const handleTransferLeader = async (memberId) => {
-      console.log(`권한 스토어로 전달: `, memberId);
       await joinMemberStore.transferLeader(props.projectId, memberId);
 
       // 프로젝트 스토어 수정
@@ -81,7 +119,9 @@ export default {
     };
 
     // 프로젝트 내보내기 한다는 전달
-    const projectOut = (memberId) => {
+    const projectOut = async (memberId) => {
+      await joinMemberStore.releaseMember(props.projectId, memberId);
+
       console.log(`부모컴포 전달 프로젝트에서 내보내기 할 멤버: `, memberId);
     };
 
@@ -104,6 +144,8 @@ export default {
       closeModal, // 프로젝트 초대 모달 닫기
       handleTransferLeader, // 권한 이전 함수
       joinMemberStore, // Pinia 스토어
+      isLeader, // template에서 사용 가능
+      sendProjectId,
     };
   },
 };
