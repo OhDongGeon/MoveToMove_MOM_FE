@@ -28,7 +28,7 @@
       </template>
     </draggable>
     <!-- 칸반 카드 오픈 슬라이드 -->
-    <KanbanCardOpen :isVisible="isKanbanCardOpen" :card="selectedCard" @close="closeKanbanCard" @delete-card="deleteCard" />
+    <KanbanCardOpen :isVisible="isKanbanCardOpen" :card="selectedCard" @close="closeKanbanCard" @delete-card="deleteCard" :projectId="projectId" />
     <div v-if="isKanbanCardOpen" class="overlay"></div>
   </div>
 </template>

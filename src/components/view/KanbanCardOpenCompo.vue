@@ -177,6 +177,7 @@ import { useCommentStore } from '@/stores/commentStore';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import { useProjectStore } from '@/stores/projectStore'; // 프로젝트 스토어
 import { computed, ref, watch, watchEffect } from 'vue';
+import {useWebSocketStore} from "@/stores/webSocketStore";
 
 export default {
   components: {
@@ -195,6 +196,10 @@ export default {
     card: {
       type: Object,
       default: () => ({}), // 기본값을 빈 객체로 설정
+    },
+    projectId: {
+      type: Number,
+      default: null,
     },
   },
 
@@ -485,9 +490,15 @@ export default {
       isDeleteCard.value = true;
     };
 
-    const agreeDeleteCard = () => {
+    const agreeDeleteCard = async () => {
       isDeleteCard.value = false;
-      kanbanCardStore.deleteKanbanCard(props.card.id);
+      await kanbanCardStore.deleteKanbanCard(props.card.id);
+      // 웹소켓
+      await webSocketStore.connect(props.card.id);
+      await webSocketStore.sendDeleteKanbanCardMessage({
+        projectId: props.projectId,
+        type: 'deleteCard',
+      });
       successDelete.value = true;
     };
 
@@ -566,6 +577,9 @@ export default {
         }
       },
     );
+
+    // 웹소켓 스토어
+    const webSocketStore = useWebSocketStore();
 
     return {
       isStartAt,
