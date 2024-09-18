@@ -110,6 +110,7 @@
                     :title="col.kanbanColumnName"
                     :columnId="col.kanbanColumnId"
                     :isCardOpen="isCardOpen"
+                    :projectId="projectId"
                     @card-move="onCardMove"
                     @open-card="openCard"
                     @close-card="closeCard"
