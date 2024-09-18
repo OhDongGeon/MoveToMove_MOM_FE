@@ -27,7 +27,7 @@
           <div class="button-timer-group">
             <round-button-item type="button" @click="handleVerifyCode" class="auth-btn" :width="95" :height="35">인증</round-button-item>
             <!-- 남은 시간 표시 -->
-            <div class="timer-box" v-if="isVerifyCode">남은 시간: {{ verificationCodeStore.authentication?.expiresIn }}</div>
+            <div class="timer-box" v-if="isVerifyCode" v-show="false">남은 시간: {{ verificationCodeStore.authentication?.expiresIn }}</div>
           </div>
         </div>
 
