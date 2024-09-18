@@ -177,7 +177,7 @@ import { useCommentStore } from '@/stores/commentStore';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import { useProjectStore } from '@/stores/projectStore'; // 프로젝트 스토어
 import { computed, ref, watch, watchEffect } from 'vue';
-import {useWebSocketStore} from "@/stores/webSocketStore";
+import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   components: {
@@ -380,8 +380,14 @@ export default {
     };
 
     // 제목 저장
-    const saveTitle = (cardId, updateColumn, updateData) => {
-      kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+    const saveTitle = async (cardId, updateColumn, updateData) => {
+      await kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+      // 웹소켓
+      await webSocketStore.connect(props.projectId);
+      await webSocketStore.sendUpdateKanbanCardTitleMessage({
+        projectId: props.projectId,
+        type: 'updateCardTitle',
+      });
       isEditingTitle.value = false;
     };
 
