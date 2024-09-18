@@ -44,6 +44,7 @@ export default {
     UserItem,
     ProjectMemberInvite,
   },
+  emits: ['projectOut'],
   props: {
     projectId: {
       type: Number,
@@ -116,7 +117,9 @@ export default {
     };
 
     // 프로젝트 내보내기 한다는 전달
-    const projectOut = (memberId) => {
+    const projectOut = async (memberId) => {
+      await joinMemberStore.releaseMember(props.projectId, memberId);
+
       console.log(`부모컴포 전달 프로젝트에서 내보내기 할 멤버: `, memberId);
     };
 

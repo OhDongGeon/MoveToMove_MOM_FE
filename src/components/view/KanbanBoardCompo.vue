@@ -667,7 +667,6 @@ h1 {
   border: 1.5px solid #6b9e9b;
   height: 98%; /* 부모 폼 높이에 맞게 100%로 설정 */
   padding: 5px;
-  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
 }
 
 .project-title {
@@ -734,6 +733,7 @@ h1 {
   width: 100%;
   height: 100%;
   padding: 0;
+  overflow-x: auto; /* 넘치는 경우 가로 스크롤 활성화 */
 }
 
 /* Deep Selector를 사용하여 Vue3Tree의 내부 스타일을 덮어씁니다. */

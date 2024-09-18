@@ -38,6 +38,21 @@ export const useJoinMemberStore = defineStore('joinMemberStore', {
       }
     },
 
+    // 프로젝트 내보내기
+    async releaseMember(projectId, memberId) {
+      try {
+        console.log('내보내기 시작', projectId, memberId);
+
+        const response = await axiosInstance.delete(`/api/projects/${projectId}/release/${memberId}`);
+        if (response.status === 200) {
+          console.log('내보내기 성공', response.data);
+          await this.fetchMembers(projectId); // 권한 이전 후 멤버 목록 다시 조회
+        }
+      } catch (e) {
+        console.error('Error occurred during transferring leader', e);
+      }
+    },
+
     reset() {
       this.joinMembers = []; // 상태 초기화
     },
