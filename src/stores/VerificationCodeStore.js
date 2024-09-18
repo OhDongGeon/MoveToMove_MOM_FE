@@ -25,14 +25,13 @@ export const useVerificationCodeStore = defineStore('verificationCode', {
           const response = await axiosInstance.post(`/api/members/password/send-authentication-code`, requestData);
 
           this.authentication = response.data.data;
-
           this.isSent = true;
           this.alertVisible = true;
 
           // 카운트다운 시작
           this.startCountdown();
         } catch (error) {
-          console.error('인��번호 전�� 실��:', error.response?.data || error.message);
+          console.error('인증코드 전송 실패:', error.response?.data || error.message);
           throw error;
         } finally {
           this.stopLoading();
