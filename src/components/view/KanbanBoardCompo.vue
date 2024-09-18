@@ -106,7 +106,7 @@
               <template #item="{ element: col }">
                 <div class="column kanban-column" :key="col.kanbanColumnId" :data-column-id="col.kanbanColumnId">
                   <kanban-column
-                    :id="col.kanbanColumnId"
+                    :id="projectId"
                     :title="col.kanbanColumnName"
                     :columnId="col.kanbanColumnId"
                     :isCardOpen="isCardOpen"

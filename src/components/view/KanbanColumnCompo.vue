@@ -39,7 +39,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import draggable from 'vuedraggable';
 import KanbanCard from './KanbanCardCompo.vue';
 import KanbanCardOpen from './KanbanCardOpenCompo.vue';
-// import { useWebSocketStore } from '@/stores/webSocketStore';
+import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   components: {
@@ -70,7 +70,7 @@ export default {
 
   setup(props, { emit }) {
     const kanbanCardStore = useKanbanCardStore();
-
+    const webSocketStore = useWebSocketStore();
     // props.cards를 참조하는 computed 속성 사용
     const computedCards = ref([]);
     // 컬럼 아이디 기준 다시 조회
@@ -89,6 +89,7 @@ export default {
     // 컴포넌트가 마운트될 때 스토어에서 카드 데이터를 가져옴
     onMounted(() => {
       updateCards();
+      webSocketStore.connect(props.id);
       // const element = document.querySelector(`[data-column-id="${props.columnId}"]`);
       // element.addEventListener('update-cards', updateCards);
       //
@@ -150,7 +151,7 @@ export default {
         };
 
         await kanbanCardStore.addCard(columnId, newCard); // 수정된 부분
-
+        // await webSo
         // 새로 추가된 카드를 반영하기 위해 computedCards 업데이트
         updateCards(); // 스토어의 최신 데이터를 다시 로드하여 computedCards 갱신
 

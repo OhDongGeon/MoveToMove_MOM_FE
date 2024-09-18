@@ -116,6 +116,14 @@ export const useWebSocketStore = defineStore('webSocket', () => {
         console.error('Failed to reload project:', e);
       }
     },
+    // 칸반 카드 생성
+    async addCard(projectId) {
+      try {
+        await kanbanCardsStore.loadAllCards(projectId);
+      } catch (e) {
+        console.error("Failed to reload columns: ", e)
+      }
+    },
     // 새로운 메시지 유형 핸들러 추가 가능
     async anotherMessageTypeHandler(projectId) {
         console.error(`프로젝트${projectId}에서 Processing another message type. type: 등록되지 않은 요청입니다.`);
@@ -294,6 +302,27 @@ export const useWebSocketStore = defineStore('webSocket', () => {
       }
     }
   }
+  // 칸반카드 생성
+  async function sendAddKanbanCardMessage(message) {
+    const client = projectConnections[message.projectId];
+    const isConnected = connectionStatus[message.projectId];
+    // 웹소켓
+    if (client && isConnected) {
+      try {
+        client.send(
+            `/app/project/${message.projectId}/add-project`,
+            {},
+            JSON.stringify(message),
+        );
+        console.log('Card add card message sent successfully:', message);
+      } catch (e) {
+        // 재연결 시도
+        console.error('Error sending card add Project to Server', e);
+        connect(message.projectId);
+        console.log(`웹소켓 재연결`);
+      }
+    }
+  }
   return {
     projectConnections,
     connectionStatus,
@@ -308,5 +337,6 @@ export const useWebSocketStore = defineStore('webSocket', () => {
     sendAddColumnMessage,
     sendDeleteColumnMessage,
     sendUpdateProjectMessage,
+    sendAddKanbanCardMessage,
   };
 });
