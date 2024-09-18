@@ -58,6 +58,7 @@ export default {
     const projectStore = useProjectStore();
     const authStore = useAuthStore(); // 로그인 정보 가져오기
     const isLeader = ref(false);
+    const sendProjectId = ref(null);
 
     onMounted(() => {
       if (props.projectId) {
@@ -67,6 +68,7 @@ export default {
         const projectData = projectStore.projectData;
         if (projectData && projectData.projectLeaderYN) {
           isLeader.value = projectData.projectLeaderYN;
+          sendProjectId.value = projectData.projectId;
         }
       }
     });
@@ -143,6 +145,7 @@ export default {
       handleTransferLeader, // 권한 이전 함수
       joinMemberStore, // Pinia 스토어
       isLeader, // template에서 사용 가능
+      sendProjectId,
     };
   },
 };

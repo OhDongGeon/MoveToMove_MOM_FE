@@ -177,6 +177,7 @@ import { useCommentStore } from '@/stores/commentStore';
 import { useKanbanCardStore } from '@/stores/kanbanCardStore';
 import { useProjectStore } from '@/stores/projectStore'; // 프로젝트 스토어
 import { computed, ref, watch, watchEffect } from 'vue';
+import { useWebSocketStore } from '@/stores/webSocketStore';
 
 export default {
   components: {
@@ -195,6 +196,10 @@ export default {
     card: {
       type: Object,
       default: () => ({}), // 기본값을 빈 객체로 설정
+    },
+    projectId: {
+      type: Number,
+      default: null,
     },
   },
 
@@ -319,10 +324,14 @@ export default {
     const startAtFormat = ref('');
 
     // 시작 날짜를 업데이트 체크
-    const updateStartAt = (newValue) => {
+    const updateStartAt = async (newValue) => {
       if (!props.card.endAt) {
         // endAt이 null이므로 비교 없이 바로 업데이트
-        kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', newValue);
+        await kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', newValue);
+        await webSocketStore.sendUpdateCardInfoMessage({
+          projectId: props.projectId,
+          type: 'updateCardInfo',
+        });
         return;
       }
 
@@ -335,16 +344,24 @@ export default {
 
       // 비교를 통과했을 때 업데이트
       kanbanCardStore.updateKanbanCard(props.card.id, 'start_at', newValue);
+      await webSocketStore.sendUpdateCardInfoMessage({
+        projectId: props.projectId,
+        type: 'updateCardInfo',
+      });
     };
 
     // 종료 날짜
     const endAtFormat = ref('');
 
     // 종료 날짜를 업데이트 체크
-    const updateEndAt = (newValue) => {
+    const updateEndAt = async (newValue) => {
       if (!props.card.startAt) {
         // startAt이 null이므로 비교 없이 바로 업데이트
-        kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', newValue);
+        await kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', newValue);
+        await webSocketStore.sendUpdateCardInfoMessage({
+          projectId: props.projectId,
+          type: 'updateCardInfo',
+        });
         return;
       }
 
@@ -356,7 +373,11 @@ export default {
       }
 
       // 비교를 통과했을 때 업데이트
-      kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', newValue);
+      await kanbanCardStore.updateKanbanCard(props.card.id, 'end_at', newValue);
+      await webSocketStore.sendUpdateCardInfoMessage({
+        projectId: props.projectId,
+        type: 'updateCardInfo',
+      });
     };
 
     // 저장 및 수정
@@ -375,8 +396,14 @@ export default {
     };
 
     // 제목 저장
-    const saveTitle = (cardId, updateColumn, updateData) => {
-      kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+    const saveTitle = async (cardId, updateColumn, updateData) => {
+      await kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+
+      // 웹소켓
+      await webSocketStore.sendUpdateCardInfoMessage({
+        projectId: props.projectId,
+        type: 'updateCardInfo',
+      });
       isEditingTitle.value = false;
     };
 
@@ -393,8 +420,12 @@ export default {
     };
 
     // 내용 저장
-    const saveContent = (cardId, updateColumn, updateData) => {
-      kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+    const saveContent = async (cardId, updateColumn, updateData) => {
+      await kanbanCardStore.updateKanbanCard(cardId, updateColumn, updateData);
+      await webSocketStore.sendUpdateCardInfoMessage({
+        projectId: props.projectId,
+        type: 'updateCardInfo',
+      });
       isEditingContent.value = false;
     };
 
@@ -462,14 +493,20 @@ export default {
     };
 
     // 모달 확인
-    const handleConfirm = (selectedItems) => {
+    const handleConfirm = async (selectedItems) => {
       if (modalTitle.value === '담당자 선택') {
-        kanbanCardStore.updateKanbanCardMember(props.card.id, selectedItems);
+        await kanbanCardStore.updateKanbanCardMember(props.card.id, selectedItems);
       } else if (modalTitle.value === '우선순위 선택') {
-        kanbanCardStore.updateKanbanCard(props.card.id, 'priority', selectedItems[0].id);
+        await kanbanCardStore.updateKanbanCard(props.card.id, 'priority', selectedItems[0].id);
       } else if (modalTitle.value === '작업크기 선택') {
-        kanbanCardStore.updateKanbanCard(props.card.id, 'task_size', selectedItems[0].id);
+        await kanbanCardStore.updateKanbanCard(props.card.id, 'task_size', selectedItems[0].id);
       }
+
+      // 웹소켓
+      await webSocketStore.sendUpdateCardInfoMessage({
+        projectId: props.projectId,
+        type: 'updateCardInfo',
+      });
       closeModal();
     };
 
@@ -485,9 +522,15 @@ export default {
       isDeleteCard.value = true;
     };
 
-    const agreeDeleteCard = () => {
+    const agreeDeleteCard = async () => {
       isDeleteCard.value = false;
-      kanbanCardStore.deleteKanbanCard(props.card.id);
+      await kanbanCardStore.deleteKanbanCard(props.card.id);
+      // 웹소켓
+      await webSocketStore.connect(props.projectId);
+      await webSocketStore.sendDeleteKanbanCardMessage({
+        projectId: props.projectId,
+        type: 'deleteCard',
+      });
       successDelete.value = true;
     };
 
@@ -566,6 +609,9 @@ export default {
         }
       },
     );
+
+    // 웹소켓 스토어
+    const webSocketStore = useWebSocketStore();
 
     return {
       isStartAt,
