@@ -310,11 +310,11 @@ const handleSubmit = async () => {
 
 // 소셜 로그인 함수
 const handleGoogleLogin = () => {
-  window.location.href = `${API_BASE_URL}/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
+  window.location.href = `${API_BASE_URL}/api/oauth2/authorization/google`; // 백엔드 OAuth2 인증 엔드포인트로 리다이렉트
   navigationStore.setActiveItem('mypage');
 };
 const handleKakaoLogin = () => {
-  window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao`;
+  window.location.href = `${API_BASE_URL}/api/oauth2/authorization/kakao`;
   navigationStore.setActiveItem('mypage');
 };
 </script>
